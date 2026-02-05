@@ -1,0 +1,183 @@
+# Basic Equity Analysis - Qualification Scenario
+# Tests fundamental analytical skills for new contributor onboarding
+
+id: qualification_basic_equity
+title: "Consumer Retail Investment Analysis"
+version: "1.0.0"
+module: "00_qualification"
+category: "qualification_test"
+difficulty: "moderate"
+estimated_time_minutes: 35
+
+# === CONTEXT ===
+
+context:
+  company:
+    name: "HomeStyle Brands"
+    ticker: "HSB"
+    sector: "Consumer Discretionary - Home Furnishings"
+    market_cap: "$4.2B"
+    description: >
+      HomeStyle Brands is a mid-cap retailer specializing in home furnishings
+      and decor, operating 380 stores across the United States with a growing
+      e-commerce presence (~22% of sales).
+
+  situation: >
+    HomeStyle recently reported Q3 2024 earnings that beat consensus estimates.
+    Revenue grew 8% YoY to $1.1B, with comparable store sales up 4.2%. However,
+    gross margins compressed 120bps to 38.1% due to higher freight costs and
+    promotional activity. Management raised full-year revenue guidance but
+    maintained EBITDA guidance, implying continued margin pressure in Q4.
+
+    The stock is down 12% YTD despite the earnings beat, trading at 11x forward
+    earnings vs. the 5-year average of 14x. Bulls point to the valuation gap
+    and improving top-line trends. Bears worry about margin sustainability
+    and consumer spending headwinds.
+
+  market_conditions: >
+    Consumer discretionary sector facing headwinds from higher interest rates
+    impacting home purchases and renovation activity. Home furnishing peers
+    have seen mixed results, with some reporting inventory build-up. Housing
+    turnover at multi-year lows, though existing home improvement spending
+    remains relatively stable.
+
+  as_of_date: "2024-11-15"
+
+  key_financials:
+    revenue_ttm: "$4.1B"
+    ebitda_margin: "9.8%"
+    net_debt: "$620M"
+    free_cash_flow_ttm: "$185M"
+    dividend_yield: "2.8%"
+    pe_forward: "11x"
+    ev_ebitda: "8.5x"
+
+# === TASK ===
+
+task:
+  prompt: >
+    Based on the information provided, develop a concise investment recommendation
+    for HomeStyle Brands (HSB). Your analysis should include:
+
+    1. Investment Thesis (2-3 sentences): Bull or bear? Why?
+    2. Key Supporting Points (3 bullet points): What drives your view?
+    3. Primary Risk (1-2 sentences): What could prove you wrong?
+    4. Valuation Assessment: Is the current valuation justified? Support with data.
+    5. Recommendation: Buy, Hold, or Sell with brief rationale.
+
+    Keep your response focused and professional. Target length: 250-400 words.
+
+  expected_output_type: "short_investment_thesis"
+
+  constraints:
+    - "Must take a clear directional stance (not neutral)"
+    - "Must reference specific financial data from the context"
+    - "Must identify at least one quantifiable risk"
+    - "Valuation assessment must include peer/historical comparison"
+
+  time_horizon: "6-12 months"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Thesis Clarity"
+      weight: 0.25
+      criteria:
+        - "Clear directional stance with logical reasoning"
+        - "Thesis is specific to this company, not generic"
+        - "Supports thesis with relevant evidence"
+
+    - name: "Analytical Rigor"
+      weight: 0.30
+      criteria:
+        - "Uses financial data accurately"
+        - "Identifies relevant drivers and headwinds"
+        - "Shows understanding of retail/consumer dynamics"
+
+    - name: "Risk Awareness"
+      weight: 0.20
+      criteria:
+        - "Identifies material risk factors"
+        - "Risk is specific and quantifiable where possible"
+        - "Considers both company-specific and macro risks"
+
+    - name: "Valuation Reasoning"
+      weight: 0.15
+      criteria:
+        - "References appropriate valuation metrics"
+        - "Compares to historical or peer benchmarks"
+        - "Connects valuation to thesis"
+
+    - name: "Communication Quality"
+      weight: 0.10
+      criteria:
+        - "Professional tone and structure"
+        - "Concise and focused"
+        - "Appropriate length (250-400 words)"
+
+  critical_failures:
+    - "Factual errors about provided financial data"
+    - "No clear investment recommendation"
+    - "Hallucinated data or company information"
+    - "Response under 150 words or over 600 words"
+
+  pass_threshold: 70
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Q3 revenue $1.1B, up 8% YoY"
+    source: "context.situation"
+    importance: "critical"
+
+  - fact: "Gross margin compressed 120bps to 38.1%"
+    source: "context.situation"
+    importance: "critical"
+
+  - fact: "Trading at 11x forward vs 14x 5-year average"
+    source: "context.situation"
+    importance: "important"
+
+  - fact: "Stock down 12% YTD"
+    source: "context.situation"
+    importance: "supporting"
+
+  - fact: "E-commerce ~22% of sales"
+    source: "context.company"
+    importance: "supporting"
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Confusing TTM revenue ($4.1B) with Q3 revenue ($1.1B)"
+    failure_type: "calculation_error"
+    severity: "major"
+
+  - description: "Ignoring the margin compression when making a bull case"
+    failure_type: "missing_risk"
+    severity: "major"
+
+  - description: "Making up analyst price targets or earnings estimates"
+    failure_type: "hallucination"
+    severity: "critical"
+
+  - description: "Generic consumer sector commentary without company specifics"
+    failure_type: "lack_of_specificity"
+    severity: "minor"
+
+# === METADATA ===
+
+metadata:
+  author: "Platform Team"
+  created_at: "2024-11-15"
+  purpose: "qualification_assessment"
+  tags:
+    - "qualification"
+    - "consumer_discretionary"
+    - "retail"
+    - "equity_analysis"
+  notes: >
+    Standard qualification scenario for new contributor onboarding.
+    Tests fundamental equity analysis skills without requiring
+    complex modeling or specialized domain knowledge.
