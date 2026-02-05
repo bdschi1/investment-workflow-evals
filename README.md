@@ -220,7 +220,7 @@ investment-workflow-evals/
 ## Contact
 
 - GitHub: [@bdschi1](https://github.com/bdschi1)
-- LinkedIn: [bdschi1](https://linkedin.com/in/bdschi1)
+- LinkedIn: - [LinkedIn](https://linkedin.com/in/bdschi1)
 
 ## License
 
