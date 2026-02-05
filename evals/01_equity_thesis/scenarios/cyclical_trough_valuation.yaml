@@ -1,0 +1,239 @@
+# Cyclical Trough Valuation Scenario
+# Tests: Earnings normalization, cycle timing, contrarian analysis
+
+id: cyclical_trough_valuation
+title: "Cyclical Industrial at Earnings Trough"
+version: "1.0.0"
+module: "01_equity_thesis"
+category: "value_contrarian"
+difficulty: "hard"
+estimated_time_minutes: 60
+
+context:
+  company:
+    name: "Caterpillar Inc."
+    ticker: "CAT"
+    sector: "Industrials - Machinery"
+    market_cap: "$175B"
+    description: >
+      Caterpillar is the world's leading manufacturer of construction
+      and mining equipment, diesel and natural gas engines, industrial
+      gas turbines, and diesel-electric locomotives. The company
+      operates through three primary segments: Construction Industries,
+      Resource Industries, and Energy & Transportation.
+
+  situation: >
+    Caterpillar's stock has declined 18% from its 52-week high as
+    investors worry about a cyclical downturn. The company reported
+    Q3 2024 results showing:
+
+    - Revenue down 4% YoY to $16.1B
+    - Operating margin compressed 150bps to 21.3%
+    - Dealer inventory destocking ongoing
+    - North America construction activity slowing
+    - Mining equipment demand robust but plateauing
+
+    Management guided for "modestly lower" revenue in 2025, the first
+    revenue decline since 2020. Construction spending appears to have
+    peaked, and interest rate sensitivity is high. However, the company
+    maintains strong pricing power and has $7B in cash.
+
+    The stock trades at 13x forward earnings vs a 5-year average of 15x
+    and a trough multiple of 10x during COVID. The dividend yield is
+    1.8% with 30 consecutive years of increases.
+
+  market_conditions: >
+    Industrial sector has lagged the broader market in 2024 on cycle
+    concerns. Interest rates remain elevated, pressuring construction
+    activity. However, infrastructure spending from IIJA is just beginning
+    to flow, and data center construction is creating new demand drivers.
+    China stimulus measures have been announced but impact unclear.
+
+  as_of_date: "2024-12-15"
+
+  additional_context: >
+    Key cycle indicators are mixed:
+    - US housing starts: down 12% YoY
+    - Non-residential construction spending: +3% YoY (decelerating)
+    - Mining capex: flat to slightly up
+    - Infrastructure (roads, bridges): +15% YoY
+    - Dealer inventory: elevated, destocking in progress
+
+    Historically, CAT's earnings trough-to-peak swing is 40-60%, with
+    cycles lasting 3-5 years. The 2015-2016 downturn saw EPS decline
+    45% before recovering 80% by 2019.
+
+task:
+  prompt: >
+    Develop an investment thesis for Caterpillar (CAT) at this point in
+    the cycle. Your analysis should include:
+
+    1. Assessment of where we are in the machinery cycle
+    2. Normalized earnings estimate and methodology
+    3. Valuation analysis using multiple approaches
+    4. Specific long/short recommendation with entry points
+    5. Key risks with probability and impact assessment
+    6. Catalyst timeline for thesis realization
+
+    Consider both the case for buying into weakness and the case for
+    waiting for clearer cycle signals.
+
+  expected_output_type: "investment_thesis"
+
+  constraints:
+    - "Must provide normalized earnings estimate with clear methodology"
+    - "Valuation must use at least 2 different approaches"
+    - "Must address timing risk for cyclical investment"
+    - "Historical cycle analysis required"
+
+  time_horizon: "12-24 months"
+
+data_sources:
+  - type: "10-K"
+    description: "Caterpillar 2023 Annual Report"
+    date: "2024-02-14"
+    key_data_points:
+      - "Full year revenue: $67.1B (+13% YoY)"
+      - "Operating margin: 22.4%"
+      - "Free cash flow: $10.8B"
+      - "Dividend: $5.20/share"
+      - "Share repurchases: $7.5B"
+
+  - type: "10-Q"
+    description: "Caterpillar Q3 2024 Report"
+    date: "2024-10-29"
+    key_data_points:
+      - "Q3 revenue: $16.1B (-4% YoY)"
+      - "Q3 operating margin: 21.3%"
+      - "Dealer inventory changes: $(1.2B)"
+      - "North America: -7% YoY"
+      - "Mining/Resources: +2% YoY"
+
+  - type: "earnings_transcript"
+    description: "Q3 2024 Earnings Call"
+    date: "2024-10-29"
+    key_data_points:
+      - "2025 guidance: revenue modestly lower"
+      - "Dealer destocking to continue into Q1"
+      - "Infrastructure demand remains bright spot"
+      - "Mining demand stable but not growing"
+
+  - type: "industry_data"
+    description: "US Census Construction Spending"
+    date: "2024-11-01"
+    key_data_points:
+      - "Total construction: $2.1T annualized"
+      - "YoY growth: +7% (decelerating from +12%)"
+      - "Residential: -3% YoY"
+      - "Manufacturing: +23% YoY"
+
+key_facts:
+  - fact: "CAT's mid-cycle EPS is approximately $22-24, based on 10-year average margins and revenue"
+    source: "Historical analysis"
+    importance: "critical"
+
+  - fact: "The stock's trough-to-peak return in the 2016-2019 cycle was +180%"
+    source: "Historical price data"
+    importance: "important"
+
+  - fact: "Dealer inventory days are 15% above normal, suggesting further destocking"
+    source: "Company disclosure"
+    importance: "important"
+
+  - fact: "Infrastructure Investment and Jobs Act (IIJA) spending just beginning to accelerate"
+    source: "Government data"
+    importance: "important"
+
+  - fact: "CAT has generated positive free cash flow in every year since 2010"
+    source: "Financial statements"
+    importance: "supporting"
+
+  - fact: "Mining segment has shorter cycles (2-3 years) vs construction (3-5 years)"
+    source: "Industry analysis"
+    importance: "supporting"
+
+pitfalls:
+  - description: "Using current depressed earnings for valuation without normalization"
+    failure_type: "calculation_error"
+    severity: "critical"
+
+  - description: "Ignoring the timing risk of early cycle entry"
+    failure_type: "missing_risk"
+    severity: "major"
+
+  - description: "Conflating revenue decline with margin collapse (CAT maintains pricing)"
+    failure_type: "correlation_causation"
+    severity: "major"
+
+  - description: "Using only trailing multiples without considering cycle position"
+    failure_type: "period_mismatch"
+    severity: "major"
+
+  - description: "Ignoring the offsetting impact of infrastructure spending"
+    failure_type: "missing_risk"
+    severity: "minor"
+
+evaluation_criteria:
+  dimensions:
+    - name: "Cycle Assessment"
+      weight: 0.25
+      criteria:
+        - "Clear framework for where we are in the cycle"
+        - "Uses leading indicators (orders, inventory, starts)"
+        - "Distinguishes between end markets (construction vs mining)"
+        - "Considers cycle duration and depth"
+
+    - name: "Earnings Normalization"
+      weight: 0.25
+      criteria:
+        - "Provides normalized/mid-cycle earnings estimate"
+        - "Methodology is clearly explained"
+        - "Uses appropriate historical period"
+        - "Adjusts for structural changes (pricing, costs)"
+
+    - name: "Valuation Analysis"
+      weight: 0.20
+      criteria:
+        - "Uses multiple valuation methodologies"
+        - "Considers cycle-adjusted P/E"
+        - "Compares to historical trough/peak valuations"
+        - "Provides specific price targets with rationale"
+
+    - name: "Risk Assessment"
+      weight: 0.15
+      criteria:
+        - "Identifies timing risk for cyclical entry"
+        - "Considers depth of potential trough"
+        - "Addresses China/macro concerns"
+        - "Notes execution and competitive risks"
+
+    - name: "Evidence Quality"
+      weight: 0.15
+      criteria:
+        - "Uses current and accurate financial data"
+        - "Historical comparisons are valid"
+        - "Industry data is properly sourced"
+        - "Distinguishes between leading and lagging indicators"
+
+  critical_failures:
+    - "Uses current depressed earnings without normalization"
+    - "No discussion of cycle position or timing"
+    - "Material errors in financial data"
+    - "Ignores potential for further earnings decline"
+    - "No downside scenario analysis"
+
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2024-12-20"
+  tags:
+    - "cyclical"
+    - "industrials"
+    - "value"
+    - "earnings_normalization"
+    - "contrarian"
+  notes: >
+    This scenario tests the ability to analyze cyclical businesses
+    at potential inflection points. Key skills: earnings normalization,
+    cycle analysis, valuation through the cycle, timing assessment.

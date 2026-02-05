@@ -1,0 +1,165 @@
+# Scenario Template
+# Copy this file and fill in the details for your scenario
+
+# === REQUIRED FIELDS ===
+
+# Unique identifier (snake_case, e.g., "biotech_phase3_catalyst")
+id: your_scenario_id
+
+# Human-readable title
+title: "Your Scenario Title"
+
+# Semantic version
+version: "1.0.0"
+
+# Parent module (must match directory name)
+module: "01_equity_thesis"  # Options: 01_equity_thesis, 02_dcf_valuation, etc.
+
+# Category within the module
+category: "event_driven"  # Options vary by module
+
+# Difficulty level
+difficulty: "moderate"  # Options: easy, moderate, hard, expert
+
+# Estimated completion time in minutes
+estimated_time_minutes: 45
+
+# === CONTEXT SECTION ===
+
+context:
+  company:
+    name: "Company Name"
+    ticker: "TICK"
+    sector: "Sector - Industry"
+    market_cap: "$XXB"
+    description: >
+      Brief description of what the company does and its position
+      in the market. 2-3 sentences.
+
+  situation: >
+    Describe the current situation being analyzed. What event,
+    development, or question needs to be addressed? What makes
+    this situation interesting for evaluation?
+
+    Include relevant details like:
+    - Recent company events or announcements
+    - Current market context
+    - Key uncertainties or debates
+
+  market_conditions: >
+    Describe the broader market environment relevant to this
+    scenario. Include sector trends, macro factors, and any
+    relevant market dynamics.
+
+  as_of_date: "YYYY-MM-DD"  # The "present" for this scenario
+
+  additional_context: >
+    Any additional background information that would be helpful.
+    This might include historical context, competitive dynamics,
+    or relevant precedents.
+
+# === TASK DEFINITION ===
+
+task:
+  prompt: >
+    Write the specific task or question for the AI to answer.
+    Be clear and specific about what you want analyzed.
+
+    Structure suggestions:
+    1. Main analysis request
+    2. Specific components required
+    3. Any format requirements
+    4. Scope constraints
+
+  expected_output_type: "investment_thesis"
+  # Options: investment_thesis, valuation_model, portfolio_recommendation,
+  #          earnings_analysis, risk_analysis, comparison, short_answer
+
+  constraints:
+    - "Constraint 1 (e.g., must include probability estimates)"
+    - "Constraint 2 (e.g., must address specific risks)"
+    - "Constraint 3"
+
+  time_horizon: "6-12 months"  # If applicable
+
+# === DATA SOURCES ===
+# List the key data sources available for this scenario
+
+data_sources:
+  - type: "10-K"  # Options: 10-K, 10-Q, 8-K, earnings_transcript, investor_presentation, etc.
+    description: "Company 2023 Annual Report"
+    date: "YYYY-MM-DD"
+    key_data_points:
+      - "Key metric 1: value"
+      - "Key metric 2: value"
+      - "Important disclosure"
+
+  - type: "earnings_transcript"
+    description: "Q3 2024 Earnings Call"
+    date: "YYYY-MM-DD"
+    key_data_points:
+      - "Management quote or guidance"
+      - "Analyst Q&A highlight"
+
+# === KEY FACTS ===
+# Facts that a correct response should identify or address
+
+key_facts:
+  - fact: "Critical fact that must be recognized"
+    source: "Where this fact comes from"
+    importance: "critical"  # Options: critical, important, supporting
+
+  - fact: "Another important fact"
+    source: "Source reference"
+    importance: "important"
+
+# === PITFALLS ===
+# Common mistakes to test for
+
+pitfalls:
+  - description: "Description of common mistake"
+    failure_type: "hallucination"
+    # Options: hallucination, calculation_error, period_mismatch,
+    #          missing_risk, survivorship_bias, gaap_confusion,
+    #          correlation_causation, stale_data
+    severity: "critical"  # Options: critical, major, minor
+
+  - description: "Another pitfall to test"
+    failure_type: "missing_risk"
+    severity: "major"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Dimension Name"
+      weight: 0.25  # Must sum to 1.0 across all dimensions
+      criteria:
+        - "Specific criterion 1"
+        - "Specific criterion 2"
+        - "Specific criterion 3"
+
+    - name: "Another Dimension"
+      weight: 0.25
+      criteria:
+        - "Criterion 1"
+        - "Criterion 2"
+
+  critical_failures:
+    - "Condition that causes automatic fail"
+    - "Another critical failure condition"
+
+  pass_threshold: 70  # Minimum score to pass (0-100)
+
+# === METADATA ===
+
+metadata:
+  author: "Your Name"
+  created_at: "YYYY-MM-DD"
+  tags:
+    - "tag1"
+    - "tag2"
+    - "tag3"
+  notes: >
+    Any notes about this scenario, such as why it was created,
+    what skills it tests, or how it relates to other scenarios.

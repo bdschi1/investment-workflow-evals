@@ -1,0 +1,187 @@
+# Pharma/Biotech Pair: Hedge the Environment, Size the Alpha
+# Tests ability to construct pairs that isolate idiosyncratic exposure
+
+id: pharma_biotech_pair
+title: "Pharma/Biotech Pair: Hedge the Environment, Size the Alpha"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "healthcare_pairs"
+difficulty: "hard"
+estimated_time_minutes: 40
+
+# === CONTEXT ===
+
+context:
+  trade_structure:
+    long_position:
+      name: "MegaPharma Inc"
+      ticker: "MEGA"
+      market_cap: "$180B"
+      characteristics:
+        - "Large-cap diversified pharma"
+        - "Stable cash flows from mature franchises"
+        - "2.5% dividend yield"
+        - "Beta: 0.7"
+        - "Annualized volatility: 18%"
+      thesis: "Undervalued relative to sum-of-parts; pipeline optionality underappreciated"
+
+    short_position:
+      name: "Catalyst Biotech"
+      ticker: "CATB"
+      market_cap: "$8B"
+      characteristics:
+        - "Mid-cap biotech"
+        - "Trading on Phase 3 pipeline optionality"
+        - "No revenue, cash runway 18 months"
+        - "Beta: 1.8"
+        - "Annualized volatility: 55%"
+      thesis: "Pipeline probability of success overpriced; management history of overpromising"
+
+  portfolio_context:
+    strategy: "Long/short healthcare"
+    gross_exposure: "150%"
+    net_exposure: "30%"
+    existing_healthcare_weight: "25% of gross"
+
+  market_conditions: >
+    XBI (biotech ETF) down 15% YTD. Large pharma outperforming on defensive flows.
+    Rising rates environment favoring cash-generative over cash-burning names.
+    Sector correlation elevated during recent volatility.
+
+# === TASK ===
+
+task:
+  prompt: >
+    You construct a long/short healthcare pair: long a large-cap pharma company
+    with stable cash flows; short a mid-cap biotech trading on pipeline optionality.
+    The thesis is stock-specific.
+
+    Explain how you would hedge environmental risks while preserving intended
+    idiosyncratic exposure, and how sizing should reflect this distinction.
+
+    Your response should address:
+    1. Classification of risks as market, factor, environmental, or idiosyncratic
+    2. What should be hedged and what should not
+    3. Sizing methodology that reflects risk contribution, not notional capital
+    4. How to avoid over-hedging away alpha
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must classify risks correctly"
+    - "Must hedge environmental risks, not alpha"
+    - "Must use risk-based sizing, not dollar-based"
+    - "Must explain rationale for what is and is not hedged"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Risk Classification"
+      id: "risk_classification"
+      weight: 35
+      criteria:
+        - "Correctly identifies market, factor, and duration risks as environmental"
+        - "Identifies pipeline outcomes as idiosyncratic"
+        - "Recognizes sector beta differential between positions"
+        - "Understands correlation structure"
+
+    - name: "Hedging Logic"
+      id: "hedging_logic"
+      weight: 35
+      criteria:
+        - "Hedges what is not part of the thesis"
+        - "Avoids over-hedging away alpha"
+        - "Specifies instruments or methods for hedging"
+        - "Explains residual exposures after hedging"
+
+    - name: "Sizing Methodology"
+      id: "sizing"
+      weight: 30
+      criteria:
+        - "Uses volatility or risk contribution, not capital symmetry"
+        - "Accounts for asymmetric volatility between legs"
+        - "Considers nonlinear biotech risk (binary outcomes)"
+        - "Reflects intended alpha expression in sizing"
+
+  critical_failures:
+    - "Claims neutrality while leaving major environmental risk unhedged"
+    - "Sizes positions equally on dollar basis without risk adjustment"
+    - "Confuses notional symmetry with risk neutrality"
+    - "Ignores volatility differential between legs"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Dollar-neutral sizing ignoring volatility differential"
+    failure_type: "sizing_error"
+    severity: "critical"
+
+  - description: "Claiming beta neutrality without adjustment for sector exposure"
+    failure_type: "false_neutrality"
+    severity: "major"
+
+  - description: "Over-hedging idiosyncratic exposure that is the thesis"
+    failure_type: "alpha_destruction"
+    severity: "major"
+
+  - description: "Ignoring binary nature of biotech pipeline outcomes"
+    failure_type: "risk_mischaracterization"
+    severity: "major"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    By sizing the positions equally on a dollar basis, the trade achieves
+    neutrality while allowing valuation convergence to drive returns.
+
+  why_this_fails:
+    - "Confuses notional symmetry with risk neutrality"
+    - "Ignores volatility differential (18% vs 55%)"
+    - "Ignores nonlinear biotech risk"
+    - "Leaves environment unhedged"
+
+# === RISK METRICS ===
+
+risk_metrics:
+  long_volatility: "18%"
+  short_volatility: "55%"
+  correlation_estimate: "0.45"
+  volatility_ratio: "3.1x"
+  beta_differential: "1.1"
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Long volatility 18% vs short volatility 55% (3.1x ratio)"
+    source: "context.trade_structure"
+    importance: "critical"
+
+  - fact: "Beta differential of 1.1 (0.7 vs 1.8)"
+    source: "context.trade_structure"
+    importance: "critical"
+
+  - fact: "Short has 18-month cash runway (survival risk)"
+    source: "context.trade_structure.short_position"
+    importance: "important"
+
+  - fact: "Sector correlation elevated during volatility"
+    source: "context.market_conditions"
+    importance: "important"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2024-12-15"
+  sector_focus: "healthcare"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "pairs_trading"
+    - "risk_management"
+    - "position_sizing"
+    - "healthcare"

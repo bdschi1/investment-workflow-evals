@@ -1,0 +1,227 @@
+# Portfolio Construction Module - Standard Rubric
+# For evaluating position sizing, hedging, and risk classification
+
+id: portfolio_construction_standard
+title: "Portfolio Construction Standard Rubric"
+version: "1.0.0"
+module: "03_portfolio_construction"
+
+description: >
+  This rubric evaluates AI-generated portfolio construction and position
+  sizing recommendations, testing ability to classify risks, hedge
+  appropriately, and size based on risk contribution.
+
+total_points: 100
+pass_threshold: 70
+excellence_threshold: 85
+
+# === DIMENSIONS ===
+
+dimensions:
+  - name: "Risk Classification"
+    id: "risk_classification"
+    weight: 35
+    description: >
+      Evaluates ability to correctly identify and classify different
+      risk types: market, factor, environmental, and idiosyncratic.
+
+    scoring_levels:
+      - score: "32-35"
+        label: "Excellent"
+        description: >
+          Correctly classifies all major risk types. Distinguishes
+          market/factor/environmental from idiosyncratic. Recognizes
+          when backward-looking measures are inadequate. Identifies
+          policy risk as environmental, not stock-specific.
+        anchor_examples:
+          - "Identifies biotech beta differential as environmental exposure"
+          - "Recognizes policy risk as systematic across holdings"
+          - "Distinguishes pipeline binary risk as idiosyncratic"
+
+      - score: "25-31"
+        label: "Good"
+        description: >
+          Correct classification of major risks. May miss some nuances
+          in factor vs idiosyncratic distinction.
+
+      - score: "18-24"
+        label: "Acceptable"
+        description: >
+          Basic risk classification present but incomplete.
+          May confuse some categories.
+
+      - score: "10-17"
+        label: "Poor"
+        description: >
+          Significant classification errors. Conflates environmental
+          with idiosyncratic risks.
+
+      - score: "0-9"
+        label: "Fail"
+        description: >
+          No meaningful risk classification. Treats all risks as
+          equivalent or ignores systematic exposures.
+
+  - name: "Hedging Logic"
+    id: "hedging_logic"
+    weight: 35
+    description: >
+      Evaluates whether hedging targets environmental risks while
+      preserving intended alpha exposure.
+
+    scoring_levels:
+      - score: "32-35"
+        label: "Excellent"
+        description: >
+          Hedges environmental risks appropriately. Preserves intended
+          idiosyncratic exposure. Specifies instruments or methods.
+          Explains residual exposures. Does not over-hedge alpha away.
+        anchor_examples:
+          - "Suggests beta-adjusting short leg for sector exposure"
+          - "Identifies what remains unhedged and why that's acceptable"
+          - "Distinguishes what should vs should not be hedged"
+
+      - score: "25-31"
+        label: "Good"
+        description: >
+          Appropriate hedging framework. May lack specificity on
+          instruments or residual exposure quantification.
+
+      - score: "18-24"
+        label: "Acceptable"
+        description: >
+          Basic hedging awareness. May hedge wrong things or
+          leave obvious exposures unaddressed.
+
+      - score: "10-17"
+        label: "Poor"
+        description: >
+          Hedging logic confused. May over-hedge alpha or
+          leave major environmental risks exposed.
+
+      - score: "0-9"
+        label: "Fail"
+        description: >
+          No coherent hedging framework. Claims neutrality while
+          leaving major risks unhedged.
+
+  - name: "Sizing Methodology"
+    id: "sizing_methodology"
+    weight: 30
+    description: >
+      Evaluates use of risk-based sizing vs notional capital,
+      including treatment of volatility differentials and tail risks.
+
+    scoring_levels:
+      - score: "27-30"
+        label: "Excellent"
+        description: >
+          Uses volatility or risk contribution for sizing. Accounts
+          for asymmetric volatility between positions. Considers
+          non-linear risks (binary outcomes, tail events). Reflects
+          intended alpha expression in sizing.
+        anchor_examples:
+          - "Sizes short smaller in notional to match risk contribution"
+          - "Uses implied vol for binary catalyst positions"
+          - "Considers marginal VaR contribution"
+
+      - score: "21-26"
+        label: "Good"
+        description: >
+          Risk-based sizing framework present. May miss some
+          nuances in tail risk or asymmetric payoffs.
+
+      - score: "15-20"
+        label: "Acceptable"
+        description: >
+          Some risk adjustment in sizing but incomplete.
+          May still anchor on notional amounts.
+
+      - score: "8-14"
+        label: "Poor"
+        description: >
+          Primarily notional-based sizing with minimal risk adjustment.
+          Ignores volatility differentials.
+
+      - score: "0-7"
+        label: "Fail"
+        description: >
+          Pure dollar-based sizing. Confuses notional symmetry with
+          risk neutrality. Ignores 3x volatility differential.
+
+# === CRITICAL FAILURES ===
+
+critical_failures:
+  - condition: "Dollar-neutral sizing ignoring volatility differential"
+    score_penalty: null
+    automatic_fail: true
+
+  - condition: "Claims neutrality while leaving major environmental risk unhedged"
+    score_penalty: null
+    automatic_fail: true
+
+  - condition: "Uses trailing volatility as primary signal for policy-exposed names"
+    score_penalty: null
+    automatic_fail: true
+
+  - condition: "Ignores portfolio-level correlation of policy exposure"
+    score_penalty: 20
+    automatic_fail: false
+
+  - condition: "Treats low beta as equivalent to low risk"
+    score_penalty: 25
+    automatic_fail: false
+
+# === SCENARIO-SPECIFIC CRITERIA ===
+
+scenario_criteria:
+  pharma_biotech_pair:
+    must_address:
+      - "3x+ volatility differential between legs"
+      - "Beta differential and sector exposure"
+      - "Binary nature of biotech pipeline risk"
+    red_flags:
+      - "Equal dollar sizing"
+      - "Claiming beta neutrality without adjustment"
+
+  healthcare_services_policy_risk:
+    must_address:
+      - "Inadequacy of trailing volatility"
+      - "Forward-looking policy risk quantification"
+      - "Portfolio-level policy exposure (28%+ already)"
+    red_flags:
+      - "Low beta as safety signal"
+      - "Policy risk as 'catalyst to monitor'"
+
+# === CALIBRATION EXAMPLES ===
+
+calibration_examples:
+  - score: 94
+    summary: >
+      Correctly classifies all risks. Sizes short 3x smaller in notional
+      to equalize risk contribution. Identifies sector beta exposure
+      requiring hedge. Explicitly addresses binary biotech risk.
+      Notes portfolio-level policy concentration.
+
+  - score: 76
+    summary: >
+      Good risk classification. Risk-based sizing framework present
+      but doesn't fully quantify volatility ratio. Hedging logic
+      sound but lacks instrument specificity.
+
+  - score: 58
+    summary: >
+      Basic risk awareness. Mentions volatility difference but
+      doesn't adjust sizing proportionally. Some hedging discussion
+      but incomplete. Policy risk acknowledged but not sized for.
+
+  - score: 38
+    summary: >
+      Equal dollar sizing. Claims trade is "balanced." Ignores
+      volatility differential. Uses low beta as safety argument.
+      Treats policy risk as optional monitoring item.
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2024-12-15"
+  sector_focus: "healthcare"

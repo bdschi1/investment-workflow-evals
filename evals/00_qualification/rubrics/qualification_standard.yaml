@@ -1,0 +1,246 @@
+# Qualification Rubric - Standard Assessment
+# Used to score new contributor qualification submissions
+
+id: qualification_standard_rubric
+title: "Standard Qualification Assessment Rubric"
+version: "1.0.0"
+module: "00_qualification"
+
+# === SCORING DIMENSIONS ===
+
+dimensions:
+  - name: "Thesis Clarity"
+    weight: 0.25
+    description: "Clear, defensible investment stance with logical reasoning"
+
+    levels:
+      - score_range: [90, 100]
+        label: "Excellent"
+        description: >
+          Thesis is immediately clear, specific to the company, and demonstrates
+          insight beyond surface-level analysis. Reasoning chain is tight and
+          professional-quality.
+        examples:
+          - "HSB is a buy: margin compression is transitory while e-commerce growth and valuation discount create asymmetric upside."
+
+      - score_range: [75, 89]
+        label: "Good"
+        description: >
+          Clear directional stance with solid reasoning. Thesis is specific
+          but may lack the sharpness of an excellent response.
+
+      - score_range: [60, 74]
+        label: "Acceptable"
+        description: >
+          Identifiable thesis but reasoning is generic or weakly supported.
+          May hedge excessively without taking a clear stance.
+
+      - score_range: [40, 59]
+        label: "Below Standard"
+        description: >
+          Thesis unclear or contradictory. May present both sides without
+          reaching a conclusion.
+
+      - score_range: [0, 39]
+        label: "Unacceptable"
+        description: >
+          No discernible thesis or recommendation. Response is off-topic
+          or fundamentally misunderstands the task.
+
+  - name: "Analytical Rigor"
+    weight: 0.30
+    description: "Accurate use of data and sound analytical reasoning"
+
+    levels:
+      - score_range: [90, 100]
+        label: "Excellent"
+        description: >
+          All financial data used accurately. Analysis demonstrates understanding
+          of retail economics, margin dynamics, and valuation. Connects dots
+          between data points effectively.
+
+      - score_range: [75, 89]
+        label: "Good"
+        description: >
+          Data used correctly with solid analytical framework. May miss some
+          nuances but overall reasoning is sound.
+
+      - score_range: [60, 74]
+        label: "Acceptable"
+        description: >
+          Basic data usage with some analytical gaps. May rely too heavily
+          on provided information without adding insight.
+
+      - score_range: [40, 59]
+        label: "Below Standard"
+        description: >
+          Errors in data interpretation or weak analytical framework.
+          Key drivers may be misidentified.
+
+      - score_range: [0, 39]
+        label: "Unacceptable"
+        description: >
+          Major factual errors or no evidence of analytical process.
+          Hallucinated data or metrics.
+
+  - name: "Risk Awareness"
+    weight: 0.20
+    description: "Identification and assessment of material risk factors"
+
+    levels:
+      - score_range: [90, 100]
+        label: "Excellent"
+        description: >
+          Identifies most material risks with specific, quantifiable framing.
+          Distinguishes between company-specific and macro risks. Shows
+          understanding of what could invalidate the thesis.
+
+      - score_range: [75, 89]
+        label: "Good"
+        description: >
+          Solid risk identification with good specificity. May miss one
+          secondary risk factor.
+
+      - score_range: [60, 74]
+        label: "Acceptable"
+        description: >
+          Identifies at least one relevant risk but lacks specificity
+          or depth. Risk assessment may be generic.
+
+      - score_range: [40, 59]
+        label: "Below Standard"
+        description: >
+          Risks identified are tangential or poorly articulated.
+          May list risks without connecting to thesis.
+
+      - score_range: [0, 39]
+        label: "Unacceptable"
+        description: >
+          No meaningful risk identification or risks are imagined/hallucinated.
+
+  - name: "Valuation Reasoning"
+    weight: 0.15
+    description: "Appropriate valuation framework and peer/historical context"
+
+    levels:
+      - score_range: [90, 100]
+        label: "Excellent"
+        description: >
+          Uses multiple relevant metrics (P/E, EV/EBITDA) with appropriate
+          context. Compares to both historical and peer benchmarks.
+          Connects valuation to investment thesis.
+
+      - score_range: [75, 89]
+        label: "Good"
+        description: >
+          Solid valuation assessment using provided data. May rely
+          on single metric but uses it appropriately.
+
+      - score_range: [60, 74]
+        label: "Acceptable"
+        description: >
+          References valuation but lacks depth. May state valuation
+          without explaining significance.
+
+      - score_range: [40, 59]
+        label: "Below Standard"
+        description: >
+          Weak valuation reasoning or misapplies metrics.
+
+      - score_range: [0, 39]
+        label: "Unacceptable"
+        description: >
+          No valuation assessment or completely incorrect methodology.
+
+  - name: "Communication Quality"
+    weight: 0.10
+    description: "Professional presentation, structure, and conciseness"
+
+    levels:
+      - score_range: [90, 100]
+        label: "Excellent"
+        description: >
+          Polished, professional writing. Well-organized with clear structure.
+          Appropriate length. Would be acceptable in an institutional setting.
+
+      - score_range: [75, 89]
+        label: "Good"
+        description: >
+          Clear and professional. Minor structural or length issues.
+
+      - score_range: [60, 74]
+        label: "Acceptable"
+        description: >
+          Generally clear but may be poorly organized or slightly
+          over/under length target.
+
+      - score_range: [40, 59]
+        label: "Below Standard"
+        description: >
+          Hard to follow or unprofessional tone. Significant length issues.
+
+      - score_range: [0, 39]
+        label: "Unacceptable"
+        description: >
+          Incomprehensible or grossly inappropriate length/format.
+
+# === CRITICAL FAILURES ===
+
+critical_failures:
+  - condition: "Misquotes financial data from the scenario"
+    score_penalty: 30
+    automatic_fail: false
+
+  - condition: "Hallucinates earnings estimates, price targets, or analyst ratings"
+    score_penalty: null
+    automatic_fail: true
+
+  - condition: "No clear Buy/Hold/Sell recommendation"
+    score_penalty: 20
+    automatic_fail: false
+
+  - condition: "Response under 150 words"
+    score_penalty: null
+    automatic_fail: true
+
+  - condition: "Response over 600 words"
+    score_penalty: 15
+    automatic_fail: false
+
+# === SCORING THRESHOLDS ===
+
+scoring:
+  pass_threshold: 70
+
+  tier_thresholds:
+    fast_track_standard: 85  # Immediate Standard tier
+    pass_trainee: 70         # Pass as Trainee
+    conditional: 50          # Requires additional training
+    fail: 49                 # Must retry
+
+  retry_policy:
+    max_attempts: 3
+    cooldown_days: 7
+
+# === CALIBRATION EXAMPLES ===
+
+calibration_examples:
+  - score: 92
+    summary: "Strong thesis with clear margin recovery narrative, accurate data usage, specific housing turnover risk identified, solid peer valuation comparison."
+
+  - score: 78
+    summary: "Clear buy recommendation with good reasoning, minor over-reliance on valuation discount, risk section generic but acceptable."
+
+  - score: 65
+    summary: "Thesis present but hedged, data used correctly but superficially, risk identification weak, valuation mentioned but not analyzed."
+
+  - score: 45
+    summary: "Contradictory conclusions, confused revenue figures, risks not connected to thesis, no peer comparison."
+
+metadata:
+  author: "Platform Team"
+  created_at: "2024-11-15"
+  reviewer_notes: >
+    This rubric is calibrated for qualification assessment. Scoring should
+    be consistent with the goal of identifying contributors who can produce
+    institutional-quality work. When in doubt, compare to calibration examples.
