@@ -1,0 +1,224 @@
+# Biotech Phase 3 Catalyst Scenario
+# Tests: Event-driven analysis, probability estimation, binary outcome assessment
+
+id: biotech_phase3_catalyst
+title: "Biotech Phase 3 Readout - Event-Driven Thesis"
+version: "1.0.0"
+module: "01_equity_thesis"
+category: "event_driven"
+difficulty: "moderate"
+estimated_time_minutes: 45
+
+context:
+  company:
+    name: "Vertex Therapeutics"
+    ticker: "VRTX"
+    sector: "Healthcare - Biotechnology"
+    market_cap: "$95B"
+    description: >
+      Vertex is a global biotechnology company focused on developing
+      transformative medicines for serious diseases. The company has a
+      dominant franchise in cystic fibrosis (CF) treatments and is
+      diversifying into pain, kidney disease, and gene editing.
+
+  situation: >
+    Vertex has a Phase 3 readout expected in Q1 2025 for VX-548, a
+    non-opioid pain medication targeting acute pain. The drug showed
+    mixed results in Phase 2, meeting primary endpoints in some studies
+    but narrowly missing in others. The acute pain market represents a
+    $10B+ opportunity if the drug succeeds and gains broad adoption.
+
+    The stock has rallied 25% over the past 3 months on optimism about
+    the pipeline, and options markets imply a 15% move on the readout.
+
+    Key uncertainties include:
+    - Primary endpoint success (pain reduction vs placebo)
+    - Safety profile (GI side effects observed in Phase 2)
+    - Differentiation vs existing non-opioid options
+    - Regulatory pathway (NDA vs additional trials)
+
+  market_conditions: >
+    Biotech sector has underperformed broader market YTD. M&A activity
+    remains elevated with large pharma seeking pipeline replenishment.
+    Opioid crisis has created regulatory tailwinds for non-opioid
+    alternatives, but commercial success of prior entrants has been
+    disappointing (e.g., Nektar's NKTR-181 failure).
+
+  as_of_date: "2024-12-15"
+
+  additional_context: >
+    Vertex's CF franchise generates $8B+ annually with high margins.
+    The company has $13B in cash and no debt. Management has historically
+    been conservative in guidance but has recently increased commentary
+    on VX-548's commercial potential. Several sell-side analysts have
+    raised price targets citing option value from the pain program.
+
+task:
+  prompt: >
+    Develop an investment thesis for Vertex Therapeutics (VRTX) ahead of
+    the VX-548 Phase 3 readout. Your analysis should include:
+
+    1. A clear long/short recommendation with position sizing
+    2. Assessment of the probability of Phase 3 success
+    3. Scenario analysis for success vs failure outcomes
+    4. Risk/reward framework with specific price targets
+    5. Key risks and mitigants
+    6. Catalysts and timing considerations
+
+    Base your analysis on the provided context and publicly available
+    information as of December 2024.
+
+  expected_output_type: "investment_thesis"
+
+  constraints:
+    - "Must provide specific probability estimates for key scenarios"
+    - "Position sizing must be justified by risk/reward"
+    - "All financial projections must show methodology"
+    - "Must address both bull and bear cases"
+
+  time_horizon: "6-12 months"
+
+data_sources:
+  - type: "10-K"
+    description: "Vertex 2023 Annual Report"
+    date: "2024-02-28"
+    key_data_points:
+      - "CF franchise revenue: $8.9B"
+      - "R&D expense: $3.2B"
+      - "Cash and investments: $13.2B"
+      - "Operating margin: 42%"
+
+  - type: "10-Q"
+    description: "Vertex Q3 2024 Quarterly Report"
+    date: "2024-11-05"
+    key_data_points:
+      - "Q3 revenue: $2.7B (+10% YoY)"
+      - "VX-548 Phase 3 enrollment complete"
+      - "Data readout expected Q1 2025"
+
+  - type: "earnings_transcript"
+    description: "Q3 2024 Earnings Call"
+    date: "2024-11-05"
+    key_data_points:
+      - "Management confidence in VX-548 program"
+      - "Pain market opportunity sizing: $10B+"
+      - "Regulatory interactions ongoing"
+
+  - type: "investor_presentation"
+    description: "R&D Day Presentation"
+    date: "2024-09-15"
+    key_data_points:
+      - "Phase 2 data review"
+      - "Phase 3 trial design details"
+      - "Commercial strategy overview"
+
+key_facts:
+  - fact: "VX-548 is a selective NaV1.8 inhibitor targeting peripheral pain"
+    source: "Company filings"
+    importance: "critical"
+
+  - fact: "Phase 2 acute pain study showed statistically significant pain reduction vs placebo in bunionectomy but missed primary endpoint in abdominoplasty"
+    source: "Clinical trial results"
+    importance: "critical"
+
+  - fact: "Options implied move of ~15% suggests market sees binary outcome"
+    source: "Options market data"
+    importance: "important"
+
+  - fact: "CF franchise provides stable base business regardless of VX-548 outcome"
+    source: "Financial statements"
+    importance: "important"
+
+  - fact: "Prior non-opioid pain drugs have largely failed commercially despite clinical success"
+    source: "Industry analysis"
+    importance: "important"
+
+  - fact: "Vertex has $13B+ cash providing significant financial flexibility"
+    source: "Balance sheet"
+    importance: "supporting"
+
+pitfalls:
+  - description: "Ignoring the mixed Phase 2 results when estimating Phase 3 probability"
+    failure_type: "survivorship_bias"
+    severity: "major"
+
+  - description: "Conflating clinical success with commercial success"
+    failure_type: "correlation_causation"
+    severity: "major"
+
+  - description: "Using outdated CF revenue figures"
+    failure_type: "stale_data"
+    severity: "minor"
+
+  - description: "Failing to account for the binary nature of catalyst"
+    failure_type: "missing_risk"
+    severity: "critical"
+
+  - description: "Hallucinating Phase 3 results that haven't been released"
+    failure_type: "hallucination"
+    severity: "critical"
+
+evaluation_criteria:
+  dimensions:
+    - name: "Probability Assessment"
+      weight: 0.25
+      criteria:
+        - "Provides specific probability estimate for Phase 3 success"
+        - "Estimate is grounded in Phase 2 data and comparable trials"
+        - "Acknowledges uncertainty and range of outcomes"
+        - "Distinguishes between clinical and regulatory success"
+
+    - name: "Scenario Analysis"
+      weight: 0.25
+      criteria:
+        - "Models both success and failure scenarios"
+        - "Price targets are justified with valuation methodology"
+        - "Considers multiple success scenarios (strong vs marginal data)"
+        - "Accounts for base business value in downside"
+
+    - name: "Risk Assessment"
+      weight: 0.20
+      criteria:
+        - "Identifies binary catalyst risk"
+        - "Addresses commercial execution risk"
+        - "Notes competitive landscape"
+        - "Considers regulatory pathway uncertainty"
+
+    - name: "Position Sizing Logic"
+      weight: 0.15
+      criteria:
+        - "Size is commensurate with conviction and risk"
+        - "Accounts for portfolio context"
+        - "Has clear stop-loss or risk management framework"
+        - "Entry/exit timing is specified"
+
+    - name: "Evidence Quality"
+      weight: 0.15
+      criteria:
+        - "All claims are supported by cited sources"
+        - "Financial data is current and accurate"
+        - "Uses appropriate comparables and precedents"
+        - "Distinguishes between fact and opinion"
+
+  critical_failures:
+    - "States Phase 3 results that haven't been released"
+    - "Provides no probability estimate for key catalyst"
+    - "Ignores the binary nature of the investment"
+    - "Material factual errors about company or drug"
+    - "No consideration of downside scenario"
+
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2024-12-20"
+  tags:
+    - "biotech"
+    - "event_driven"
+    - "catalyst"
+    - "binary_outcome"
+    - "healthcare"
+  notes: >
+    This scenario tests the ability to analyze event-driven situations
+    with binary outcomes. Key skills: probability estimation, scenario
+    analysis, position sizing under uncertainty.

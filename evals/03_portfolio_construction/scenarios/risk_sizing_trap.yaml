@@ -1,0 +1,22 @@
+id: MOD03-SIZE-001
+module: "03_portfolio_construction"
+title: "Notional vs. Risk-Based Sizing"
+observed_relationship: |
+  A PM has 10% in a 12% vol Large-Cap Pharma stock and 5% in a 60% vol 
+  Biotech stock. They claim the Pharma stock is the "primary risk driver."
+context: |
+  Risk-based sizing logic: Risk = Weight * Volatility.
+task: "Evaluate if the PM is correct about which position drives portfolio risk."
+anchor_answers:
+  strong:
+    response: |
+      The PM is mathematically incorrect. 
+      Pharma Risk: 10% * 12% = 1.2 units of risk.
+      Biotech Risk: 5% * 60% = 3.0 units of risk. 
+      The Biotech position is 2.5x riskier than the Pharma position despite 
+      having half the capital. The PM is suffering from notional bias.
+  failing:
+    response: |
+      The PM is correct. The 10% allocation represents double the capital 
+      commitment, meaning price movements in the Pharma stock will have 
+      the largest absolute impact on the portfolio's NAV day-to-day.

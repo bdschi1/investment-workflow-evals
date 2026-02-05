@@ -1,0 +1,193 @@
+# MedTech: Normalization Is Not Risk-Neutral
+# Tests ability to distinguish cyclical mean reversion from structural improvement
+
+id: medtech_normalization
+title: "MedTech: Normalization Is Not Risk-Neutral"
+version: "1.0.0"
+module: "02_dcf_valuation"
+category: "healthcare_valuation"
+difficulty: "hard"
+estimated_time_minutes: 40
+
+# === CONTEXT ===
+
+context:
+  company:
+    name: "Surgical Dynamics Corp"
+    ticker: "SDC"
+    sector: "Healthcare - Medical Devices"
+    market_cap: "$12B"
+    description: >
+      MedTech company focused on elective surgical procedures including
+      orthopedic implants, spine surgery devices, and surgical robotics.
+      Revenue is highly correlated with hospital procedure volumes.
+
+  situation: >
+    The company is emerging from a significant downturn caused by elective
+    procedure deferrals. Margins are well below historical averages due to
+    volume deleverage and labor inefficiencies. Management claims structural
+    improvements will support higher margins going forward, citing:
+    - Automation investments in manufacturing
+    - Shift to higher-margin robotic-assisted procedures
+    - Rationalized SKU portfolio
+    - Improved sales force productivity
+
+    However, current utilization at customer hospitals remains 15% below
+    pre-pandemic levels, and staffing shortages continue to constrain
+    procedure capacity.
+
+  market_conditions: >
+    Elective procedure volumes recovering unevenly. Orthopedic procedures
+    at ~90% of pre-pandemic levels. Hospital staffing shortages persist.
+    Wage inflation elevated in healthcare. Competitors also claiming
+    structural margin improvements.
+
+  as_of_date: "2024-12-15"
+
+  key_financials:
+    revenue_ttm: "$4.8B"
+    current_gross_margin: "58%"
+    historical_peak_gross_margin: "65%"
+    current_ebitda_margin: "18%"
+    historical_peak_ebitda_margin: "26%"
+    management_target_ebitda_margin: "28%"
+    procedure_volume_vs_2019: "85%"
+    hospital_utilization_vs_2019: "85%"
+
+  margin_bridge:
+    volume_impact: "-4%"
+    labor_inflation_impact: "-2%"
+    mix_shift_impact: "-1%"
+    automation_benefit_claimed: "+3%"
+    sku_rationalization_claimed: "+1%"
+
+# === TASK ===
+
+task:
+  prompt: >
+    A medtech company focused on elective procedures is emerging from a downturn.
+    Margins are well below historical averages due to volume deferrals and labor
+    inefficiencies. Management claims structural improvements will support higher
+    margins going forward.
+
+    Explain how a valuation framework should distinguish cyclical mean reversion
+    from true structural improvement, and where uncertainty should be reflected.
+
+    Your response should address:
+    1. How to separate utilization recovery from operational improvement
+    2. Where to allocate uncertainty (forecasts, terminal assumptions, or discounting)
+    3. How to treat normalization as a probabilistic outcome, not a base-case fact
+    4. What evidence would distinguish cyclical recovery from structural improvement
+
+  expected_output_type: "valuation_framework"
+
+  constraints:
+    - "Must separate cyclical vs structural drivers"
+    - "Must not embed certainty into normalized margins"
+    - "Must treat normalization as probabilistic"
+    - "Must specify where uncertainty is reflected"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Cyclical vs Structural Identification"
+      id: "cyclical_structural"
+      weight: 35
+      criteria:
+        - "Separates utilization recovery from operational improvement"
+        - "Identifies which margin drivers are volume-dependent"
+        - "Distinguishes temporary labor dynamics from permanent changes"
+        - "Recognizes that competitors claim similar structural improvements"
+
+    - name: "Risk Placement"
+      id: "risk_placement"
+      weight: 35
+      criteria:
+        - "Appropriately allocates uncertainty to forecasts, terminal assumptions, or discounting"
+        - "Avoids embedding certainty into normalized margins"
+        - "Does not treat historical margins as automatic destiny"
+        - "Specifies mechanism for reflecting uncertainty"
+
+    - name: "Judgment Under Uncertainty"
+      id: "uncertainty_judgment"
+      weight: 30
+      criteria:
+        - "Treats normalization as probabilistic outcome"
+        - "Does not convert management claims into base-case facts"
+        - "Identifies what evidence would validate structural improvement"
+        - "Maintains intellectual honesty about unknowns"
+
+  critical_failures:
+    - "Implicitly hedged nothing while assuming full margin recovery"
+    - "Converted historical margins into automatic destiny"
+    - "Treated management claims as facts without verification framework"
+    - "Assumed normalization without any risk compensation"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Assuming full margin normalization without uncertainty"
+    failure_type: "false_certainty"
+    severity: "critical"
+
+  - description: "Treating historical peak margins as achievable floor"
+    failure_type: "anchoring_bias"
+    severity: "major"
+
+  - description: "Ignoring that competitors claim identical improvements"
+    failure_type: "insufficient_skepticism"
+    severity: "major"
+
+  - description: "Conflating volume recovery with operational alpha"
+    failure_type: "cyclical_structural_confusion"
+    severity: "major"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    Given historical margins and management's automation initiatives, it is
+    reasonable to assume full margin normalization over the next several years,
+    with the DCF capturing this through a return to prior peak margins.
+
+  why_this_fails:
+    - "Converts history into destiny"
+    - "Ignores uncertainty in utilization recovery"
+    - "Assumes normalization without risk compensation"
+    - "Treats management initiatives as accomplished facts"
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Current EBITDA margin 18% vs historical peak 26%"
+    source: "context.key_financials"
+    importance: "critical"
+
+  - fact: "Procedure volumes at 85% of pre-pandemic levels"
+    source: "context.key_financials"
+    importance: "critical"
+
+  - fact: "Management target margin of 28% exceeds prior peak"
+    source: "context.key_financials"
+    importance: "important"
+
+  - fact: "Volume impact accounts for -4% of margin gap"
+    source: "context.margin_bridge"
+    importance: "important"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2024-12-15"
+  sector_focus: "healthcare"
+  skill_level: "advanced"
+  tags:
+    - "dcf_valuation"
+    - "medtech"
+    - "margin_normalization"
+    - "cyclical_analysis"
+    - "healthcare"

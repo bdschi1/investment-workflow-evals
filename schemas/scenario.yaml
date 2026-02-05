@@ -1,0 +1,271 @@
+# JSON Schema for Evaluation Scenarios
+# Use this as a template for creating new scenarios
+
+$schema: "http://json-schema.org/draft-07/schema#"
+title: "Evaluation Scenario"
+description: "Schema for investment workflow evaluation scenarios"
+
+type: object
+required:
+  - id
+  - title
+  - version
+  - module
+  - category
+  - difficulty
+  - context
+  - task
+  - data_sources
+  - key_facts
+  - evaluation_criteria
+
+properties:
+  id:
+    type: string
+    description: "Unique identifier for the scenario (snake_case)"
+    pattern: "^[a-z][a-z0-9_]*$"
+
+  title:
+    type: string
+    description: "Human-readable title"
+    maxLength: 100
+
+  version:
+    type: string
+    description: "Semantic version of the scenario"
+    pattern: "^\\d+\\.\\d+\\.\\d+$"
+
+  module:
+    type: string
+    description: "Parent evaluation module"
+    enum:
+      - "01_equity_thesis"
+      - "02_dcf_valuation"
+      - "03_portfolio_construction"
+      - "04_earnings_analysis"
+      - "05_risk_attribution"
+
+  category:
+    type: string
+    description: "Scenario category within module"
+
+  difficulty:
+    type: string
+    enum: ["easy", "moderate", "hard", "expert"]
+    description: "Difficulty level"
+
+  estimated_time_minutes:
+    type: integer
+    minimum: 5
+    maximum: 180
+    description: "Expected time to complete"
+
+  # Context Section
+  context:
+    type: object
+    required:
+      - company
+      - situation
+      - market_conditions
+      - as_of_date
+    properties:
+      company:
+        type: object
+        properties:
+          name:
+            type: string
+          ticker:
+            type: string
+          sector:
+            type: string
+          market_cap:
+            type: string
+          description:
+            type: string
+
+      situation:
+        type: string
+        description: "Current situation being analyzed"
+
+      market_conditions:
+        type: string
+        description: "Relevant market context"
+
+      as_of_date:
+        type: string
+        format: date
+        description: "Date context for the analysis"
+
+      additional_context:
+        type: string
+        description: "Any additional relevant background"
+
+  # Task Definition
+  task:
+    type: object
+    required:
+      - prompt
+      - expected_output_type
+    properties:
+      prompt:
+        type: string
+        description: "The specific task/question for the AI"
+
+      expected_output_type:
+        type: string
+        enum:
+          - "investment_thesis"
+          - "valuation_model"
+          - "portfolio_recommendation"
+          - "earnings_analysis"
+          - "risk_analysis"
+          - "comparison"
+          - "short_answer"
+
+      constraints:
+        type: array
+        items:
+          type: string
+        description: "Any constraints on the response"
+
+      time_horizon:
+        type: string
+        description: "Investment time horizon if applicable"
+
+  # Data Sources
+  data_sources:
+    type: array
+    items:
+      type: object
+      required:
+        - type
+        - description
+      properties:
+        type:
+          type: string
+          enum:
+            - "10-K"
+            - "10-Q"
+            - "8-K"
+            - "earnings_transcript"
+            - "investor_presentation"
+            - "press_release"
+            - "analyst_report"
+            - "industry_data"
+            - "market_data"
+            - "regulatory_filing"
+        description:
+          type: string
+        url:
+          type: string
+          format: uri
+        date:
+          type: string
+          format: date
+        key_data_points:
+          type: array
+          items:
+            type: string
+
+  # Key Facts
+  key_facts:
+    type: array
+    description: "Facts that must be correctly identified"
+    items:
+      type: object
+      required:
+        - fact
+        - importance
+      properties:
+        fact:
+          type: string
+        source:
+          type: string
+        importance:
+          type: string
+          enum: ["critical", "important", "supporting"]
+
+  # Common Pitfalls
+  pitfalls:
+    type: array
+    description: "Common mistakes to test for"
+    items:
+      type: object
+      required:
+        - description
+        - failure_type
+      properties:
+        description:
+          type: string
+        failure_type:
+          type: string
+          enum:
+            - "hallucination"
+            - "calculation_error"
+            - "period_mismatch"
+            - "missing_risk"
+            - "survivorship_bias"
+            - "gaap_confusion"
+            - "correlation_causation"
+            - "stale_data"
+        severity:
+          type: string
+          enum: ["critical", "major", "minor"]
+
+  # Evaluation Criteria
+  evaluation_criteria:
+    type: object
+    required:
+      - dimensions
+      - critical_failures
+    properties:
+      dimensions:
+        type: array
+        items:
+          type: object
+          required:
+            - name
+            - weight
+            - criteria
+          properties:
+            name:
+              type: string
+            weight:
+              type: number
+              minimum: 0
+              maximum: 1
+            criteria:
+              type: array
+              items:
+                type: string
+
+      critical_failures:
+        type: array
+        items:
+          type: string
+        description: "Conditions that cause automatic fail"
+
+      pass_threshold:
+        type: number
+        minimum: 0
+        maximum: 100
+        default: 70
+
+  # Metadata
+  metadata:
+    type: object
+    properties:
+      author:
+        type: string
+      created_at:
+        type: string
+        format: date
+      updated_at:
+        type: string
+        format: date
+      tags:
+        type: array
+        items:
+          type: string
+      notes:
+        type: string

@@ -1,0 +1,23 @@
+id: MOD03-SIZE-001
+module: "03_portfolio_construction"
+title: "Capital vs. Risk: The High-Vol Trap"
+context:
+  portfolio:
+    position_A: "10% weight in Mega-Cap Pharma (15% Vol)"
+    position_B: "4% weight in Small-Cap Biotech (60% Vol)"
+  pm_belief: "Position A is more than twice as risky as Position B because it has more than double the capital."
+task: "Evaluate the PM's risk assessment. Which position contributes more to portfolio volatility?"
+anchor_answers:
+  strong:
+    response: |
+      The PM's assessment is incorrect. Risk contribution is a function of weight * volatility. 
+      Position A (0.10 * 0.15) = 1.5% vol contribution units. 
+      Position B (0.04 * 0.60) = 2.4% vol contribution units. 
+      Despite having less than half the capital, the Biotech position is significantly 'larger' 
+      in risk terms. Per Paleologo’s 'Advanced Portfolio Management', sizing should be 
+      vol-normalized to ensure the tail doesn't wag the dog.
+  failing:
+    response: |
+      The PM is correct. By concentrating capital in the 10% Pharma position, the portfolio's 
+      main performance driver is the Mega-Cap leg. The 4% Biotech position is a smaller, 
+      speculative side-bet that is appropriately sized to limit total loss potential.

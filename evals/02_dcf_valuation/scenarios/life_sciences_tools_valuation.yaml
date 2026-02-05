@@ -1,0 +1,203 @@
+# Life Sciences Tools: Alpha vs Environment in Long-Horizon Valuation
+# Tests ability to distinguish company-specific value creation from environmental tailwinds
+
+id: life_sciences_tools_valuation
+title: "Life Sciences Tools: Alpha vs Environment in Long-Horizon Valuation"
+version: "1.0.0"
+module: "02_dcf_valuation"
+category: "healthcare_valuation"
+difficulty: "hard"
+estimated_time_minutes: 45
+
+# === CONTEXT ===
+
+context:
+  company:
+    name: "Precision Life Sciences"
+    ticker: "PLS"
+    sector: "Healthcare - Life Sciences Tools & Services"
+    market_cap: "$45B"
+    description: >
+      Diversified life sciences tools company with exposure to biopharma R&D,
+      academic research, and diagnostics. Provides instrumentation, consumables,
+      and software for life sciences research and clinical applications.
+
+  situation: >
+    Revenue growth accelerated during a period of elevated biotech funding and
+    pandemic-era demand, but is now decelerating as funding tightens. The company
+    benefited from unprecedented NIH budget increases, record biotech IPO/VC funding,
+    and COVID-related research demand from 2020-2022.
+
+    Consumables represent ~45% of revenue with recurring characteristics.
+    Margins are expanding but remain below best-in-class peers (current EBITDA
+    margin 22% vs peer average 28%). Management attributes margin gap to
+    integration costs from recent acquisitions and investment in commercial
+    infrastructure.
+
+  market_conditions: >
+    Biotech funding environment has normalized sharply. VC funding down 50%+ from
+    peak. Biotech IPO market largely closed. NIH budget growth returning to
+    historical ~3% annual increases after exceptional COVID-era expansion.
+    Academic research budgets under pressure globally. Biopharma R&D spending
+    growth moderating as large pharma faces patent cliffs.
+
+  as_of_date: "2024-12-15"
+
+  key_financials:
+    revenue_ttm: "$8.2B"
+    revenue_growth_2020_2022_cagr: "18%"
+    revenue_growth_2023: "6%"
+    revenue_growth_2024e: "4%"
+    ebitda_margin: "22%"
+    peer_ebitda_margin: "28%"
+    consumables_mix: "45%"
+    instruments_mix: "40%"
+    services_software_mix: "15%"
+    net_debt_ebitda: "2.1x"
+    roic: "9%"
+    wacc_estimate: "8.5%"
+
+  historical_context:
+    biotech_vc_funding_2021: "$38B"
+    biotech_vc_funding_2024: "$15B"
+    nih_budget_growth_2020_2022: "25%"
+    nih_budget_growth_normalized: "3%"
+
+# === TASK ===
+
+task:
+  prompt: >
+    You are valuing Precision Life Sciences, a diversified life sciences tools
+    company with exposure to biopharma R&D, academic research, and diagnostics.
+
+    Revenue growth accelerated during a period of elevated biotech funding and
+    pandemic-era demand, but is now decelerating as funding tightens. Consumables
+    represent ~45% of revenue. Margins are expanding but remain below best-in-class peers.
+
+    Construct a valuation logic that clearly distinguishes company-specific value
+    creation from environmental tailwinds, and explain how this distinction should
+    affect long-term growth, reinvestment, and terminal value assumptions.
+
+    Your response should address:
+    1. How to separate alpha (firm-controlled value creation) from environment (external tailwinds)
+    2. How environmental uncertainty should be reflected in assumptions
+    3. How to prevent terminal value from embedding unhedged sector-wide growth
+    4. Specific guidance on growth, reinvestment, and ROIC assumptions
+
+  expected_output_type: "valuation_framework"
+
+  constraints:
+    - "Must explicitly distinguish alpha vs environment drivers"
+    - "Must not capitalize funding-cycle tailwinds as permanent alpha"
+    - "Terminal value must not embed unhedged sector-wide growth"
+    - "Must maintain internal consistency between growth, reinvestment, and margins"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Alpha vs Environment Separation"
+      id: "alpha_environment"
+      weight: 35
+      criteria:
+        - "Correctly identifies which growth drivers are firm-controlled vs externally driven"
+        - "Avoids capitalizing funding-cycle tailwinds as permanent alpha"
+        - "Distinguishes installed base dynamics from funding-dependent demand"
+        - "Recognizes that diversification does not eliminate environmental exposure"
+
+    - name: "Risk Treatment in Valuation"
+      id: "risk_treatment"
+      weight: 35
+      criteria:
+        - "Reflects environmental uncertainty through assumptions, not narrative smoothing"
+        - "Maintains internal consistency between growth, reinvestment, and margins"
+        - "Does not use diversification as proxy for immunity to funding cycles"
+        - "Appropriately discounts or probability-weights environmental scenarios"
+
+    - name: "Terminal Value Discipline"
+      id: "terminal_value"
+      weight: 30
+      criteria:
+        - "Prevents terminal value from embedding unhedged sector-wide growth"
+        - "Aligns terminal assumptions with long-run research funding realities"
+        - "Does not extrapolate above-market growth into perpetuity"
+        - "Terminal growth rate reflects sustainable, hedged assumptions"
+
+  critical_failures:
+    - "Misclassified environmental risk as alpha (treating biotech funding cycles as firm-level growth durability)"
+    - "Embedded unhedged funding risk into terminal value"
+    - "Used diversification as justification for premium terminal growth"
+    - "Assumed full margin normalization without risk compensation"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Treating diversified customer base as immunity to funding cycles"
+    failure_type: "alpha_environment_confusion"
+    severity: "critical"
+
+  - description: "Using installed base as justification for above-market terminal growth"
+    failure_type: "terminal_value_inflation"
+    severity: "critical"
+
+  - description: "Narrative smoothing of environmental uncertainty"
+    failure_type: "risk_misrepresentation"
+    severity: "major"
+
+  - description: "Extrapolating 2020-2022 growth rates as sustainable"
+    failure_type: "recency_bias"
+    severity: "major"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    Given the company's diversified customer base and strong consumables mix,
+    recent growth demonstrates durable competitive advantage. While funding
+    cycles fluctuate, the installed base ensures sustained above-market growth,
+    justifying a premium terminal growth rate relative to GDP.
+
+  why_this_fails:
+    - "Treats environmental demand as structural alpha"
+    - "Uses diversification as a proxy for immunity"
+    - "Embeds unhedged funding risk into terminal value"
+    - "Conflates installed base with funding-independent demand"
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Revenue growth decelerated from 18% CAGR (2020-2022) to 4% (2024E)"
+    source: "context.key_financials"
+    importance: "critical"
+
+  - fact: "Biotech VC funding down from $38B (2021) to $15B (2024)"
+    source: "context.historical_context"
+    importance: "critical"
+
+  - fact: "Consumables represent 45% of revenue"
+    source: "context.key_financials"
+    importance: "important"
+
+  - fact: "EBITDA margin 22% vs peer average 28%"
+    source: "context.key_financials"
+    importance: "important"
+
+  - fact: "NIH budget growth normalized from 25% to 3%"
+    source: "context.historical_context"
+    importance: "important"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2024-12-15"
+  sector_focus: "healthcare"
+  skill_level: "advanced"
+  tags:
+    - "dcf_valuation"
+    - "life_sciences"
+    - "alpha_vs_environment"
+    - "terminal_value"
+    - "healthcare"

@@ -1,0 +1,233 @@
+# DCF Valuation Module - Standard Rubric
+# For evaluating valuation frameworks and DCF analysis
+
+id: dcf_valuation_standard
+title: "DCF Valuation Standard Rubric"
+version: "1.0.0"
+module: "02_dcf_valuation"
+
+description: >
+  This rubric evaluates AI-generated DCF valuations and valuation frameworks,
+  testing the ability to distinguish alpha from environment, treat risk
+  appropriately, and maintain terminal value discipline.
+
+total_points: 100
+pass_threshold: 70
+excellence_threshold: 85
+
+# === DIMENSIONS ===
+
+dimensions:
+  - name: "Alpha vs Environment Separation"
+    id: "alpha_environment"
+    weight: 35
+    description: >
+      Evaluates ability to distinguish company-specific value creation
+      from environmental tailwinds and external demand drivers.
+
+    scoring_levels:
+      - score: "32-35"
+        label: "Excellent"
+        description: >
+          Clearly identifies and separates firm-controlled drivers from
+          environmental factors. Does not capitalize cyclical tailwinds
+          as permanent alpha. Recognizes that diversification does not
+          eliminate environmental exposure.
+        anchor_examples:
+          - "Explicitly separates biotech funding-driven demand from installed base growth"
+          - "Quantifies environmental contribution vs organic market share gains"
+          - "Notes that all competitors benefited from same tailwinds"
+
+      - score: "25-31"
+        label: "Good"
+        description: >
+          Identifies key alpha vs environment distinction. May miss some
+          nuances but correctly avoids major conflation errors.
+        anchor_examples:
+          - "Recognizes funding cycle impact but doesn't fully quantify"
+          - "Separates cyclical from structural but with some gaps"
+
+      - score: "18-24"
+        label: "Acceptable"
+        description: >
+          Shows awareness of distinction but treatment is superficial.
+          May hedge without clear framework.
+        anchor_examples:
+          - "Mentions external factors but doesn't adjust assumptions"
+          - "Acknowledges tailwinds without changing terminal value"
+
+      - score: "10-17"
+        label: "Poor"
+        description: >
+          Minimal distinction between alpha and environment.
+          Treats recent performance as indicative of durable advantage.
+
+      - score: "0-9"
+        label: "Fail"
+        description: >
+          Conflates environmental tailwinds with company-specific alpha.
+          Capitalizes cyclical demand into perpetuity.
+
+  - name: "Risk Treatment in Valuation"
+    id: "risk_treatment"
+    weight: 35
+    description: >
+      Evaluates whether uncertainty is reflected through assumptions
+      rather than narrative smoothing, with internal consistency.
+
+    scoring_levels:
+      - score: "32-35"
+        label: "Excellent"
+        description: >
+          Reflects uncertainty through explicit assumptions, scenarios,
+          or probability weighting. Maintains internal consistency between
+          growth, reinvestment, and margins. Does not use diversification
+          as proxy for immunity.
+        anchor_examples:
+          - "Uses scenario analysis with probability weights"
+          - "Adjusts discount rate or growth for environmental uncertainty"
+          - "Shows how margin assumptions tie to reinvestment needs"
+
+      - score: "25-31"
+        label: "Good"
+        description: >
+          Appropriate risk treatment with minor gaps. Consistency
+          mostly maintained. Clear about where uncertainty lies.
+
+      - score: "18-24"
+        label: "Acceptable"
+        description: >
+          Some risk acknowledgment but treatment is narrative rather
+          than quantitative. May have minor consistency issues.
+
+      - score: "10-17"
+        label: "Poor"
+        description: >
+          Narrative smoothing of uncertainty. Inconsistent assumptions.
+          Risk acknowledged but not reflected in numbers.
+
+      - score: "0-9"
+        label: "Fail"
+        description: >
+          No meaningful risk treatment. Certainty embedded in assumptions.
+          Internally inconsistent growth/margin/reinvestment.
+
+  - name: "Terminal Value Discipline"
+    id: "terminal_value"
+    weight: 30
+    description: >
+      Evaluates whether terminal value avoids embedding unhedged
+      sector-wide growth and aligns with long-run realities.
+
+    scoring_levels:
+      - score: "27-30"
+        label: "Excellent"
+        description: >
+          Terminal growth rate reflects sustainable, hedged assumptions.
+          Does not extrapolate above-market growth into perpetuity.
+          Aligns with long-run funding/demand realities.
+        anchor_examples:
+          - "Terminal growth at or below GDP despite recent outperformance"
+          - "Explicitly addresses why terminal margins are sustainable"
+          - "Considers terminal ROIC convergence to cost of capital"
+
+      - score: "21-26"
+        label: "Good"
+        description: >
+          Reasonable terminal assumptions with minor issues.
+          Avoids major perpetuity inflation errors.
+
+      - score: "15-20"
+        label: "Acceptable"
+        description: >
+          Terminal value somewhat elevated but not egregious.
+          Limited justification for assumptions.
+
+      - score: "8-14"
+        label: "Poor"
+        description: >
+          Terminal value embeds optimistic assumptions without hedging.
+          Above-market growth into perpetuity.
+
+      - score: "0-7"
+        label: "Fail"
+        description: >
+          Terminal value captures majority of enterprise value with
+          unhedged assumptions. Perpetuates recent growth indefinitely.
+
+# === CRITICAL FAILURES ===
+
+critical_failures:
+  - condition: "Treats environmental demand as structural alpha"
+    score_penalty: null
+    automatic_fail: true
+
+  - condition: "Embeds unhedged funding-cycle growth into terminal value"
+    score_penalty: null
+    automatic_fail: true
+
+  - condition: "Uses diversification as justification for premium terminal growth"
+    score_penalty: 25
+    automatic_fail: false
+
+  - condition: "Internally inconsistent growth/margin/reinvestment assumptions"
+    score_penalty: 20
+    automatic_fail: false
+
+  - condition: "Assumes full margin normalization without uncertainty"
+    score_penalty: 20
+    automatic_fail: false
+
+# === SCENARIO-SPECIFIC CRITERIA ===
+
+scenario_criteria:
+  life_sciences_tools_valuation:
+    must_address:
+      - "Biotech funding cycle impact on demand"
+      - "Distinction between installed base and funding-dependent growth"
+      - "Terminal growth rate justification"
+    red_flags:
+      - "Treating consumables mix as immunity to cycles"
+      - "Recent 18% CAGR as sustainable baseline"
+
+  medtech_normalization:
+    must_address:
+      - "Cyclical vs structural margin drivers"
+      - "Where uncertainty is placed (forecasts, terminal, discount rate)"
+      - "What evidence would validate structural improvement"
+    red_flags:
+      - "Historical peak margins as automatic destiny"
+      - "Management claims treated as facts"
+
+# === CALIBRATION EXAMPLES ===
+
+calibration_examples:
+  - score: 92
+    summary: >
+      Clearly separates funding-driven demand from organic growth. Uses
+      scenario-weighted terminal value. Explicitly addresses why terminal
+      growth should be at GDP despite recent outperformance. Internally
+      consistent assumptions.
+
+  - score: 78
+    summary: >
+      Good alpha/environment distinction. Terminal value reasonable but
+      not fully justified. Risk treatment adequate but mostly narrative.
+      Minor consistency gaps.
+
+  - score: 62
+    summary: >
+      Acknowledges external factors but doesn't adjust assumptions.
+      Terminal growth slightly elevated. Mentions uncertainty but
+      doesn't quantify or scenario-weight.
+
+  - score: 45
+    summary: >
+      Conflates recent performance with durable advantage. Terminal
+      value embeds above-market growth. Diversification cited as
+      protection from cycles.
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2024-12-15"
+  sector_focus: "healthcare"

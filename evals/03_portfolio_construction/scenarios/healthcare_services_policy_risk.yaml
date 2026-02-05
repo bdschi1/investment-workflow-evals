@@ -1,0 +1,177 @@
+# Healthcare Services: Low Volatility, High Risk
+# Tests recognition that trailing volatility masks policy tail risk
+
+id: healthcare_services_policy_risk
+title: "Healthcare Services: Low Volatility, High Risk"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "healthcare_risk"
+difficulty: "hard"
+estimated_time_minutes: 35
+
+# === CONTEXT ===
+
+context:
+  company:
+    name: "National Healthcare Services"
+    ticker: "NHS"
+    sector: "Healthcare Services"
+    market_cap: "$15B"
+    description: >
+      Diversified healthcare services company with exposure to government
+      reimbursement across Medicare Advantage, Medicaid managed care, and
+      post-acute care services.
+
+  risk_profile:
+    trailing_beta: 0.65
+    trailing_volatility: "16%"
+    sector_classification: "Defensive Healthcare"
+    factor_model_risk: "Low"
+    earnings_stability: "High (10 consecutive beats)"
+
+  policy_exposure:
+    pending_rule_change: "CMS Medicare Advantage rate methodology revision"
+    potential_impact: "-15% to -25% revenue at risk"
+    timeline: "Final rule expected Q1 2025"
+    historical_precedent: "2014 MA rate cuts caused 30%+ drawdowns in exposed names"
+    probability_estimate: "40-60% chance of adverse outcome"
+
+  market_conditions: >
+    Healthcare services sector trading at premium multiples on defensive
+    characteristics. Factor models showing low systematic risk. Sell-side
+    consensus assumes benign regulatory outcome.
+
+  portfolio_context:
+    other_policy_exposed_names:
+      - "Medicaid MCO (15% of portfolio)"
+      - "Dialysis provider (8% of portfolio)"
+      - "Home health company (5% of portfolio)"
+    total_reimbursement_policy_exposure: "28% + this position"
+
+# === TASK ===
+
+task:
+  prompt: >
+    A healthcare services company shows low historical volatility but faces a
+    potential reimbursement rule change with asymmetric downside. The stock
+    appears low risk in factor models.
+
+    Explain how this risk should be classified and reflected in position sizing.
+
+    Your response should address:
+    1. Why trailing volatility is an inadequate risk measure here
+    2. How to classify policy risk (environmental vs idiosyncratic)
+    3. How to incorporate forward-looking, non-linear risk into sizing
+    4. Portfolio context considerations (correlated policy exposure)
+
+  expected_output_type: "risk_assessment_framework"
+
+  constraints:
+    - "Must not rely on trailing volatility as primary risk signal"
+    - "Must correctly classify policy risk"
+    - "Must consider portfolio-level policy correlation"
+    - "Must address asymmetric/non-linear loss potential"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Risk Recognition"
+      id: "risk_recognition"
+      weight: 35
+      criteria:
+        - "Identifies policy risk as environmental, not idiosyncratic"
+        - "Recognizes inadequacy of trailing volatility"
+        - "Understands asymmetric payoff structure"
+        - "Does not conflate low volatility with low risk"
+
+    - name: "Forward-Looking Risk Estimation"
+      id: "forward_risk"
+      weight: 35
+      criteria:
+        - "Does not rely on trailing volatility"
+        - "Incorporates scenario-based risk assessment"
+        - "Considers historical precedent for policy events"
+        - "Appropriately sizes for tail outcomes"
+
+    - name: "Portfolio Context"
+      id: "portfolio_context"
+      weight: 30
+      criteria:
+        - "Considers correlated policy exposure across holdings"
+        - "Recognizes aggregate reimbursement risk"
+        - "Does not treat positions as independent"
+        - "Evaluates portfolio-level policy concentration"
+
+  critical_failures:
+    - "Used historical volatility as primary risk signal"
+    - "Treated policy risk as optional monitoring item"
+    - "Ignored portfolio-level policy correlation"
+    - "Confused stability with safety"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Relying on low beta as safety signal"
+    failure_type: "backward_looking_risk"
+    severity: "critical"
+
+  - description: "Treating tail risk as catalyst to monitor rather than size for"
+    failure_type: "tail_risk_dismissal"
+    severity: "critical"
+
+  - description: "Ignoring correlated policy exposure in portfolio"
+    failure_type: "correlation_blindness"
+    severity: "major"
+
+  - description: "Assuming benign outcome because that's consensus"
+    failure_type: "consensus_anchoring"
+    severity: "major"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    Given the stock's low beta and stable earnings history, the position can
+    be sized aggressively, with policy risk monitored as a potential catalyst.
+
+  why_this_fails:
+    - "Treats tail risk as optional"
+    - "Confuses stability with safety"
+    - "Ignores non-linear loss potential"
+    - "Uses backward-looking risk as sizing input"
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Trailing beta 0.65, volatility 16% (appears low risk)"
+    source: "context.risk_profile"
+    importance: "critical"
+
+  - fact: "Potential policy impact: -15% to -25% revenue at risk"
+    source: "context.policy_exposure"
+    importance: "critical"
+
+  - fact: "2014 precedent: 30%+ drawdowns on MA rate cuts"
+    source: "context.policy_exposure"
+    importance: "critical"
+
+  - fact: "Portfolio has 28% in other policy-exposed names"
+    source: "context.portfolio_context"
+    importance: "important"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2024-12-15"
+  sector_focus: "healthcare"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "policy_risk"
+    - "position_sizing"
+    - "tail_risk"
+    - "healthcare"

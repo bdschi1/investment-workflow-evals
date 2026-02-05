@@ -1,0 +1,374 @@
+# Standard Equity Thesis Rubric
+# For evaluating investment thesis quality
+
+id: standard_equity_thesis
+title: "Standard Equity Thesis Evaluation Rubric"
+version: "1.0.0"
+module: "01_equity_thesis"
+
+description: >
+  This rubric evaluates AI-generated investment theses against
+  institutional standards for analytical rigor, evidence quality,
+  and actionability. Use this for general equity thesis scenarios.
+
+# Scoring Overview
+total_points: 100
+pass_threshold: 70
+excellence_threshold: 85
+
+# Dimension Definitions
+dimensions:
+  - name: "Factual Accuracy"
+    id: "factual_accuracy"
+    weight: 30
+    description: >
+      Evaluates the correctness and verifiability of all factual claims,
+      including financial data, company information, and market data.
+
+    scoring_levels:
+      - score: "27-30"
+        label: "Excellent"
+        description: >
+          All data points are verified and correctly cited. Financial
+          metrics match official sources. Calculations are shown and
+          correct. No errors in company facts or market data.
+        anchor_examples:
+          - "Cites specific 10-Q page numbers for financial data"
+          - "Shows step-by-step valuation calculation"
+          - "All peer comparisons use consistent time periods"
+
+      - score: "21-26"
+        label: "Good"
+        description: >
+          Most data is verified and cited. Minor citation gaps or
+          rounding differences. No material errors that affect thesis.
+        anchor_examples:
+          - "Uses correct revenue but rounds to nearest billion"
+          - "Missing specific filing reference but data is accurate"
+
+      - score: "15-20"
+        label: "Acceptable"
+        description: >
+          Data is generally accurate but some claims are uncheckable.
+          Minor errors that don't materially impact analysis.
+        anchor_examples:
+          - "Uses industry data without source citation"
+          - "Slight date confusion (Q2 vs Q3) but correct direction"
+
+      - score: "8-14"
+        label: "Poor"
+        description: >
+          Multiple unverified claims. Some material errors present.
+          Calculations may have errors.
+        anchor_examples:
+          - "Revenue figure off by >10%"
+          - "Confuses trailing vs forward metrics"
+
+      - score: "0-7"
+        label: "Fail"
+        description: >
+          Significant factual errors. Hallucinated data. Material
+          impact on thesis validity.
+        anchor_examples:
+          - "States financial results that don't exist"
+          - "Fundamentally wrong about company's business"
+
+  - name: "Analytical Rigor"
+    id: "analytical_rigor"
+    weight: 25
+    description: >
+      Evaluates the logical coherence, assumption transparency,
+      and depth of analytical reasoning.
+
+    scoring_levels:
+      - score: "22-25"
+        label: "Excellent"
+        description: >
+          Clear thesis → evidence → conclusion chain. All assumptions
+          explicit. Multiple scenarios considered. Counterarguments
+          acknowledged and addressed.
+        anchor_examples:
+          - "Provides bull/base/bear cases with probabilities"
+          - "Lists key assumptions with sensitivity analysis"
+          - "Addresses main bear case and explains disagreement"
+
+      - score: "17-21"
+        label: "Good"
+        description: >
+          Solid logical structure. Most assumptions stated. Some
+          scenario analysis. Basic counterarguments addressed.
+        anchor_examples:
+          - "Has base case with upside/downside variants"
+          - "Key assumptions listed but limited sensitivity"
+
+      - score: "12-16"
+        label: "Acceptable"
+        description: >
+          Logical structure present but gaps. Some assumptions
+          unstated. Limited scenario consideration.
+        anchor_examples:
+          - "Single scenario presented"
+          - "Some assumptions implicit rather than explicit"
+
+      - score: "6-11"
+        label: "Poor"
+        description: >
+          Weak logical structure. Many unstated assumptions.
+          No alternative scenarios. Ignores counterarguments.
+        anchor_examples:
+          - "Circular reasoning present"
+          - "No discussion of what could go wrong"
+
+      - score: "0-5"
+        label: "Fail"
+        description: >
+          No coherent logic. Unsupported assertions. Analysis
+          does not follow from evidence.
+        anchor_examples:
+          - "Conclusion contradicts stated evidence"
+          - "Key logical steps missing"
+
+  - name: "Risk Assessment"
+    id: "risk_assessment"
+    weight: 20
+    description: >
+      Evaluates the identification and assessment of investment risks,
+      including probability and impact estimation.
+
+    scoring_levels:
+      - score: "18-20"
+        label: "Excellent"
+        description: >
+          5+ specific risks identified. Each has probability and
+          impact estimate. Mix of company and market risks.
+          Mitigants discussed where applicable.
+        anchor_examples:
+          - "Lists 6 risks with High/Medium/Low probability and impact"
+          - "Includes both idiosyncratic and systematic risks"
+          - "Discusses hedging or position sizing as risk mitigant"
+
+      - score: "14-17"
+        label: "Good"
+        description: >
+          Most key risks identified. Some probability/impact
+          assessment. Both company and market risks noted.
+        anchor_examples:
+          - "4-5 risks with qualitative assessment"
+          - "Major risks covered but missing some nuances"
+
+      - score: "10-13"
+        label: "Acceptable"
+        description: >
+          Basic risk list provided. Limited assessment of
+          probability or impact. May miss some key risks.
+        anchor_examples:
+          - "3 risks listed without probability assessment"
+          - "Focuses only on company risks, ignores macro"
+
+      - score: "5-9"
+        label: "Poor"
+        description: >
+          Few risks identified. No probability/impact assessment.
+          Major obvious risks may be missing.
+        anchor_examples:
+          - "1-2 risks mentioned in passing"
+          - "Missing obvious major risk"
+
+      - score: "0-4"
+        label: "Fail"
+        description: >
+          No meaningful risk assessment. Material risks completely
+          ignored. Would be dangerous to act upon.
+        anchor_examples:
+          - "No risks mentioned"
+          - "Dismisses all risks without analysis"
+
+  - name: "Evidence Quality"
+    id: "evidence_quality"
+    weight: 15
+    description: >
+      Evaluates the quality, recency, and authority of sources
+      used to support the analysis.
+
+    scoring_levels:
+      - score: "14-15"
+        label: "Excellent"
+        description: >
+          Citations to authoritative sources (filings, transcripts).
+          All data recent (within 6 months). Calculations shown
+          with intermediate steps. Peer comparisons for context.
+        anchor_examples:
+          - "Cites 10-K page 47 for revenue breakdown"
+          - "References Q3 earnings call management commentary"
+          - "Shows DCF with all assumptions listed"
+
+      - score: "11-13"
+        label: "Good"
+        description: >
+          Good sourcing with minor gaps. Most data current.
+          Key calculations shown.
+        anchor_examples:
+          - "Uses 10-K data but doesn't cite page number"
+          - "Most metrics current, one or two from prior quarter"
+
+      - score: "8-10"
+        label: "Acceptable"
+        description: >
+          Acceptable sourcing but some claims uncheckable.
+          Some data may be older. Basic calculations shown.
+        anchor_examples:
+          - "References 'company filings' generically"
+          - "Uses annual data when quarterly available"
+
+      - score: "4-7"
+        label: "Poor"
+        description: >
+          Weak sourcing. Many unsupported claims. Outdated
+          data used. Calculations not shown.
+        anchor_examples:
+          - "States 'revenue is growing' without data"
+          - "Uses 2+ year old financial data"
+
+      - score: "0-3"
+        label: "Fail"
+        description: >
+          No meaningful sources. Assertions without support.
+          Data appears fabricated or hallucinated.
+        anchor_examples:
+          - "No sources cited at all"
+          - "Financial data doesn't match any real filings"
+
+  - name: "Completeness"
+    id: "completeness"
+    weight: 10
+    description: >
+      Evaluates coverage of all material factors for an investment
+      thesis and balanced presentation.
+
+    scoring_levels:
+      - score: "9-10"
+        label: "Excellent"
+        description: >
+          Covers thesis, valuation, catalysts, risks, sizing.
+          Balanced bull and bear points. Time horizon specified.
+          Clear recommendation. Monitoring plan included.
+        anchor_examples:
+          - "Includes all major sections with appropriate depth"
+          - "Explicitly states investment horizon and review triggers"
+
+      - score: "7-8"
+        label: "Good"
+        description: >
+          Most factors covered. Reasonably balanced. Clear
+          recommendation but may miss minor elements.
+        anchor_examples:
+          - "Strong on thesis/valuation, lighter on sizing"
+          - "Good balance but missing monitoring plan"
+
+      - score: "5-6"
+        label: "Acceptable"
+        description: >
+          Core elements present but some gaps. May be
+          unbalanced toward bull or bear case.
+        anchor_examples:
+          - "Good thesis but weak risk section"
+          - "Missing position sizing rationale"
+
+      - score: "2-4"
+        label: "Poor"
+        description: >
+          Multiple major gaps. Clearly one-sided presentation.
+          Missing key required elements.
+        anchor_examples:
+          - "No valuation section"
+          - "All bull, no bear considerations"
+
+      - score: "0-1"
+        label: "Fail"
+        description: >
+          Missing most required elements. Incomplete analysis
+          that cannot support an investment decision.
+        anchor_examples:
+          - "Only states 'buy the stock' without analysis"
+          - "Missing 3+ required sections"
+
+# Critical Failures
+# Any of these result in automatic fail regardless of score
+critical_failures:
+  - id: "material_factual_error"
+    description: "Material factual error in financial data or company facts"
+    examples:
+      - "Wrong revenue by more than 20%"
+      - "Incorrect business description"
+      - "Non-existent acquisition or product"
+
+  - id: "hallucinated_data"
+    description: "Hallucinated or fabricated data sources"
+    examples:
+      - "Cites report or study that doesn't exist"
+      - "Quotes management saying something they didn't say"
+      - "Invents analyst price target"
+
+  - id: "missing_material_risk"
+    description: "Fails to identify obvious material risk"
+    examples:
+      - "Ignores binary catalyst in event-driven thesis"
+      - "Misses regulatory risk in healthcare"
+      - "Ignores concentration risk"
+
+  - id: "regulatory_violation"
+    description: "Makes forward-looking guarantees or unbalanced presentation"
+    examples:
+      - "States the stock 'will' go up"
+      - "Presents only bull case as certainty"
+      - "Makes price guarantee"
+
+  - id: "calculation_error"
+    description: "Material calculation error affecting thesis"
+    examples:
+      - "Valuation math is demonstrably wrong"
+      - "DCF has structural errors"
+      - "Ratios calculated incorrectly"
+
+# Scoring Instructions
+scoring_instructions:
+  general:
+    - "Score each dimension independently before calculating total"
+    - "Use anchor examples for calibration"
+    - "Document reasoning for borderline scores"
+    - "Check for critical failures before final scoring"
+
+  calibration:
+    - "An 'Excellent' score requires meeting all criteria, not just most"
+    - "'Good' is the expected baseline for competent analysis"
+    - "'Acceptable' means usable with significant caveats"
+    - "'Poor' indicates the dimension has material deficiencies"
+    - "'Fail' means the dimension is fundamentally inadequate"
+
+  weighting:
+    - "Apply weights to calculate total score"
+    - "Round final score to nearest integer"
+    - "Document any critical failures found"
+
+# Output Format
+output_format:
+  required_fields:
+    - "overall_score"
+    - "dimension_scores"
+    - "critical_failures_found"
+    - "pass_fail_status"
+    - "summary_feedback"
+
+  optional_fields:
+    - "detailed_dimension_feedback"
+    - "improvement_suggestions"
+    - "exemplary_elements"
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2024-12-20"
+  version_notes: "Initial version based on institutional standards"
+  applicable_scenarios:
+    - "All equity thesis scenarios"
+    - "Long and short recommendations"
+    - "All sectors and styles"
