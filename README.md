@@ -220,7 +220,7 @@ investment-workflow-evals/
 ## Contact
 
 - GitHub: [@bdschi1](https://github.com/bdschi1)
-- LinkedIn: [Brad Schonhoft](https://linkedin.com/in/brad-schonhoft-cfa)
+- LinkedIn: - [LinkedIn](https://linkedin.com/in/brad-schonhoft-cfa)
 
 ## License
 
