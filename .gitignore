@@ -35,17 +35,25 @@ htmlcov/
 # Jupyter
 .ipynb_checkpoints/
 
-# Environment & Secrets
+# Environment & Secrets — NEVER commit these
 .env
 .env.local
+.env.*.local
+!.env.example
 *.key
+**/*.pem
 secrets/
+secrets.toml
+secrets.yaml
+secrets.json
+*credentials*
 
 # Claude Code local settings
 .claude/
 
 # Outputs & Results
 results/
+RESULTS/
 outputs/
 *.log
 *.jsonl
@@ -65,8 +73,9 @@ tmp/
 temp/
 scratch/
 
-# Project-specific
+# Project-specific / Internal documents (not for public repo)
 start.txt
 Fundamental.md
 fundamental.md
 b-notes.md
+TECHNICAL_DOCUMENTATION.md
