@@ -237,4 +237,3 @@ python -m tools.eval_runner run \
 
 **Module version**: 1.0  
 **Last updated**: December 2024  
-**Maintained by**: Brad Schonhoft, CFA
