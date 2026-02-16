@@ -28,6 +28,15 @@ setup(
             "anthropic>=0.18.0",
             "openai>=1.0.0",
         ],
+        "studio": [
+            "streamlit>=1.30.0",
+            "streamlit-sortables>=0.3.0",
+            "google-genai>=1.0.0",
+            "pymupdf>=1.24.0",
+            "pandas>=2.0.0",
+            "anthropic>=0.18.0",
+            "openai>=1.0.0",
+        ],
         "dev": [
             "pytest>=7.4.0",
             "black>=23.0.0",

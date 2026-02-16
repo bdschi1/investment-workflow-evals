@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "PreferencePair",
+  "description": "Unified JSONL schema for DPO/RLHF preference pairs. Both the scenario-anchor pipeline (src/extract_pairs.py) and the interactive studio pipeline (studio/ranker.py) emit records conforming to this schema.",
+  "type": "object",
+  "required": ["prompt", "chosen", "rejected"],
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "description": "ISO-8601 timestamp of pair creation"
+    },
+    "scenario_id": {
+      "type": "string",
+      "description": "Scenario identifier (scenario-anchor pipeline)"
+    },
+    "prompt": {
+      "type": "string",
+      "description": "The input prompt / task given to the model"
+    },
+    "chosen": {
+      "type": "string",
+      "description": "The preferred (higher-quality) response"
+    },
+    "rejected": {
+      "type": "string",
+      "description": "The dispreferred (lower-quality) response"
+    },
+    "chosen_score": {
+      "type": "number",
+      "description": "Numeric score of the chosen response (if available)"
+    },
+    "rejected_score": {
+      "type": "number",
+      "description": "Numeric score of the rejected response (if available)"
+    },
+    "source": {
+      "type": "string",
+      "enum": ["scenario_anchor", "studio_ranking", "studio_single_pair"],
+      "description": "Pipeline that produced this pair"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Error taxonomy tags (e.g., Hallucination, Math Error)"
+    },
+    "mode": {
+      "type": "string",
+      "description": "Generation mode (single_pair, ranking)"
+    },
+    "ranking_metadata": {
+      "type": "object",
+      "description": "K-ranking metadata (studio pipeline only)",
+      "properties": {
+        "session_id": { "type": "string" },
+        "total_k": { "type": "integer" },
+        "chosen_rank": { "type": "integer" },
+        "rejected_rank": { "type": "integer" },
+        "rank_margin": { "type": "integer" },
+        "chosen_config": { "type": "object" },
+        "rejected_config": { "type": "object" },
+        "full_ranking": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

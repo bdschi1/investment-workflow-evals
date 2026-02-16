@@ -183,6 +183,13 @@ investment-workflow-evals/
 ├── tools/
 │   ├── eval_runner.py             # Run evaluations
 │   └── grading_engine.py          # Score submissions
+├── studio/                        # RLHF Studio (interactive DPO data)
+│   ├── app.py                     # Streamlit UI
+│   ├── configs.py                 # Models, presets, personas
+│   ├── generator.py               # Multi-provider LLM generation
+│   ├── ranker.py                  # K-ranking → pairwise extraction
+│   ├── document.py                # Section-aware PDF parsing
+│   └── storage.py                 # JSONL persistence
 ├── src/
 │   ├── extract_pairs.py           # Extract RLHF preference pairs
 │   └── summarize_dataset.py       # Dataset statistics
@@ -190,7 +197,8 @@ investment-workflow-evals/
 ├── examples/
 │   └── sample_ai_response.md      # Test input
 ├── schemas/
-│   └── scenario.yaml              # JSON Schema for scenario validation
+│   ├── scenario.yaml              # JSON Schema for scenario validation
+│   └── preference_pair.json       # Unified DPO pair schema
 ├── templates/
 │   ├── scenario_template.yaml     # Template for new scenarios
 │   └── investment_memo_template.md
@@ -201,12 +209,35 @@ investment-workflow-evals/
 └── run_all.sh                     # Run full pipeline
 ```
 
+## RLHF Studio (Interactive Preference Data)
+
+The `studio/` package provides a Streamlit-based interactive workflow for generating DPO preference pairs from live LLM outputs. Upload a financial PDF, select sections, generate K outputs across different models/temperatures/personas, then rank them to produce training data.
+
+**Two annotation modes:**
+- **Single Pair:** Generate one draft → correct it → 1 preference pair
+- **K-Ranking:** Generate K outputs (2–9) → rank best→worst → up to K(K-1)/2 pairs per session (e.g., K=4 → 6 pairs)
+
+**Features:** Section-aware PDF parsing (10-K/10-Q), boilerplate filtering, auto-chunking, multi-provider generation (Anthropic/OpenAI/Gemini), rate-limit handling, drag-and-drop ranking.
+
+```bash
+# Install studio dependencies
+pip install -e ".[studio]"
+
+# Launch the studio
+streamlit run studio/app.py
+```
+
+Both pipelines emit a unified JSONL schema (see `schemas/preference_pair.json`):
+- `src/extract_pairs.py` → `source: "scenario_anchor"` (batch, from YAML scenarios)
+- `studio/ranker.py` → `source: "studio_ranking"` (interactive, from live LLM outputs)
+
 ## Use Cases
 
 - **RLHF preference data** - Paired comparisons for reward model training
 - **SFT training data** - High-quality examples for supervised fine-tuning
 - **Model evaluation** - Standardized benchmarks for financial AI
 - **Red teaming** - Adversarial testing for hallucination detection
+- **Interactive DPO data** - Live K-ranking across models and personas via RLHF Studio
 
 ## Skills & Expertise
 
@@ -234,3 +265,5 @@ MIT License
 ![YAML](https://img.shields.io/badge/YAML-CB171E?style=flat&logo=yaml&logoColor=white)
 ![Anthropic](https://img.shields.io/badge/Anthropic-191919?style=flat&logo=anthropic&logoColor=white)
 ![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=flat&logo=openai&logoColor=white)
+![Google Gemini](https://img.shields.io/badge/Gemini-4285F4?style=flat&logo=google&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white)
