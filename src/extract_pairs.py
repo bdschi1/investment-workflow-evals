@@ -4,6 +4,7 @@
 from __future__ import annotations
 import argparse
 import json
+from datetime import datetime
 from pathlib import Path
 import yaml
 
@@ -52,12 +53,14 @@ def extract_preference_pair(scenario: dict) -> dict:
     failing = scenario.get("anchor_answers", {}).get("failing", {})
     
     return {
+        "timestamp": datetime.now().isoformat(),
         "scenario_id": scenario.get("id", "unknown"),
         "prompt": prompt,
         "chosen": format_field(strong.get("response", "")),
         "rejected": format_field(failing.get("response", "")),
         "chosen_score": strong.get("score", 5),
         "rejected_score": failing.get("score", 1),
+        "source": "scenario_anchor",
     }
 
 def get_all_scenarios(evals_dir: Path, module: str | None = None) -> list[Path]:
