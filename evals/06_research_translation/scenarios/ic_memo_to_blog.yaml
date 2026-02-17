@@ -1,0 +1,46 @@
+version: "1.0.0"
+id: "ic_memo_to_blog"
+title: "Translate IC Memo to Retail Blog Post"
+description: >
+  Translate a full investment committee memo into a retail investor blog post.
+
+source_type: "ic_memo"
+target_audience: "retail_investor"
+
+context: |
+  You have received a full investment committee memo analyzing a pharmaceutical
+  company (ABBV - AbbVie Inc). The memo includes an underweight recommendation
+  with conviction 4.2/10 from the portfolio manager, a bull case at 7.8/10
+  conviction highlighting the Skyrizi/Rinvoq franchise, and a bear case at
+  8.2/10 risk severity citing 94x trailing P/E and $69B in debt. The macro
+  environment is rated 6.5/10 favorable.
+
+  Your task is to translate this into a blog post that a retail investor with
+  no finance degree could understand and act on.
+
+task: |
+  Translate the provided investment committee memo into a retail-friendly blog
+  post of approximately 400-500 words. The post should:
+  1. Lead with a clear recommendation in plain English
+  2. Explain what the company does and why it matters
+  3. Highlight 3-5 key numbers with plain English annotations
+  4. List risks as "what could go wrong" in simple terms
+  5. End with a clear "bottom line" action statement
+
+  Do NOT include: financial jargon without definitions, multi-level bullet
+  hierarchies, tables with more than 4 columns, or disclaimers.
+
+evaluation_criteria:
+  - "Recommendation direction matches source (underweight / cautious)"
+  - "Price target or fair value estimate preserved"
+  - "At least 3 key risks mentioned in simplified form"
+  - "No undefined financial jargon"
+  - "Flesch-Kincaid reading level under Grade 10"
+
+key_facts_to_preserve:
+  - "ABBV ticker and AbbVie company name"
+  - "Underweight or cautious recommendation"
+  - "Skyrizi and Rinvoq as growth drivers replacing Humira"
+  - "Humira biosimilar competitive pressure"
+  - "At least one quantitative metric (revenue, P/E, or margin)"
+  - "$69B debt load as a key risk"
