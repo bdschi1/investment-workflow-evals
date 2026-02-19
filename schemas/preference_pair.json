@@ -63,6 +63,38 @@
           "items": { "type": "string" }
         }
       }
+    },
+    "reward_details": {
+      "type": "object",
+      "description": "GRPO-aligned multi-faceted reward scores (studio/rewards.py)",
+      "properties": {
+        "chosen": {
+          "type": "object",
+          "description": "Reward breakdown for the chosen response",
+          "properties": {
+            "accuracy": { "type": "number" },
+            "logic": { "type": "number" },
+            "format_quality": { "type": "number" },
+            "length": { "type": "number" },
+            "composite": { "type": "number" }
+          }
+        },
+        "rejected": {
+          "type": "object",
+          "description": "Reward breakdown for the rejected response",
+          "properties": {
+            "accuracy": { "type": "number" },
+            "logic": { "type": "number" },
+            "format_quality": { "type": "number" },
+            "length": { "type": "number" },
+            "composite": { "type": "number" }
+          }
+        },
+        "reward_type": {
+          "type": "string",
+          "description": "Reward function identifier (e.g., grpo_multifaceted)"
+        }
+      }
     }
   }
 }
