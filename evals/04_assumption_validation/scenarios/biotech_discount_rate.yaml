@@ -1,0 +1,63 @@
+# Scenario: Biotech Discount Rate Assumption Validation
+# Tests ability to challenge embedded WACC/discount rate in early-stage biotech DCF
+
+id: biotech_discount_rate
+title: "Biotech Discount Rate Assumption Challenge"
+module: "04_assumption_validation"
+difficulty: hard
+
+context: |
+  You are reviewing a sell-side analyst's DCF model for BioGenesis Therapeutics,
+  a pre-revenue biotech company with two Phase 2 candidates and one Phase 3
+  candidate in rare diseases.
+
+  Key model assumptions embedded by the analyst:
+  - WACC: 10.5% (derived from CAPM with beta of 1.2)
+  - Risk-free rate: 4.3% (10-year Treasury)
+  - Equity risk premium: 5.5%
+  - Terminal growth rate: 3.0%
+  - Revenue onset: 2027E (Phase 3 drug only)
+  - Peak revenue: $2.8B by 2032E
+  - R&D as % of revenue: 35% declining to 18% by 2032E
+  - Cash runway: 14 months at current burn rate ($180M/quarter)
+  - Probability of approval (PoA): Not explicitly stated; full revenue in base case
+
+  Comparable companies:
+  - Large-cap biotech peers trade at 8-12x EV/Revenue
+  - Pre-revenue rare disease biotechs typically use 12-18% discount rates
+  - Recent biotech IPOs priced at $400-600M enterprise value
+
+  Additional context:
+  - FDA has issued a Refuse-to-File letter for the Phase 3 candidate once
+    before (2024); resubmission accepted January 2026
+  - Management guided to "partnership discussions" for ex-US rights
+  - Insider selling: CFO sold 40% of holdings in Q4 2025
+
+task: |
+  Review the discount rate and key assumptions embedded in this biotech DCF model.
+  Identify which assumptions are reasonable, which are questionable, and which are
+  critical red flags. For each questionable assumption, provide:
+  1. Why it may be inappropriate
+  2. What a more defensible assumption would be
+  3. How sensitive the valuation is to this assumption
+
+adversarial_example:
+  response: |
+    The WACC of 10.5% appears reasonable for a biotech company. The beta of 1.2
+    is in line with the healthcare sector average. The terminal growth rate of 3%
+    is conservative and below GDP growth. The revenue projections look achievable
+    given the large addressable market in rare diseases. I would keep these
+    assumptions as they are well-supported by the analyst's work.
+  why_wrong: |
+    - 10.5% WACC is dramatically too low for a pre-revenue biotech; peers use 12-18%
+    - Beta of 1.2 is a large-cap biotech beta, not a clinical-stage company beta
+    - Revenue projections embed 100% PoA (no probability adjustment)
+    - 14-month cash runway creates dilution risk not reflected in WACC
+    - RTF letter history and insider selling are ignored
+    - Terminal growth at 3% on a drug portfolio with patent cliffs is unrealistic
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-19"
+  sector_focus: "healthcare/biotech"
+  tags: ["discount-rate", "wacc", "probability-of-approval", "pre-revenue", "biotech"]

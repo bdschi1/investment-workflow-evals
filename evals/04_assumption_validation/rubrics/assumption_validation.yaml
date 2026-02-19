@@ -1,0 +1,276 @@
+# Assumption Validation Module - Standard Rubric
+# For evaluating ability to challenge and validate model assumptions
+#
+# Inspired by:
+#   - FinanceQA (2025): assumption-heavy question taxonomies
+#   - PRBench (2025): binary criteria with integer weights
+
+id: assumption_validation_standard
+title: "Assumption Validation Standard Rubric"
+version: "1.0.0"
+module: "04_assumption_validation"
+
+description: >
+  Evaluates AI ability to identify, challenge, and stress-test
+  assumptions embedded in financial models and analyst research.
+  Tests whether the model can distinguish reasonable from questionable
+  assumptions and quantify sensitivity to key inputs.
+
+total_points: 100
+pass_threshold: 70
+excellence_threshold: 85
+
+dimensions:
+  - name: "Assumption Extraction"
+    id: "extraction"
+    weight: 20
+    description: >
+      Identifies all material assumptions in the provided context,
+      distinguishing explicit assumptions from implicit ones.
+
+    scoring_levels:
+      - score: "18-20"
+        label: "Excellent"
+        description: >
+          Identifies all explicit assumptions and surfaces at least 2
+          implicit/hidden assumptions.  Categorizes by type (financial,
+          operational, market, regulatory).
+        anchor_examples:
+          - "Identifies the implicit 100% PoA embedded in base-case revenue"
+          - "Flags the disconnect between hedge book tenor and forecast horizon"
+          - "Notes that beta source (large-cap peers) mismatches company profile"
+
+      - score: "14-17"
+        label: "Good"
+        description: >
+          Identifies most explicit assumptions.  Surfaces at least one
+          implicit assumption.
+
+      - score: "10-13"
+        label: "Acceptable"
+        description: >
+          Identifies major explicit assumptions but misses implicit ones.
+
+      - score: "5-9"
+        label: "Poor"
+        description: >
+          Identifies only the most obvious assumptions.
+
+      - score: "0-4"
+        label: "Fail"
+        description: >
+          Fails to systematically extract assumptions from context.
+
+  - name: "Reasonableness Assessment"
+    id: "reasonableness"
+    weight: 25
+    description: >
+      Benchmarks each assumption against observable data: historical
+      ranges, peer comparisons, forward curves, first principles.
+
+    scoring_levels:
+      - score: "23-25"
+        label: "Excellent"
+        description: >
+          Each questioned assumption is compared to at least two
+          independent benchmarks (e.g., forward curve + historical
+          range + peer median).  Clearly labels each as reasonable,
+          aggressive, or conservative with supporting evidence.
+        anchor_examples:
+          - "Compares WACC to pre-revenue biotech peer range (12-18%)"
+          - "Notes WTI assumption vs forward curve backwardation"
+          - "Benchmarks terminal growth against patent cliff economics"
+
+      - score: "18-22"
+        label: "Good"
+        description: >
+          Most assumptions benchmarked against at least one data point.
+          Clear reasonable/aggressive/conservative labeling.
+
+      - score: "13-17"
+        label: "Acceptable"
+        description: >
+          Some benchmarking but inconsistent.  Labels directionally
+          correct but not well-supported.
+
+      - score: "7-12"
+        label: "Poor"
+        description: >
+          Minimal benchmarking.  Opinions without supporting data.
+
+      - score: "0-6"
+        label: "Fail"
+        description: >
+          No meaningful comparison to external data or benchmarks.
+
+  - name: "Sensitivity Analysis"
+    id: "sensitivity"
+    weight: 25
+    description: >
+      Quantifies how changes in key assumptions affect valuation
+      or key metrics.  Tests whether the model understands which
+      assumptions are most impactful.
+
+    scoring_levels:
+      - score: "23-25"
+        label: "Excellent"
+        description: >
+          Provides quantified sensitivity for top 3+ assumptions.
+          Identifies which assumption dominates valuation uncertainty.
+          Suggests specific alternative values (not just "higher/lower").
+        anchor_examples:
+          - "At 15% WACC (vs 10.5%), NPV drops 45% from $X to $Y"
+          - "Every $5/bbl below $85 reduces EBITDA by ~$X and FCF yield by Y%"
+          - "Probability-adjusted revenue (60% PoA) halves base-case NPV"
+
+      - score: "18-22"
+        label: "Good"
+        description: >
+          Quantified sensitivity for at least 2 assumptions.
+          Alternative values are specific and defensible.
+
+      - score: "13-17"
+        label: "Acceptable"
+        description: >
+          Directional sensitivity ("if WACC is higher, value is lower")
+          but limited quantification.
+
+      - score: "7-12"
+        label: "Poor"
+        description: >
+          Generic sensitivity comments without numbers.
+
+      - score: "0-6"
+        label: "Fail"
+        description: >
+          No sensitivity analysis attempted.
+
+  - name: "Red Flag Detection"
+    id: "red_flags"
+    weight: 20
+    description: >
+      Identifies assumptions that are not just aggressive but
+      potentially misleading or structurally flawed.
+
+    scoring_levels:
+      - score: "18-20"
+        label: "Excellent"
+        description: >
+          Identifies structural flaws (not just aggressive inputs).
+          Explains why the flaw matters for decision-making.
+          Connects red flags to investment risk.
+        anchor_examples:
+          - "100% PoA in base case is not an aggressive assumption — it is a structural flaw"
+          - "Using spot-plus commodity deck when forward curve is in backwardation misleads on terminal value"
+          - "14-month cash runway with no dilution assumption in WACC is internally inconsistent"
+
+      - score: "14-17"
+        label: "Good"
+        description: >
+          Identifies at least one structural flaw beyond just
+          "aggressive" assumptions.
+
+      - score: "10-13"
+        label: "Acceptable"
+        description: >
+          Flags aggressive assumptions but does not distinguish
+          structural flaws from optimistic inputs.
+
+      - score: "5-9"
+        label: "Poor"
+        description: >
+          Misses most red flags.
+
+      - score: "0-4"
+        label: "Fail"
+        description: >
+          Fails to identify any red flags; accepts assumptions at face value.
+
+  - name: "Alternative Framing"
+    id: "alternatives"
+    weight: 10
+    description: >
+      Proposes defensible alternative assumptions with justification.
+      Tests constructive feedback ability.
+
+    scoring_levels:
+      - score: "9-10"
+        label: "Excellent"
+        description: >
+          Proposes specific alternative values with clear justification.
+          Alternatives reflect conservative-but-fair adjustments.
+        anchor_examples:
+          - "Recommend 14-16% WACC for pre-revenue biotech, based on peer range"
+          - "Use forward curve ($74/$68/$65) instead of flat $85 deck"
+          - "Apply 60% PoA to Phase 3 revenue, 25% to Phase 2 candidates"
+
+      - score: "7-8"
+        label: "Good"
+        description: >
+          Proposes alternatives for key assumptions with some justification.
+
+      - score: "5-6"
+        label: "Acceptable"
+        description: >
+          Suggests directional changes but values are not well-justified.
+
+      - score: "3-4"
+        label: "Poor"
+        description: >
+          Vague suggestions ("use a higher rate").
+
+      - score: "0-2"
+        label: "Fail"
+        description: >
+          No alternative assumptions proposed.
+
+critical_failures:
+  - condition: "Accepts all assumptions without challenge"
+    score_penalty: null
+    automatic_fail: true
+
+  - condition: "Misidentifies a structural flaw as reasonable"
+    score_penalty: 30
+    automatic_fail: false
+
+  - condition: "Provides sensitivity analysis with incorrect direction"
+    score_penalty: 25
+    automatic_fail: false
+
+  - condition: "Fabricates benchmark data that does not exist in context"
+    score_penalty: null
+    automatic_fail: true
+
+calibration_examples:
+  - score: 94
+    summary: >
+      Extracts all explicit and implicit assumptions (including hidden 100% PoA).
+      Benchmarks WACC against pre-revenue biotech peers (12-18%).  Quantifies NPV
+      sensitivity to WACC (45% drop at 15%) and PoA (50% drop at 60%).  Identifies
+      cash runway / dilution as structural flaw.  Proposes specific alternatives
+      with peer-based justification.
+
+  - score: 76
+    summary: >
+      Good extraction of major assumptions.  Correctly flags WACC as too low
+      and PoA as missing.  Limited quantification of sensitivity.  Proposes
+      some alternatives but not all are well-justified.
+
+  - score: 58
+    summary: >
+      Identifies WACC and commodity price as questionable but treatment is
+      superficial.  No sensitivity quantification.  Misses implicit PoA
+      assumption.  Directional comments only.
+
+  - score: 35
+    summary: >
+      Accepts most assumptions.  Notes WACC "might be low" without benchmarks.
+      No red flags identified.  No alternatives proposed.
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-19"
+  references:
+    - "FinanceQA (2025): Assumption-based question taxonomy"
+    - "PRBench (2025): Expert-curated binary criteria with integer weights"
+    - "Fin-o1 (2025): Multi-faceted evaluation for financial reasoning"

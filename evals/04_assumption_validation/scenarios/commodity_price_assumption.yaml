@@ -1,0 +1,65 @@
+# Scenario: Commodity Price Assumption Validation
+# Tests ability to challenge embedded commodity price forecasts in an E&P model
+
+id: commodity_price_assumption
+title: "Commodity Price Forecast Assumption Challenge"
+module: "04_assumption_validation"
+difficulty: hard
+
+context: |
+  You are reviewing a junior analyst's financial model for Permian Resources Corp,
+  a mid-cap E&P company focused on the Permian Basin.
+
+  Key commodity assumptions embedded:
+  - WTI crude: $85/bbl through forecast period (2026E-2030E)
+  - Natural gas (Henry Hub): $4.50/MMBtu through forecast period
+  - NGL realization: 35% of WTI
+  - Basis differential: -$2.50/bbl (Midland-Cushing spread)
+
+  Model-derived metrics at these prices:
+  - EBITDA margin: 62% stable throughout
+  - FCF yield: 14% in 2026E, rising to 18% by 2030E
+  - Net debt/EBITDA: 0.8x declining to 0.2x
+  - Breakeven: $42/bbl WTI (including capex for maintenance production)
+
+  Current market context:
+  - WTI spot: $78/bbl (as of review date)
+  - Forward curve: $74/bbl (12-month), $68/bbl (24-month), $65/bbl (36-month)
+  - OPEC+ maintaining production cuts; compliance slipping
+  - US production at record 13.4 MMbbl/d
+  - Natural gas: spot $3.20/MMBtu, 12-month forward $3.80/MMBtu
+  - LNG export capacity additions expected 2026-2027
+
+  Hedge book:
+  - 60% of 2026E oil production hedged at $76/bbl (costless collars: $72-$84)
+  - 0% of natural gas hedged
+  - No hedges beyond 2026
+
+task: |
+  Critically evaluate the commodity price assumptions embedded in this E&P model.
+  For each assumption:
+  1. Compare to current spot, forward curve, and historical ranges
+  2. Assess whether the assumption is reasonable, aggressive, or conservative
+  3. Quantify the impact on key metrics (EBITDA, FCF, leverage) at alternative prices
+  4. Identify which assumptions create the greatest valuation risk
+
+adversarial_example:
+  response: |
+    The commodity price assumptions are reasonable. WTI at $85 reflects the current
+    geopolitical environment and OPEC+ support. Natural gas at $4.50 accounts for
+    growing LNG demand. These prices are well within the 5-year historical range.
+    The model looks conservative given the strong hedge book protecting downside.
+  why_wrong: |
+    - $85 WTI is $7 above spot and $17-20 above the 2-3 year forward curve
+    - Natural gas at $4.50 is 40% above spot and 18% above the 12-month forward
+    - "Well within historical range" ignores that the forward curve prices in supply/demand
+    - Hedge book only covers 60% of oil for 1 year; model uses $85 for 5 years
+    - No sensitivity analysis provided
+    - OPEC+ compliance slipping and record US production are bearish signals ignored
+    - Using flat commodity deck instead of forward curve inflates terminal value
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-19"
+  sector_focus: "energy/E&P"
+  tags: ["commodity-prices", "forward-curve", "sensitivity-analysis", "oil-gas"]
