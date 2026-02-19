@@ -257,6 +257,15 @@ Both pipelines emit a unified JSONL schema (see `schemas/preference_pair.json`):
 
 MIT License
 
+## Related Work
+
+This project draws on several recent academic contributions to financial AI evaluation and alignment:
+
+- **Fin-o1** (Qian et al., 2025) — First systematic comparison of PPO, DPO, and GRPO reinforcement learning methods for financial reasoning. GRPO's multi-faceted reward function (accuracy + logic + format + length) directly informs the `studio/rewards.py` reward signal design. [arXiv:2502.08127](https://arxiv.org/abs/2502.08127)
+- **FinanceQA** (Mateega et al., 2025) — Benchmark exposing that frontier LLMs fail ~60% of realistic analyst tasks, with near-zero accuracy on assumption-based questions. Motivates the `04_assumption_validation` eval category. [arXiv:2501.18062](https://arxiv.org/abs/2501.18062)
+- **PRBench** (Akyurek et al., 2025) — 19,356 expert-curated binary criteria with integer weights across 7 finance rubric categories. Informs our rubric-based evaluation methodology and YAML rubric schema design. [arXiv:2511.11562](https://arxiv.org/abs/2511.11562)
+- **FLaME** (Matlin et al., 2025) — First holistic benchmarking suite for financial NLP, evaluating 23 models across 20 datasets and 6 task categories. Provides the taxonomy framework for cross-benchmark comparability. [arXiv:2506.15846](https://arxiv.org/abs/2506.15846)
+
 ---
 
 ![Python](https://img.shields.io/badge/python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
