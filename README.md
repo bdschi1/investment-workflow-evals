@@ -33,7 +33,9 @@ This repo demonstrates all four capabilities with working examples.
 | **Equity Thesis** | 2 | [standard.yaml](evals/01_equity_thesis/rubrics/standard.yaml) | Thesis construction, catalyst analysis, risk/reward |
 | **DCF Valuation** | 2 | [standard.yaml](evals/02_dcf_valuation/rubrics/standard.yaml) | Alpha vs environment, terminal value, margin normalization |
 | **Portfolio Construction** | 2 | [standard.yaml](evals/03_portfolio_construction/rubrics/standard.yaml) | Risk-based sizing, hedging, policy risk |
-| **Risk Attribution** | 2 | [standard.yaml](evals/05_risk_attribution/rubrics/standard.yaml) | Factor decomposition, hypothesis testing |
+| **Assumption Validation** | 2 | [assumption_validation.yaml](evals/04_assumption_validation/rubrics/assumption_validation.yaml) | Discount rate stress-testing, commodity price assumptions |
+| **Risk Attribution** | — | — | Factor decomposition, hypothesis testing *(scaffolded, content pending)* |
+| **Research Translation** | 1 | [translation_quality.yaml](evals/06_research_translation/rubrics/translation_quality.yaml) | IC memo to retail-readable summary |
 
 ## Sample Scenarios
 
@@ -47,8 +49,9 @@ Each scenario includes context, task prompt, evaluation criteria, and an adversa
 | **DCF Valuation** | [MedTech Normalization](evals/02_dcf_valuation/scenarios/medtech_normalization.yaml) | Cyclical vs structural, uncertainty placement |
 | **Portfolio Construction** | [Pharma/Biotech Pair](evals/03_portfolio_construction/scenarios/pharma_biotech_pair.yaml) | Risk-based sizing, hedging environmental exposure |
 | **Portfolio Construction** | [Policy Risk Sizing](evals/03_portfolio_construction/scenarios/healthcare_services_policy_risk.yaml) | Forward-looking risk, tail risk recognition |
-| **Risk Attribution** | [Alpha vs Environment](evals/05_risk_attribution/scenarios/alpha_vs_environment_attribution.yaml) | Factor decomposition, hypothesis testing |
-| **Risk Attribution** | [Capital vs Risk](evals/05_risk_attribution/scenarios/capital_vs_risk_concentration.yaml) | Intentional vs accidental exposure |
+| **Assumption Validation** | [Biotech Discount Rate](evals/04_assumption_validation/scenarios/biotech_discount_rate.yaml) | Discount rate stress-testing under uncertainty |
+| **Assumption Validation** | [Commodity Price Assumption](evals/04_assumption_validation/scenarios/commodity_price_assumption.yaml) | Forward curve vs mean-reversion assumptions |
+| **Research Translation** | [IC Memo to Blog](evals/06_research_translation/scenarios/ic_memo_to_blog.yaml) | Institutional-to-retail content adaptation |
 
 ## Golden Answers
 
@@ -59,7 +62,8 @@ Expert-level reference responses demonstrating proper analytical workflow:
 | **Equity Thesis** | [Biotech Phase 3 Catalyst](evals/01_equity_thesis/golden_answers/biotech_phase3_catalyst.md) | Probability framework, scenario analysis, position sizing |
 | **DCF Valuation** | [Life Sciences Tools](evals/02_dcf_valuation/golden_answers/life_sciences_tools_valuation.md) | Alpha/environment decomposition, terminal value discipline |
 | **Portfolio Construction** | [Pharma/Biotech Pair](evals/03_portfolio_construction/golden_answers/pharma_biotech_pair.md) | Volatility-adjusted sizing, environmental hedging |
-| **Risk Attribution** | [Alpha vs Environment](evals/05_risk_attribution/golden_answers/alpha_vs_environment_attribution.md) | Factor decomposition, hypothesis falsification |
+| **Assumption Validation** | [Biotech Discount Rate](evals/04_assumption_validation/golden_answers/biotech_discount_rate.md) | Sensitivity analysis, uncertainty quantification |
+| **Research Translation** | [ABBV Retail Summary](evals/06_research_translation/golden_answers/abbv_retail_summary.md) | Jargon simplification, actionable takeaways |
 
 ## Rubric Structure
 
