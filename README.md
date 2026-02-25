@@ -1,30 +1,22 @@
 # Investment Workflow Evaluations
 
-**AI training and evaluation in institutional investment research / Domain Expertise.**
+Evaluation scenarios and graded reference answers for testing AI models on institutional investment research tasks. Covers the core analyst workflow — from reading SEC filings to writing investment memos — with rubric-scored outputs that double as fine-tuning training data. An interactive RLHF Studio is also included for generating DPO preference pairs from live LLM outputs against real financial documents.
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## About This Project
 
-This repository demonstrates capabilities in AI evaluation and training data creation for financial domains. It showcases:
+This repository contains evaluation scenarios, scoring rubrics, golden reference answers, and adversarial test cases for investment research tasks. The evaluation modules cover equity thesis construction, DCF valuation, portfolio construction, assumption validation, and research translation. Each module includes:
 
-- **Scenario design** for testing AI financial reasoning
-- **Rubric development** with institutional-grade scoring criteria
-- **Golden answer writing** that models expert-level analysis
-- **Adversarial testing** to expose common AI failure modes
-- **Evaluation tooling** for automated assessment pipelines
+- **Scenarios** with task prompts and domain context drawn from realistic investment situations
+- **Rubrics** with weighted dimensions and multi-level scoring anchors
+- **Golden answers** representing expert-level analytical responses
+- **Adversarial examples** — responses that use correct-sounding language but contain substantive analytical errors
 
-## Why This Matters
+## Purpose
 
-AI labs and platforms need domain experts who can:
-
-1. **Create evaluation scenarios** - Design realistic test cases that probe AI capabilities
-2. **Write reference answers** - Produce institutional-quality responses for model training (SFT, RLHF)
-3. **Score AI outputs** - Apply consistent rubrics to identify strengths and failure modes
-4. **Design adversarial tests** - Craft edge cases that expose hallucinations and errors
-
-This repo demonstrates all four capabilities with working examples.
+The materials serve two related uses: benchmarking AI model performance on investment research tasks, and producing training data (SFT examples and RLHF preference pairs) for fine-tuning. The `studio/` package extends this to interactive preference data collection from live model outputs.
 
 ## Evaluation Modules
 
@@ -242,20 +234,6 @@ Both pipelines emit a unified JSONL schema (see `schemas/preference_pair.json`):
 - **Model evaluation** - Standardized benchmarks for financial AI
 - **Red teaming** - Adversarial testing for hallucination detection
 - **Interactive DPO data** - Live K-ranking across models and personas via RLHF Studio
-
-## Skills & Expertise
-
-| Domain | Areas |
-|--------|-------|
-| **Investment** | Equity research, portfolio management, DCF/comparables valuation, earnings analysis |
-| **Sectors** | Healthcare, Technology, Industrials, Consumer |
-| **Technical** | Python, ML/deep learning, quantitative analysis |
-| **AI Training** | Scenario design, rubric calibration, RLHF data creation, red teaming |
-
-## Contact
-
-- GitHub: [@bdschi1](https://github.com/bdschi1)
-- LinkedIn: - [LinkedIn](https://linkedin.com/in/brad-schonhoft-cfa)
 
 ## License
 
