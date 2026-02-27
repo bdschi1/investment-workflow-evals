@@ -4,6 +4,10 @@ Evaluation scenarios and graded reference answers for testing AI models on insti
 
 This is a continually developed project. Evaluation modules, scenarios, and rubrics expand over time as new research tasks and failure modes are identified.
 
+**Key questions this project answers:**
+- *Can this AI model produce analyst-quality investment research?*
+- *Where does the model fail in ways that sound intelligent but are substantively wrong?*
+
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
