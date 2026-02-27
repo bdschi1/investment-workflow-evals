@@ -2,6 +2,8 @@
 
 Evaluation scenarios and graded reference answers for testing AI models on institutional investment research tasks. Covers the core analyst workflow — from reading SEC filings to writing investment memos — with rubric-scored outputs that double as fine-tuning training data. An interactive RLHF Studio is also included for generating DPO preference pairs from live LLM outputs against real financial documents.
 
+This is a continually developed project. Evaluation modules, scenarios, and rubrics expand over time as new research tasks and failure modes are identified.
+
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
@@ -235,6 +237,18 @@ Both pipelines emit a unified JSONL schema (see `schemas/preference_pair.json`):
 - **Red teaming** - Adversarial testing for hallucination detection
 - **Interactive DPO data** - Live K-ranking across models and personas via RLHF Studio
 
+## Contributing
+
+Contributions welcome. Areas for improvement:
+- Additional evaluation modules and scenarios
+- New rubric dimensions and scoring anchors
+- Extended adversarial test cases
+- RLHF Studio enhancements and new annotation modes
+
+## Status
+
+This project is under active, ongoing development. Core evaluation modules, grading engine, and RLHF Studio are stable. New scenarios, rubrics, and adversarial variants are added as new investment tasks and AI failure modes are identified.
+
 ## License
 
 MIT License
@@ -247,14 +261,3 @@ This project draws on several recent academic contributions to financial AI eval
 - **FinanceQA** (Mateega et al., 2025) — Benchmark exposing that frontier LLMs fail ~60% of realistic analyst tasks, with near-zero accuracy on assumption-based questions. Motivates the `04_assumption_validation` eval category. [arXiv:2501.18062](https://arxiv.org/abs/2501.18062)
 - **PRBench** (Akyurek et al., 2025) — 19,356 expert-curated binary criteria with integer weights across 7 finance rubric categories. Informs our rubric-based evaluation methodology and YAML rubric schema design. [arXiv:2511.11562](https://arxiv.org/abs/2511.11562)
 - **FLaME** (Matlin et al., 2025) — First holistic benchmarking suite for financial NLP, evaluating 23 models across 20 datasets and 6 task categories. Provides the taxonomy framework for cross-benchmark comparability. [arXiv:2506.15846](https://arxiv.org/abs/2506.15846)
-
----
-
-![Python](https://img.shields.io/badge/python-3.10+-3776AB?style=flat&logo=python&logoColor=white)
-
-![Pydantic](https://img.shields.io/badge/Pydantic-E92063?style=flat&logo=pydantic&logoColor=white)
-![YAML](https://img.shields.io/badge/YAML-CB171E?style=flat&logo=yaml&logoColor=white)
-![Anthropic](https://img.shields.io/badge/Anthropic-191919?style=flat&logo=anthropic&logoColor=white)
-![OpenAI](https://img.shields.io/badge/OpenAI-412991?style=flat&logo=openai&logoColor=white)
-![Google Gemini](https://img.shields.io/badge/Gemini-4285F4?style=flat&logo=google&logoColor=white)
-![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=flat&logo=streamlit&logoColor=white)
