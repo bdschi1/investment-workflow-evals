@@ -1,0 +1,308 @@
+# Crowding Risk: When Your Best Ideas Are Everyone Else's Too
+# Tests: Crowding identification, liquidity-adjusted sizing, asymmetric risk assessment
+
+id: crowding_risk_sizing
+title: "Crowding Risk and Position Sizing - When Consensus Becomes the Risk"
+version: "1.1.0"
+module: "03_portfolio_construction"
+category: "crowding_risk"
+difficulty: "hard"
+estimated_time_minutes: 45
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Multi-Sector Momentum"
+    aum: "$1.2B"
+    gross_exposure: "180%"
+    net_exposure: "45%"
+    number_of_positions: "80 (50 long, 30 short)"
+    description: >
+      Systematic-discretionary hybrid fund that uses 12-month price momentum
+      screens to generate a long candidate universe, then applies fundamental
+      overlays for final selection. The fund targets earnings revision
+      momentum as a secondary signal. Short book is primarily anti-momentum
+      and structural shorts in secularly challenged businesses.
+
+  crowding_indicators:
+    hedge_fund_ownership_overlap:
+      description: "Percentage of long book names appearing in 13F filings of 50+ other L/S equity funds"
+      current_reading: "72% of long book names"
+      historical_average: "45%"
+      percentile: "95th percentile (since 2010)"
+    short_interest_concentration:
+      description: "Average short interest as % of float on short book names"
+      current_reading: "28% average SI across short book"
+      historical_average: "15%"
+      percentile: "92nd percentile"
+    pairwise_correlation:
+      description: "Average 60-day pairwise correlation among long book names"
+      current_reading: "0.68"
+      historical_average: "0.42"
+      percentile: "88th percentile"
+    momentum_factor_crowding:
+      description: "AQR momentum factor crowding indicator (based on valuation spread of momentum longs vs shorts)"
+      current_reading: "1.8 standard deviations above mean"
+      historical_average: "0.0 (by construction)"
+      note: "Readings above 1.5 SD preceded the Aug 2007 quant quake, Sep 2019 momentum reversal, and Mar 2020 momentum crash"
+
+  top_holdings:
+    long_positions:
+      - name: "TechMomentum Corp"
+        ticker: "TMOM"
+        weight: "4.5%"
+        characteristics:
+          - "Mega-cap tech, 12-month return +65%"
+          - "Hedge fund ownership: 38% of float"
+          - "Appeared in top-10 holdings of 85 hedge fund 13F filings"
+          - "Beta: 1.4, trailing vol: 32%"
+          - "Short interest: 2.8% of float"
+      - name: "Industrial Revival Inc"
+        ticker: "IREV"
+        weight: "3.8%"
+        characteristics:
+          - "Large-cap industrial, 12-month return +42%"
+          - "Hedge fund ownership: 22% of float"
+          - "In top-10 of 40 hedge fund 13Fs"
+          - "Beta: 1.1, trailing vol: 25%"
+      - name: "HealthMomentum Therapeutics"
+        ticker: "HMTX"
+        weight: "3.2%"
+        characteristics:
+          - "Mid-cap biotech, 12-month return +95%"
+          - "Hedge fund ownership: 31% of float"
+          - "Short interest: 8% (low for biotech)"
+          - "Beta: 1.6, trailing vol: 48%"
+
+    short_positions:
+      - name: "Legacy Retail Holdings"
+        ticker: "LRTH"
+        weight: "3.5% short"
+        characteristics:
+          - "Mid-cap retail, 12-month return -35%"
+          - "Short interest: 42% of float"
+          - "Days to cover: 12 days"
+          - "Cost to borrow: 8% annualized"
+          - "On multiple crowded-short screens"
+          - "Retail investor sentiment: heavily discussed on social media"
+      - name: "OldEnergy Corp"
+        ticker: "OENG"
+        weight: "2.8% short"
+        characteristics:
+          - "Small-cap legacy energy, 12-month return -28%"
+          - "Short interest: 35% of float"
+          - "Days to cover: 8 days"
+
+  historical_precedents: >
+    August 2007 Quant Quake: Crowded momentum/value strategies experienced
+    3-5 standard deviation losses in a 48-hour window as simultaneous
+    deleveraging by quantitative funds created a self-reinforcing liquidation
+    cascade. Funds with 80%+ overlap with the crowded trade lost 10-30% in
+    days. The trigger was believed to be a single large fund forced to
+    liquidate, not a fundamental event.
+
+    September 2019 Momentum Reversal: The momentum factor lost approximately
+    14% in a two-week period as value stocks surged on rate expectations
+    shift. Momentum crowding indicators had been at the 90th+ percentile
+    heading into the event. Funds with concentrated momentum exposure
+    experienced 5-15% drawdowns.
+
+    March 2020 Momentum Crash: COVID-19 sell-off triggered a violent momentum
+    factor reversal; 12-month momentum lost approximately 40% in three weeks
+    as prior winners were sold indiscriminately.
+
+    January 2021 GameStop/Meme Stock Squeeze: Crowded short positions in
+    retail-popular names experienced >100% short squeezes, causing forced
+    covering and broad deleveraging across the L/S equity universe. Funds
+    with concentrated short books in high-SI names faced existential losses.
+    Melvin Capital lost 53% in January alone.
+
+  market_conditions: >
+    Current environment shows elevated crowding across multiple indicators
+    simultaneously. Momentum has outperformed for 18 consecutive months.
+    Hedge fund gross leverage at cycle highs per prime broker data (GS: 245%,
+    MS: 238%). Near-record concentration in top momentum names. VIX at 14
+    but skew elevated (25-delta put IV 6 vol points above 25-delta call),
+    suggesting options markets are pricing tail risk that realized vol does
+    not yet reflect. Credit spreads tight, suggesting complacency. Fed
+    policy path uncertain.
+
+# === TASK ===
+
+task:
+  prompt: >
+    Your momentum-oriented L/S fund shows elevated crowding indicators across
+    the board: hedge fund ownership overlap at the 95th percentile, short
+    interest concentration at the 92nd, pairwise correlation at the 88th,
+    and the momentum crowding signal at 1.8 standard deviations above the
+    historical mean.
+
+    How should you adjust portfolio construction and position sizing to account
+    for crowding risk? Your response should address:
+
+    1. How crowding changes the risk profile of momentum positions even when
+       the underlying fundamentals have not changed
+    2. Specific sizing adjustments for both the long book (ownership overlap)
+       and the short book (squeeze risk from high SI and days-to-cover)
+    3. The difference between idiosyncratic conviction and factor crowding
+       risk -- and how to preserve the former while mitigating the latter
+    4. Liquidity risk considerations and exit velocity asymmetry
+    5. Portfolio-level adjustments (gross/net exposure, concentration limits,
+       correlation-adjusted risk budgets)
+    6. What historical crowding episodes (2007, 2019, 2020, 2021) teach about
+       the magnitude and speed of unwinds in similar conditions
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must distinguish between crowding risk and fundamental risk"
+    - "Must address both long and short book crowding separately"
+    - "Must incorporate liquidity risk and exit velocity into sizing"
+    - "Must reference historical precedents for calibration"
+    - "Must not treat crowding as a reason to abandon positions entirely without nuance"
+    - "Must use probabilistic language throughout"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Crowding Risk Recognition"
+      id: "crowding_recognition"
+      weight: 30
+      criteria:
+        - "Correctly identifies that crowding increases liquidation/correlation risk without changing fundamental thesis"
+        - "Recognizes that trailing volatility understates true risk when crowding is elevated"
+        - "Understands that crowded positions have non-linear loss profiles (gap risk, exit velocity asymmetry)"
+        - "Distinguishes between stock-specific conviction and factor-level crowding"
+        - "Notes that low VIX with elevated skew is a warning, not a comfort"
+
+    - name: "Sizing Adjustments"
+      id: "sizing_adjustments"
+      weight: 35
+      criteria:
+        - "Proposes specific position-level size reductions differentiated by crowding severity"
+        - "Addresses short book squeeze risk separately (days-to-cover, borrow cost, retail sentiment)"
+        - "Adjusts for the correlation increase that inflates portfolio-level risk"
+        - "Does not apply blanket reductions -- differentiates by name-level crowding metrics"
+        - "Considers options-based hedging or tail risk protection as sizing complement"
+
+    - name: "Portfolio-Level Framework"
+      id: "portfolio_framework"
+      weight: 35
+      criteria:
+        - "Addresses gross exposure reduction as a portfolio-level lever"
+        - "Considers reducing net exposure to limit directional risk in a deleveraging event"
+        - "Discusses concentration limits adjusted for correlated liquidation risk"
+        - "References historical episodes for calibrating the magnitude of adjustment"
+        - "Balances risk reduction against the opportunity cost of reducing exposure to working positions"
+
+  critical_failures:
+    - "Ignores crowding indicators entirely and sizes on fundamentals alone"
+    - "Treats crowding as a timing signal to exit all momentum positions"
+    - "Fails to address short-side squeeze risk separately from long-side crowding"
+    - "Uses trailing volatility as primary risk input when crowding is elevated"
+    - "Claims crowding is 'priced in' without supporting evidence"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Using trailing volatility as the sizing input when crowding inflates future tail risk"
+    failure_type: "backward_looking_risk"
+    severity: "critical"
+
+  - description: "Treating all crowded positions identically without differentiating by liquidity, overlap, and conviction"
+    failure_type: "blunt_instrument"
+    severity: "major"
+
+  - description: "Ignoring short-side liquidity risk (LRTH: 42% SI, 12 days to cover) in a squeeze-prone environment"
+    failure_type: "short_squeeze_blindness"
+    severity: "critical"
+
+  - description: "Concluding that crowding indicators are irrelevant because fundamentals are strong"
+    failure_type: "fundamental_anchoring"
+    severity: "major"
+
+  - description: "Over-reacting by proposing to close all momentum positions, destroying alpha to avoid factor risk"
+    failure_type: "alpha_destruction"
+    severity: "major"
+
+  - description: "Treating VIX at 14 as evidence of low risk while ignoring elevated skew"
+    failure_type: "vol_surface_blindness"
+    severity: "major"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    Our positions are selected based on fundamental analysis, and the crowding
+    indicators reflect the fact that other smart money agrees with our thesis.
+    High hedge fund ownership is a positive signal of institutional quality.
+    We should maintain current sizing because our trailing volatility remains
+    well within risk limits and the VIX is at 14, indicating a benign risk
+    environment.
+
+  why_this_fails:
+    - "Conflates crowding with validation rather than recognizing it as a distinct risk factor"
+    - "Ignores that crowded positions have correlated liquidation risk regardless of fundamentals"
+    - "Uses trailing volatility and low VIX as safety signals while ignoring elevated skew"
+    - "Fails to address short-side squeeze risk entirely"
+    - "Does not reference historical episodes where identical conditions preceded severe drawdowns"
+    - "The 2007 quant quake and 2021 meme squeeze both involved 'fundamentally correct' positions that suffered catastrophic drawdowns from crowding unwinds"
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Hedge fund ownership overlap at 95th percentile (72% of long book vs 45% average)"
+    source: "context.crowding_indicators"
+    importance: "critical"
+
+  - fact: "Short interest concentration at 92nd percentile (28% avg SI vs 15% average)"
+    source: "context.crowding_indicators"
+    importance: "critical"
+
+  - fact: "Pairwise correlation at 0.68 vs 0.42 average, inflating portfolio-level risk by roughly 60%"
+    source: "context.crowding_indicators"
+    importance: "critical"
+
+  - fact: "Momentum crowding at 1.8 SD above mean -- levels that preceded 2007, 2019, and 2020 momentum crashes"
+    source: "context.crowding_indicators"
+    importance: "critical"
+
+  - fact: "LRTH short has 42% SI, 12 days to cover, 8% borrow cost -- extreme squeeze vulnerability"
+    source: "context.top_holdings"
+    importance: "important"
+
+  - fact: "VIX at 14 but 25-delta put skew elevated 6 vol points, suggesting suppressed vol masks tail pricing"
+    source: "context.market_conditions"
+    importance: "important"
+
+  - fact: "Hedge fund gross leverage at cycle highs (GS: 245%, MS: 238%)"
+    source: "context.market_conditions"
+    importance: "important"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-27"
+  sector_focus: "multi-sector"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "crowding_risk"
+    - "position_sizing"
+    - "momentum_factor"
+    - "liquidity_risk"
+    - "short_squeeze"
+    - "tail_risk"
+  notes: >
+    This scenario tests whether an analyst or PM can separate thesis conviction
+    from position construction discipline. The key insight is that crowding is
+    not a fundamental signal -- it is a structural risk that affects the
+    distribution of outcomes. A position can be fundamentally correct and still
+    poorly sized if crowding creates asymmetric downside through correlated
+    liquidation, exit velocity asymmetry, and short squeeze dynamics. The best
+    PMs reduce size, not conviction.

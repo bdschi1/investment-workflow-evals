@@ -13,7 +13,7 @@ This is a continually developed project. Evaluation modules, scenarios, and rubr
 
 ## About This Project
 
-This repository contains evaluation scenarios, scoring rubrics, golden reference answers, and adversarial test cases for investment research tasks. The evaluation modules cover equity thesis construction, DCF valuation, portfolio construction, assumption validation, and research translation. Each module includes:
+This repository contains evaluation scenarios, scoring rubrics, golden reference answers, and adversarial test cases for investment research tasks. Seven evaluation modules cover qualification, equity thesis construction, DCF valuation, portfolio construction, assumption validation, risk attribution, and research translation. Each module includes:
 
 - **Scenarios** with task prompts and domain context drawn from realistic investment situations
 - **Rubrics** with weighted dimensions and multi-level scoring anchors
@@ -28,11 +28,12 @@ The materials serve two related uses: benchmarking AI model performance on inves
 
 | Module | Scenarios | Rubric | Focus |
 |--------|-----------|--------|-------|
-| **Equity Thesis** | 2 | [standard.yaml](evals/01_equity_thesis/rubrics/standard.yaml) | Thesis construction, catalyst analysis, risk/reward |
+| **Qualification** | 1 | [qualification_standard.yaml](evals/00_qualification/rubrics/qualification_standard.yaml) | Onboarding assessment, basic equity analysis |
+| **Equity Thesis** | 3 | [standard.yaml](evals/01_equity_thesis/rubrics/standard.yaml) | Thesis construction, catalyst analysis, capex cycle, risk/reward |
 | **DCF Valuation** | 2 | [standard.yaml](evals/02_dcf_valuation/rubrics/standard.yaml) | Alpha vs environment, terminal value, margin normalization |
-| **Portfolio Construction** | 2 | [standard.yaml](evals/03_portfolio_construction/rubrics/standard.yaml) | Risk-based sizing, hedging, policy risk |
-| **Assumption Validation** | 2 | [assumption_validation.yaml](evals/04_assumption_validation/rubrics/assumption_validation.yaml) | Discount rate stress-testing, commodity price assumptions |
-| **Risk Attribution** | — | — | Factor decomposition, hypothesis testing *(scaffolded, content pending)* |
+| **Portfolio Construction** | 5 | [standard.yaml](evals/03_portfolio_construction/rubrics/standard.yaml) | Risk-based sizing, crowding risk, hedging, policy risk |
+| **Assumption Validation** | 3 | [assumption_validation.yaml](evals/04_assumption_validation/rubrics/assumption_validation.yaml) | Discount rate stress-testing, commodity assumptions, statistical significance |
+| **Risk Attribution** | 2 | [risk_attribution.yaml](evals/05_risk_attribution/rubrics/risk_attribution.yaml) | Factor decomposition, hypothesis testing, alpha vs environment |
 | **Research Translation** | 1 | [translation_quality.yaml](evals/06_research_translation/rubrics/translation_quality.yaml) | IC memo to retail-readable summary |
 
 ## Sample Scenarios
@@ -43,24 +44,41 @@ Each scenario includes context, task prompt, evaluation criteria, and an adversa
 |--------|----------|---------------|
 | **Equity Thesis** | [Biotech Phase 3 Catalyst](evals/01_equity_thesis/scenarios/biotech_phase3_catalyst.yaml) | Probability estimation, asymmetric risk/reward |
 | **Equity Thesis** | [Cyclical Trough Valuation](evals/01_equity_thesis/scenarios/cyclical_trough_valuation.yaml) | Through-cycle valuation, margin normalization |
+| **Equity Thesis** | [AI Capex Cycle Thesis](evals/01_equity_thesis/scenarios/ai_capex_cycle_thesis.yaml) | Capex cycle timing, secular vs cyclical growth |
 | **DCF Valuation** | [Life Sciences Tools](evals/02_dcf_valuation/scenarios/life_sciences_tools_valuation.yaml) | Alpha vs environment separation, terminal value discipline |
 | **DCF Valuation** | [MedTech Normalization](evals/02_dcf_valuation/scenarios/medtech_normalization.yaml) | Cyclical vs structural, uncertainty placement |
 | **Portfolio Construction** | [Pharma/Biotech Pair](evals/03_portfolio_construction/scenarios/pharma_biotech_pair.yaml) | Risk-based sizing, hedging environmental exposure |
 | **Portfolio Construction** | [Policy Risk Sizing](evals/03_portfolio_construction/scenarios/healthcare_services_policy_risk.yaml) | Forward-looking risk, tail risk recognition |
+| **Portfolio Construction** | [Crowding Risk Sizing](evals/03_portfolio_construction/scenarios/crowding_risk_sizing.yaml) | Position sizing under crowded-trade dynamics |
 | **Assumption Validation** | [Biotech Discount Rate](evals/04_assumption_validation/scenarios/biotech_discount_rate.yaml) | Discount rate stress-testing under uncertainty |
 | **Assumption Validation** | [Commodity Price Assumption](evals/04_assumption_validation/scenarios/commodity_price_assumption.yaml) | Forward curve vs mean-reversion assumptions |
+| **Assumption Validation** | [Statistical Significance Trap](evals/04_assumption_validation/scenarios/statistical_significance_trap.yaml) | p-hacking, backtest overfitting, multiple comparisons |
+| **Risk Attribution** | [Healthcare L/S Factor Decomposition](evals/05_risk_attribution/scenarios/healthcare_ls_factor_decomposition.yaml) | Multi-factor return decomposition, residual alpha |
+| **Risk Attribution** | [Factor Tilt Attribution](evals/05_risk_attribution/scenarios/factor_tilt_attribution.yaml) | Value factor tilt vs stock selection, statistical significance |
 | **Research Translation** | [IC Memo to Blog](evals/06_research_translation/scenarios/ic_memo_to_blog.yaml) | Institutional-to-retail content adaptation |
 
 ## Golden Answers
 
-Expert-level reference responses demonstrating proper analytical workflow:
+Expert-level reference responses demonstrating proper analytical workflow. Each module now has golden answers for all its scenarios (17 total across 7 modules):
 
 | Module | Golden Answer | Key Concepts |
 |--------|---------------|--------------|
+| **Qualification** | [Basic Equity Analysis](evals/00_qualification/golden_answers/basic_equity_analysis.md) | Fundamental assessment, valuation basics |
 | **Equity Thesis** | [Biotech Phase 3 Catalyst](evals/01_equity_thesis/golden_answers/biotech_phase3_catalyst.md) | Probability framework, scenario analysis, position sizing |
+| **Equity Thesis** | [Cyclical Trough Valuation](evals/01_equity_thesis/golden_answers/cyclical_trough_valuation.md) | Through-cycle normalization, margin reversion |
+| **Equity Thesis** | [AI Capex Cycle Thesis](evals/01_equity_thesis/golden_answers/ai_capex_cycle_thesis.md) | Capex cycle timing, secular vs cyclical drivers |
 | **DCF Valuation** | [Life Sciences Tools](evals/02_dcf_valuation/golden_answers/life_sciences_tools_valuation.md) | Alpha/environment decomposition, terminal value discipline |
+| **DCF Valuation** | [MedTech Normalization](evals/02_dcf_valuation/golden_answers/medtech_normalization.md) | Cyclical vs structural margin, uncertainty placement |
 | **Portfolio Construction** | [Pharma/Biotech Pair](evals/03_portfolio_construction/golden_answers/pharma_biotech_pair.md) | Volatility-adjusted sizing, environmental hedging |
+| **Portfolio Construction** | [Policy Risk Sizing](evals/03_portfolio_construction/golden_answers/healthcare_services_policy_risk.md) | Forward-looking risk, tail event recognition |
+| **Portfolio Construction** | [Crowding Risk Sizing](evals/03_portfolio_construction/golden_answers/crowding_risk_sizing.md) | Crowded-trade dynamics, liquidity-aware sizing |
+| **Portfolio Construction** | [Risk-Based Sizing](evals/03_portfolio_construction/golden_answers/risk_based_sizing.md) | Risk-budgeted position construction |
+| **Portfolio Construction** | [Risk Sizing Trap](evals/03_portfolio_construction/golden_answers/risk_sizing_trap.md) | Mechanical sizing pitfalls, conviction integration |
 | **Assumption Validation** | [Biotech Discount Rate](evals/04_assumption_validation/golden_answers/biotech_discount_rate.md) | Sensitivity analysis, uncertainty quantification |
+| **Assumption Validation** | [Commodity Price Assumption](evals/04_assumption_validation/golden_answers/commodity_price_assumption.md) | Forward curve analysis, mean-reversion testing |
+| **Assumption Validation** | [Statistical Significance Trap](evals/04_assumption_validation/golden_answers/statistical_significance_trap.md) | p-hacking awareness, multiple comparison correction |
+| **Risk Attribution** | [Healthcare L/S Factor Decomposition](evals/05_risk_attribution/golden_answers/healthcare_ls_factor_decomposition.md) | Multi-factor decomposition, residual alpha estimation |
+| **Risk Attribution** | [Factor Tilt Attribution](evals/05_risk_attribution/golden_answers/factor_tilt_attribution.md) | Factor tilt vs selection, statistical significance |
 | **Research Translation** | [ABBV Retail Summary](evals/06_research_translation/golden_answers/abbv_retail_summary.md) | Jargon simplification, actionable takeaways |
 
 ## Rubric Structure
@@ -180,8 +198,10 @@ investment-workflow-evals/
 │   │   ├── scenarios/
 │   │   ├── rubrics/
 │   │   └── golden_answers/
-│   └── 05_risk_attribution/       # Performance attribution
-│       └── rubrics/
+│   ├── 05_risk_attribution/       # Performance attribution
+│   │   ├── scenarios/
+│   │   ├── rubrics/
+│   │   └── golden_answers/
 ├── tools/
 │   ├── eval_runner.py             # Run evaluations
 │   └── grading_engine.py          # Score submissions
@@ -251,7 +271,7 @@ Contributions welcome. Areas for improvement:
 
 ## Status
 
-This project is under active, ongoing development. Core evaluation modules, grading engine, and RLHF Studio are stable. New scenarios, rubrics, and adversarial variants are added as new investment tasks and AI failure modes are identified.
+This project is under active, ongoing development. Seven evaluation modules are live with 17 scenarios, 17 golden answers, and rubrics across all active modules. Core evaluation modules, grading engine, and RLHF Studio are stable. New scenarios, rubrics, and adversarial variants are added as new investment tasks and AI failure modes are identified.
 
 ## License
 

@@ -1,0 +1,254 @@
+# AI CapEx Cycle Equity Thesis: ServiceNow (NOW)
+# Tests: Secular growth analysis, disruption risk assessment, valuation dislocation identification
+
+id: ai_capex_cycle_thesis
+title: "AI CapEx Cycle - Enterprise Software Beneficiary vs Victim"
+version: "1.0.0"
+module: "01_equity_thesis"
+category: "secular_growth"
+difficulty: "hard"
+estimated_time_minutes: 50
+
+context:
+  company:
+    name: "ServiceNow"
+    ticker: "NOW"
+    sector: "Technology - Enterprise Software"
+    market_cap: "$210B"
+    description: >
+      ServiceNow is a cloud-based enterprise software company that provides
+      workflow automation and IT service management (ITSM) solutions.
+      The company owns the system-of-record for IT operations at most
+      Fortune 500 enterprises and is positioning its platform as the
+      orchestration layer for AI agents.
+
+  situation: >
+    The enterprise software sector has sold off 29% from its 52-week highs,
+    compressing NOW's forward P/E from 35x to 20x — the lowest valuation
+    since 2014. Goldman Sachs rates NOW as a Buy alongside MSFT and ORCL,
+    while rating ADBE and DDOG as Sell, arguing that platform-layer companies
+    benefit from AI adoption while application-layer pure-plays face
+    displacement risk.
+
+    Hyperscaler AI capital expenditure is projected at $533B for 2026 (up
+    from ~$230B in 2024), creating a massive infrastructure buildout. The
+    central investment question is whether NOW is a beneficiary or victim
+    of this disruption cycle. AI copilots from Claude Cowork and OpenAI
+    Frontier have raised fears that traditional SaaS workflows become
+    obsolete — that enterprise software becomes "passive data stores"
+    rather than active workflow engines.
+
+    NOW management is leaning into this debate, positioning the platform
+    as the orchestration layer for agentic AI — the system that dispatches,
+    monitors, and governs AI agents across enterprise workflows. Q4 2025
+    results showed 23% subscription revenue growth and 40% operating margins.
+
+  market_conditions: >
+    Broader market trading near all-time highs, but software sector
+    significantly lagging. Multiple compression across SaaS names driven
+    by fears of AI disruption to traditional subscription models. Interest
+    rates elevated but stable. Enterprise IT budgets showing early signs
+    of reallocation toward AI projects, potentially at the expense of
+    existing SaaS renewals.
+
+  as_of_date: "2026-02-10"
+
+  additional_context: >
+    NOW generates $10.5B in annual subscription revenue with 83% gross
+    margins and 40% operating margins. Net revenue retention rate is 125%.
+    The company has $7.8B in cash, no debt, and $3.5B in annual free cash
+    flow. Customer base includes 85% of the Fortune 500. The ITSM market
+    is essentially a duopoly between NOW and BMC, with NOW holding ~45%
+    share. NOW's "Now Assist" AI features are generating $100M+ in
+    incremental ACV in early adoption.
+
+    Key competitive dynamics: Microsoft Copilot is the most visible AI
+    threat to enterprise software incumbents, but MSFT and NOW have a
+    partnership rather than competitive relationship — NOW runs on Azure
+    and integrates with M365. The real threat is from AI-native workflow
+    tools that could bypass NOW's platform entirely.
+
+task:
+  prompt: >
+    Develop an investment thesis for ServiceNow (NOW) in the context of
+    the AI capital expenditure cycle. Your analysis should include:
+
+    1. A clear long/short recommendation with position sizing
+    2. Framework for evaluating whether NOW is a beneficiary or victim
+       of AI disruption
+    3. Scenario analysis spanning AI-beneficial through AI-disruptive outcomes
+    4. Valuation assessment at 20x forward P/E given growth and margin profile
+    5. Key risks including secular disruption, competitive, and macro
+    6. Catalyst identification and monitoring framework
+
+    Base your analysis on the provided context and publicly available
+    information as of February 2026.
+
+  expected_output_type: "investment_thesis"
+
+  constraints:
+    - "Must explicitly address the beneficiary vs victim framework"
+    - "Must not dismiss AI disruption risk without rigorous analysis"
+    - "Position sizing must reflect uncertainty about secular trajectory"
+    - "Valuation must be contextualized vs growth rate and historical range"
+    - "Must distinguish between platform-layer and application-layer dynamics"
+
+  time_horizon: "12-18 months"
+
+data_sources:
+  - type: "10-K"
+    description: "ServiceNow 2025 Annual Report"
+    date: "2026-01-29"
+    key_data_points:
+      - "Subscription revenue: $10.5B (+22% YoY)"
+      - "Operating margin: 40%"
+      - "Free cash flow: $3.5B"
+      - "Net revenue retention: 125%"
+
+  - type: "10-Q"
+    description: "ServiceNow Q4 2025 Quarterly Report"
+    date: "2026-01-29"
+    key_data_points:
+      - "Q4 subscription revenue: $2.9B (+23% YoY)"
+      - "cRPO growth: 21%"
+      - "Now Assist ACV contribution: $100M+"
+      - "85% of Fortune 500 as customers"
+
+  - type: "earnings_transcript"
+    description: "Q4 2025 Earnings Call"
+    date: "2026-01-29"
+    key_data_points:
+      - "Management positioning as 'AI agent orchestration platform'"
+      - "Now Assist adoption accelerating beyond initial expectations"
+      - "Enterprise AI budget reallocation benefiting platform layer"
+
+  - type: "sell_side_research"
+    description: "Goldman Sachs US Software Sector Outlook"
+    date: "2026-02-05"
+    key_data_points:
+      - "NOW rated Buy with $1,050 price target"
+      - "Platform-layer vs application-layer framework"
+      - "ADBE and DDOG rated Sell on disruption risk"
+      - "Hyperscaler AI capex at $533B for 2026"
+
+key_facts:
+  - fact: "NOW forward P/E compressed from 35x to 20x — lowest since 2014"
+    source: "Bloomberg consensus"
+    importance: "critical"
+
+  - fact: "Company growing subscription revenue 22-23% with 40% operating margins"
+    source: "Q4 2025 earnings"
+    importance: "critical"
+
+  - fact: "S&P 500 average trades at ~21x forward P/E with ~10% earnings growth and ~15% margins"
+    source: "Bloomberg"
+    importance: "important"
+
+  - fact: "NOW owns system-of-record in ITSM for 85% of Fortune 500"
+    source: "Company filings"
+    importance: "critical"
+
+  - fact: "Hyperscaler AI capex projected at $533B for 2026"
+    source: "Goldman Sachs research"
+    importance: "important"
+
+  - fact: "Now Assist generating $100M+ incremental ACV in early adoption"
+    source: "Q4 2025 earnings"
+    importance: "important"
+
+  - fact: "Enterprise software sector down 29% from highs amid AI disruption fears"
+    source: "Bloomberg"
+    importance: "important"
+
+pitfalls:
+  - description: "Treating all SaaS companies as equally exposed to AI disruption"
+    failure_type: "false_equivalence"
+    severity: "critical"
+
+  - description: "Anchoring on 35x historical P/E without questioning if the multiple regime has changed"
+    failure_type: "anchoring_bias"
+    severity: "major"
+
+  - description: "Dismissing AI disruption risk because current financials are strong"
+    failure_type: "status_quo_bias"
+    severity: "critical"
+
+  - description: "Ignoring the distinction between system-of-record and application-layer positioning"
+    failure_type: "insufficient_analysis"
+    severity: "major"
+
+  - description: "Using a DCF terminal growth rate that assumes current growth persists indefinitely"
+    failure_type: "extrapolation_error"
+    severity: "major"
+
+  - description: "Hallucinating specific AI product announcements or partnerships not in the context"
+    failure_type: "hallucination"
+    severity: "critical"
+
+evaluation_criteria:
+  dimensions:
+    - name: "Disruption Framework"
+      weight: 0.30
+      criteria:
+        - "Provides structured framework for evaluating beneficiary vs victim"
+        - "Distinguishes platform-layer from application-layer dynamics"
+        - "Assesses system-of-record stickiness vs displacement risk"
+        - "Considers multiple AI disruption scenarios, not just one"
+
+    - name: "Valuation Assessment"
+      weight: 0.25
+      criteria:
+        - "Contextualizes 20x P/E against growth, margins, and historical range"
+        - "Compares valuation to S&P 500 average on growth-adjusted basis"
+        - "Considers whether multiple compression reflects temporary fear or structural shift"
+        - "Provides explicit price targets with methodology"
+
+    - name: "Scenario Analysis"
+      weight: 0.20
+      criteria:
+        - "Models at least three scenarios spanning beneficiary to victim outcomes"
+        - "Assigns probabilities grounded in competitive analysis"
+        - "Price targets reflect different secular trajectories"
+        - "Probability-weighted expected value is calculated"
+
+    - name: "Risk Assessment"
+      weight: 0.15
+      criteria:
+        - "Identifies AI-native competition as a distinct risk from existing competitors"
+        - "Addresses enterprise budget reallocation risk"
+        - "Considers macro sensitivity of valuation"
+        - "Notes key person and execution risk"
+
+    - name: "Position Sizing Logic"
+      weight: 0.10
+      criteria:
+        - "Size reflects uncertainty about secular trajectory"
+        - "Has clear entry/exit framework"
+        - "Considers portfolio context and factor exposure"
+        - "Risk management framework is specified"
+
+  critical_failures:
+    - "Fails to address the beneficiary vs victim question"
+    - "Treats 20x P/E as obviously cheap without analyzing disruption risk"
+    - "Hallucinated financial data or product announcements"
+    - "No scenario analysis — only a single-point estimate"
+    - "Ignores AI disruption risk entirely"
+
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-27"
+  tags:
+    - "enterprise_software"
+    - "AI_disruption"
+    - "secular_growth"
+    - "valuation_dislocation"
+    - "technology"
+  notes: >
+    This scenario tests the ability to evaluate a company at the intersection
+    of secular growth and potential disruption. Key skills: framework-driven
+    analysis, valuation in uncertainty, distinguishing between temporary
+    sentiment and structural change. The central tension — is the 20x P/E
+    a dislocation or a rerating — has no single correct answer, but the
+    framework for approaching it matters.

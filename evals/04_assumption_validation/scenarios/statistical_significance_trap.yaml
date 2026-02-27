@@ -1,0 +1,244 @@
+# Statistical Significance Trap: When P-Values Mislead Investment Decisions
+# Tests: Multiple-testing bias, data snooping, statistical vs economic significance
+
+id: statistical_significance_trap
+title: "Statistical Significance Trap - Backtest Overfitting and Multiple Testing Bias"
+version: "1.1.0"
+module: "04_assumption_validation"
+category: "statistical_reasoning"
+difficulty: "hard"
+
+context: |
+  You are a PM evaluating a pitch from your internal quant team for a new
+  systematic equity strategy. The team presents the following backtest results:
+
+  Strategy: "Earnings Quality Momentum" (EQM)
+  Backtest period: January 2010 - December 2024 (15 years)
+  Universe: Russell 1000
+
+  Headline backtest statistics:
+  - Annualized return: 14.8%
+  - Annualized volatility: 12.3%
+  - Sharpe ratio: 0.78 (after subtracting risk-free rate)
+  - Maximum drawdown: -18.2%
+  - Calmar ratio: 0.81
+  - Win rate: 58% of months positive
+  - t-statistic on excess returns: 3.02 (p < 0.01)
+  - Information ratio vs S&P 500: 0.65
+  - Turnover: 45% annualized
+
+  Strategy description:
+  - Ranks stocks on a composite score combining: (1) earnings quality metrics
+    (accruals, cash flow consistency, revenue recognition patterns), and
+    (2) 6-month price momentum with a 1-month skip
+  - Goes long top quintile, short bottom quintile, dollar-neutral
+  - Monthly rebalance, equal-weighted within quintiles
+  - Transaction cost assumption: 10bps per side
+
+  What the quant team does NOT prominently disclose (buried in appendix):
+  - The team tested 200+ parameter combinations before arriving at EQM
+  - Variations tested included: lookback windows (3, 6, 9, 12 months),
+    skip periods (0, 1, 2 months), weighting schemes (equal, cap-weighted,
+    inverse-vol), quality metrics (12 different definitions), universe
+    filters (market cap cutoffs), and rebalance frequencies (weekly,
+    monthly, quarterly)
+  - The 200+ backtests were run over the same 15-year sample
+  - Only 8 of the 200+ combinations showed a Sharpe ratio above 0.70
+  - The presented strategy (Sharpe 0.78) is the best-performing combination
+  - No out-of-sample validation was performed
+  - No adjustment for multiple testing (e.g., Bonferroni, Holm, or
+    Deflated Sharpe Ratio) was applied to the reported statistics
+  - Transaction cost sensitivity not shown (10bps assumption is optimistic
+    for the smaller names in Russell 1000)
+
+  Additional context:
+  - The team's previous strategy (launched 2022 based on similar backtest
+    methodology) has underperformed its backtest Sharpe by 0.35 since launch
+  - Academic literature on backtest overfitting: Harvey, Liu, and Zhu (2016)
+    find that a t-statistic of 3.0 is the minimum threshold when accounting
+    for multiple testing in finance, not the conventional 2.0
+  - Marcos Lopez de Prado's "The Deflated Sharpe Ratio" (2014) provides
+    a framework for adjusting Sharpe ratios for the number of trials
+  - Bailey, Borwein, Lopez de Prado, and Zhu (2017) estimate that most
+    backtested strategies are likely false discoveries when tested across
+    many parameter sets
+  - The strategy's best performance period (2020-2021) coincided with
+    extreme factor dispersion that is unlikely to repeat
+
+  Quant team's presentation framing:
+  - "The strategy achieves a Sharpe ratio of 0.78 with a t-stat of 3.02,
+    which is significant at the 1% level"
+  - "Maximum drawdown of only 18.2% demonstrates strong risk management"
+  - "The earnings quality signal has economic intuition grounded in
+    accounting research (Sloan 1996, Dechow et al. 2010)"
+  - "We recommend allocating $200M to this strategy"
+
+task: |
+  The quant team presents a systematic strategy with a backtest Sharpe ratio
+  of 0.78 and a t-statistic of 3.02 (p < 0.01). However, the strategy was
+  selected as the best performer from 200+ parameter combinations tested on
+  the same data sample. Evaluate the backtest assumptions:
+
+  1. Identify the multiple-testing bias and explain why the reported
+     statistics are overstated
+  2. Estimate what the "Deflated Sharpe Ratio" or Bonferroni-adjusted
+     significance would be after accounting for the number of trials
+  3. Distinguish between statistical significance and economic significance
+     in this context
+  4. Assess the transaction cost assumptions and their impact on live
+     performance
+  5. Evaluate the quant team's previous strategy underperformance as
+     evidence of systematic backtest overfitting
+  6. Recommend whether to allocate, and if so, at what fraction of the
+     proposed $200M, with specific conditions
+
+adversarial_example:
+  response: |
+    The strategy has strong statistical support with a t-stat of 3.02,
+    exceeding the conventional 2.0 threshold for significance at the 5%
+    level. The Sharpe ratio of 0.78 is attractive for a systematic strategy.
+    The earnings quality signal is well-grounded in academic literature
+    (Sloan 1996), which adds confidence to the backtest results. The
+    maximum drawdown of 18.2% is well within risk limits. I would recommend
+    the full $200M allocation with monthly monitoring of performance
+    relative to the backtest.
+  why_wrong: |
+    - Ignores that the t-stat of 3.02 is meaningless without adjusting for
+      200+ trials; the unadjusted t-stat grossly overstates significance
+    - Harvey, Liu, and Zhu (2016) argue t > 3.0 is the MINIMUM threshold
+      after accounting for multiple testing -- and that's for the broader
+      literature, not for 200+ tests by one team on one dataset
+    - The Deflated Sharpe Ratio would reduce the effective Sharpe
+      substantially, likely rendering it statistically insignificant
+    - Transaction cost assumption of 10bps is not stress-tested
+    - The team's previous strategy underperformed its backtest by 0.35
+      Sharpe points -- direct evidence of overfitting
+    - "Academic literature supports the signal" does not validate a
+      specific parameterization selected from 200+ alternatives
+    - Recommending the full $200M without out-of-sample validation or
+      adjusted statistics shows no awareness of data snooping risk
+
+evaluation_criteria:
+  dimensions:
+    - name: "Multiple Testing Identification"
+      id: "multiple_testing"
+      weight: 30
+      criteria:
+        - "Identifies the 200+ parameter search as a source of multiple-testing bias"
+        - "Explains why the best-of-200 will overstate true expected performance"
+        - "References appropriate frameworks (Bonferroni, Deflated Sharpe Ratio, Harvey et al.)"
+        - "Notes that only 8 of 200+ achieved Sharpe > 0.70, consistent with random discovery"
+
+    - name: "Statistical Adjustment"
+      id: "statistical_adjustment"
+      weight: 25
+      criteria:
+        - "Provides quantitative adjustment for the number of trials"
+        - "Calculates or estimates the Bonferroni-adjusted p-value or Deflated Sharpe"
+        - "Correctly notes that the adjusted significance likely does not survive correction"
+        - "References Harvey et al. t > 3.0 threshold and explains why even this may not be sufficient"
+
+    - name: "Economic vs Statistical Significance"
+      id: "economic_significance"
+      weight: 20
+      criteria:
+        - "Distinguishes between statistical significance and live tradability"
+        - "Addresses transaction cost sensitivity and market impact"
+        - "Notes that backtest-to-live decay is typical and quantifiable"
+        - "Evaluates whether the signal has economic intuition independent of the parameterization"
+
+    - name: "Decision Framework"
+      id: "decision_framework"
+      weight: 25
+      criteria:
+        - "Does not recommend full allocation without out-of-sample validation"
+        - "References the team's previous overfitting as cautionary evidence"
+        - "Proposes specific conditions for a reduced allocation (out-of-sample test, paper trading period)"
+        - "Quantifies the expected live Sharpe decay from backtest levels"
+
+  critical_failures:
+    - "Accepts the reported t-stat at face value without adjusting for multiple testing"
+    - "Recommends full $200M allocation based on in-sample backtest alone"
+    - "Fails to identify the 200+ parameter search as a data snooping problem"
+    - "Ignores the team's previous strategy underperformance as relevant evidence"
+    - "Confuses the academic support for the signal concept with validation of the specific parameterization"
+
+  pass_threshold: 70
+
+pitfalls:
+  - description: "Accepting the t-stat of 3.02 as significant without adjusting for 200+ trials"
+    failure_type: "multiple_testing_blindness"
+    severity: "critical"
+
+  - description: "Treating academic literature support for the general concept as validation of the specific backtest"
+    failure_type: "concept_vs_implementation_conflation"
+    severity: "major"
+
+  - description: "Ignoring the prior strategy's 0.35 Sharpe underperformance as evidence of systematic overfitting"
+    failure_type: "base_rate_neglect"
+    severity: "major"
+
+  - description: "Accepting transaction cost assumptions without sensitivity analysis"
+    failure_type: "cost_assumption_neglect"
+    severity: "major"
+
+  - description: "Binary accept/reject without proposing a conditional allocation framework"
+    failure_type: "missing_nuance"
+    severity: "moderate"
+
+  - description: "Using only Bonferroni correction without noting its conservatism or suggesting DSR alternative"
+    failure_type: "crude_adjustment"
+    severity: "minor"
+
+key_facts:
+  - fact: "200+ parameter combinations tested on the same 15-year sample, reported strategy is the best performer"
+    source: "context (appendix disclosure)"
+    importance: "critical"
+
+  - fact: "Only 8 of 200+ combinations achieved Sharpe > 0.70, consistent with random best-of-N selection"
+    source: "context (appendix disclosure)"
+    importance: "critical"
+
+  - fact: "Harvey, Liu, and Zhu (2016) argue t > 3.0 is the minimum threshold after accounting for multiple testing"
+    source: "Academic reference"
+    importance: "critical"
+
+  - fact: "Team's previous strategy has underperformed backtest Sharpe by 0.35 since 2022 launch"
+    source: "context"
+    importance: "important"
+
+  - fact: "No out-of-sample validation performed; no multiple-testing adjustment applied"
+    source: "context (appendix disclosure)"
+    importance: "important"
+
+  - fact: "Transaction cost assumption of 10bps is optimistic for smaller Russell 1000 names"
+    source: "context"
+    importance: "supporting"
+
+  - fact: "Best performance period (2020-2021) coincided with extreme factor dispersion unlikely to repeat"
+    source: "context"
+    importance: "supporting"
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-27"
+  sector_focus: "quantitative strategies"
+  tags:
+    - "statistical_significance"
+    - "multiple_testing"
+    - "backtest_overfitting"
+    - "data_snooping"
+    - "deflated_sharpe_ratio"
+    - "assumption_validation"
+    - "quant_strategies"
+  notes: >
+    This scenario tests a critically important skill for any PM evaluating
+    quantitative strategies: the ability to detect data snooping and
+    multiple-testing bias. The reported statistics look impressive on the
+    surface (Sharpe 0.78, t-stat 3.02), but once the 200+ trial count is
+    considered, the evidence for a genuine signal is substantially weaker.
+    The inclusion of the team's prior strategy underperformance provides
+    real-world base rate evidence of the overfitting problem. A strong
+    response will apply formal multiple-testing adjustments, distinguish
+    concept validity from parameterization validity, and propose a
+    conditional allocation framework rather than binary accept/reject.

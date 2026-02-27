@@ -1,0 +1,268 @@
+# Healthcare L/S Fund Factor Decomposition
+# Tests: Factor decomposition, alpha vs beta attribution, intentionality assessment
+
+id: healthcare_ls_factor_decomposition
+title: "Healthcare Long/Short Fund - Factor Decomposition and Alpha Assessment"
+version: "1.0.0"
+module: "05_risk_attribution"
+category: "factor_decomposition"
+difficulty: "moderate"
+estimated_time_minutes: 45
+
+context:
+  fund:
+    name: "Apex Healthcare Partners"
+    strategy: "Long/Short Equity - Healthcare"
+    aum: "$850M"
+    inception: "2018"
+    benchmark: "S&P 500 Healthcare (XLV)"
+    description: >
+      Apex Healthcare Partners is a long/short equity fund focused exclusively
+      on the healthcare sector. The fund targets a net exposure of 40-60% and
+      a gross exposure of 150-200%. The PM has a background in biotech equity
+      research and claims a differentiated edge in clinical trial analysis and
+      FDA regulatory pathway assessment.
+
+  performance_period:
+    start_date: "2024-01-01"
+    end_date: "2024-12-31"
+    fund_return: "+18.2%"
+    benchmark_xlv_return: "+12.4%"
+    spy_return: "+22.1%"
+    risk_free_rate: "5.2%"
+
+  fund_characteristics:
+    average_net_exposure: "52%"
+    average_gross_exposure: "175%"
+    average_beta_to_spy: "0.48"
+    average_beta_to_xlv: "0.85"
+    long_book_return: "+24.6%"
+    short_book_return: "-6.4% (short book lost 6.4%, meaning shorts rose in value)"
+    number_of_positions: "65 (40 long, 25 short)"
+    sector_breakdown_long: "Biotech 45%, Pharma 25%, MedTech 20%, Services 10%"
+    sector_breakdown_short: "Pharma 40%, Services 30%, MedTech 20%, Biotech 10%"
+    sharpe_ratio: "1.42"
+    information_ratio: "0.95"
+
+  market_environment: >
+    2024 was a strong year for U.S. equities, with the S&P 500 returning +22.1%.
+    Healthcare underperformed the broader market, with XLV returning +12.4%.
+    Within healthcare, biotech (XBI) returned +16.8%, outperforming large-cap
+    pharma. The market was characterized by falling interest rates in H2,
+    which benefited growth/duration assets. GLP-1 momentum drove significant
+    dispersion within pharma and biotech names. The quality factor (QMJ)
+    returned +6.2%, and momentum (UMD) returned +14.1%.
+
+  pm_claims: >
+    The PM's year-end investor letter states: "We generated 18.2% returns in
+    2024, meaningfully outperforming our healthcare benchmark by nearly 600
+    basis points. This outperformance reflects our differentiated clinical
+    trial analysis and bottom-up stock selection. Our long book generated
+    alpha through several successful biotech catalyst calls, while our short
+    book contributed positively through identification of overvalued pharma
+    names facing patent cliffs."
+
+  additional_data:
+    factor_returns_2024:
+      - "Market (MKT-RF): +16.9%"
+      - "Size (SMB): +8.3%"
+      - "Value (HML): -2.1%"
+      - "Momentum (UMD): +14.1%"
+      - "Quality (QMJ): +6.2%"
+      - "Healthcare sector premium vs SPY: -9.7%"
+    fund_factor_exposures:
+      - "MKT-RF beta: 0.48"
+      - "SMB beta: 0.18"
+      - "HML beta: -0.12"
+      - "UMD beta: 0.22"
+      - "QMJ beta: 0.15"
+
+  as_of_date: "2025-01-15"
+
+  additional_context: >
+    The fund charges 1.5% management fee and 20% performance fee. The PM
+    has a 10-year track record. In 2023, the fund returned +8.1% vs XLV
+    +2.1% and SPY +26.3%. The fund's marketing materials emphasize
+    "pure alpha generation through healthcare expertise" and claim the
+    strategy is "market-neutral with respect to broad equity beta."
+    However, the fund's average net exposure of 52% suggests meaningful
+    directional market exposure. The fund's compliance disclosures note
+    that factor exposures are monitored but not explicitly hedged.
+
+task:
+  prompt: >
+    You are a risk analyst at an institutional allocator evaluating Apex
+    Healthcare Partners' 2024 performance. The PM claims +18.2% returns
+    with ~600bps of alpha over the healthcare benchmark. Your task:
+
+    1. Decompose the fund's 2024 returns into systematic factor
+       contributions (market beta, sector, size, value, momentum, quality)
+       and residual idiosyncratic alpha
+    2. Assess the PM's claim that outperformance was driven by
+       "differentiated clinical trial analysis and bottom-up stock selection"
+    3. Evaluate whether the fund's factor exposures appear intentional
+       or accidental, and whether they are consistent with the stated strategy
+    4. Apply appropriate hypothesis testing: given the fund's track record
+       length and return volatility, how confident can you be that the
+       residual alpha is skill-based rather than noise?
+    5. Provide a contextualized evaluation of the PM's performance
+       accounting for the market environment
+
+    Use a multi-factor attribution framework. Reference Paleologo's
+    Advanced Portfolio Management framework for decomposition methodology
+    and AQR's work on L/S fund design for benchmarking context.
+
+  expected_output_type: "risk_attribution_analysis"
+
+  constraints:
+    - "Must show step-by-step factor decomposition with arithmetic"
+    - "Must explicitly calculate residual alpha after removing factor contributions"
+    - "Must address statistical significance of the residual alpha estimate"
+    - "Must evaluate intentionality of factor exposures vs stated strategy"
+    - "Must use probabilistic language - avoid certainty claims about skill vs luck"
+
+  time_horizon: "backward-looking (2024 full year)"
+
+data_sources:
+  - type: "fund_fact_sheet"
+    description: "Apex Healthcare Partners 2024 Year-End Fact Sheet"
+    date: "2025-01-15"
+    key_data_points:
+      - "Fund return: +18.2%"
+      - "XLV return: +12.4%"
+      - "Net exposure: 52%"
+      - "Gross exposure: 175%"
+      - "Sharpe: 1.42"
+
+  - type: "factor_return_data"
+    description: "Kenneth French Data Library / AQR Factor Returns"
+    date: "2024-12-31"
+    key_data_points:
+      - "MKT-RF: +16.9%"
+      - "SMB: +8.3%"
+      - "HML: -2.1%"
+      - "UMD: +14.1%"
+      - "QMJ: +6.2%"
+
+  - type: "academic_reference"
+    description: "Paleologo, Advanced Portfolio Management (2021)"
+    date: "2021"
+    key_data_points:
+      - "Multi-factor attribution framework"
+      - "Residual alpha decomposition methodology"
+      - "Statistical significance thresholds for alpha claims"
+
+  - type: "academic_reference"
+    description: "AQR - Deactivating Active Share (Frazzini et al.)"
+    date: "2015"
+    key_data_points:
+      - "L/S equity factor exposure benchmarking"
+      - "Sector fund alpha decomposition"
+      - "Common factor tilts in active management"
+
+key_facts:
+  - fact: "Fund returned +18.2% with 52% average net exposure, implying levered sector bet"
+    source: "Fund fact sheet"
+    importance: "critical"
+
+  - fact: "SPY returned +22.1% while XLV returned +12.4%, meaning healthcare underperformed by ~970bps"
+    source: "Market data"
+    importance: "critical"
+
+  - fact: "Fund's 0.48 beta to SPY * 22.1% SPY return = ~10.6% attributed to market beta alone"
+    source: "Calculated from fund characteristics"
+    importance: "critical"
+
+  - fact: "Momentum factor returned +14.1% and fund had 0.22 UMD beta, contributing ~3.1%"
+    source: "Factor data + fund exposures"
+    importance: "important"
+
+  - fact: "PM claims market-neutral strategy but carries 52% net long exposure"
+    source: "Fund marketing vs fact sheet"
+    importance: "important"
+
+  - fact: "Short book lost 6.4% in a year where healthcare rose 12.4%, suggesting some short alpha"
+    source: "Fund fact sheet"
+    importance: "supporting"
+
+pitfalls:
+  - description: "Accepting the PM's 600bps outperformance claim at face value without factor decomposition"
+    failure_type: "narrative_attribution"
+    severity: "critical"
+
+  - description: "Using only single-factor (market beta) decomposition instead of multi-factor"
+    failure_type: "incomplete_analysis"
+    severity: "major"
+
+  - description: "Ignoring the difference between the fund's stated benchmark (XLV) and its actual factor exposures"
+    failure_type: "benchmark_mismatch"
+    severity: "major"
+
+  - description: "Concluding that residual alpha is skill without addressing statistical significance"
+    failure_type: "missing_hypothesis_test"
+    severity: "major"
+
+  - description: "Failing to note the inconsistency between 'market-neutral' claims and 52% net exposure"
+    failure_type: "intentionality_blind_spot"
+    severity: "moderate"
+
+  - description: "Not contextualizing the short book performance within the healthcare sector environment"
+    failure_type: "missing_context"
+    severity: "moderate"
+
+evaluation_criteria:
+  dimensions:
+    - name: "Attribution Discipline"
+      weight: 0.35
+      criteria:
+        - "Shows step-by-step multi-factor return decomposition"
+        - "Correctly calculates market beta contribution (~10.6%)"
+        - "Accounts for sector, size, momentum, and quality factor exposures"
+        - "Arrives at a residual alpha estimate and states it explicitly"
+        - "Distinguishes between gross alpha vs benchmark and net idiosyncratic alpha"
+
+    - name: "Hypothesis Testing"
+      weight: 0.35
+      criteria:
+        - "Addresses whether residual alpha is statistically distinguishable from zero"
+        - "References appropriate test (t-stat, information ratio significance, or Deflated Sharpe Ratio)"
+        - "Notes that single-year observation is insufficient for skill/luck determination"
+        - "Applies appropriate skepticism to the PM's narrative claims"
+        - "Considers the multiple-testing problem if PM ran many positions"
+
+    - name: "Contextual Evaluation"
+      weight: 0.30
+      criteria:
+        - "Notes healthcare underperformance vs broad market and its implications"
+        - "Evaluates whether factor exposures are consistent with stated strategy"
+        - "Identifies the inconsistency between 'market-neutral' claim and 52% net exposure"
+        - "Contextualizes short book alpha within the healthcare sector's positive year"
+        - "Considers whether the environment was favorable or unfavorable for this strategy"
+
+  critical_failures:
+    - "Accepts PM's 600bps alpha claim without any factor decomposition"
+    - "States with certainty that the PM has (or lacks) skill based on one year"
+    - "Material arithmetic errors in factor decomposition"
+    - "Ignores market beta contribution entirely"
+    - "Uses overconfident language ('the PM definitely generated alpha')"
+
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2025-01-20"
+  tags:
+    - "risk_attribution"
+    - "factor_decomposition"
+    - "healthcare"
+    - "long_short"
+    - "alpha_assessment"
+    - "hypothesis_testing"
+  notes: >
+    This scenario tests the ability to decompose a healthcare L/S fund's
+    returns into systematic factor contributions and residual alpha. The
+    key insight is that much of the apparent outperformance is attributable
+    to systematic factor exposures rather than idiosyncratic stock selection.
+    A strong response will show multi-factor arithmetic, address statistical
+    significance, and identify the inconsistency between the PM's narrative
+    and the fund's actual exposures.

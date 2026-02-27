@@ -1,0 +1,310 @@
+# Cross-Sector Factor Tilt Attribution
+# Tests: Factor exposure attribution, statistical significance, skill vs luck assessment
+
+id: factor_tilt_attribution
+title: "Multi-Sector Equity Fund - Factor Tilt vs Stock Selection Attribution"
+version: "1.0.0"
+module: "05_risk_attribution"
+category: "factor_decomposition"
+difficulty: "moderate"
+estimated_time_minutes: 45
+
+context:
+  fund:
+    name: "Ridgeline Capital Equity Fund"
+    strategy: "Long-Only Multi-Sector Equity"
+    aum: "$2.4B"
+    inception: "2019"
+    benchmark: "S&P 500 (SPY)"
+    description: >
+      Ridgeline Capital Equity Fund is a long-only, multi-sector equity
+      fund benchmarked to the S&P 500. The PM's stated approach is
+      "fundamental stock selection across all sectors with a focus on
+      durable competitive advantages and attractive valuations." The fund
+      typically holds 50-70 positions and targets sector weights within
+      +/-5% of the benchmark, with active share historically around 65%.
+
+  performance_period:
+    start_date: "2024-01-01"
+    end_date: "2024-12-31"
+    fund_return: "+26.3%"
+    benchmark_spy_return: "+22.1%"
+    excess_return: "+420bps"
+    risk_free_rate: "5.2%"
+
+  fund_characteristics:
+    active_share: "63%"
+    tracking_error: "4.8%"
+    information_ratio: "0.88"
+    number_of_positions: "58"
+    average_market_cap: "$45B"
+    weighted_average_pe: "16.2x (vs benchmark 21.5x)"
+    weighted_average_pb: "2.8x (vs benchmark 4.1x)"
+    dividend_yield: "2.4% (vs benchmark 1.3%)"
+    portfolio_beta: "0.97"
+
+  factor_exposures:
+    description: >
+      Regression of monthly fund excess returns against Fama-French five
+      factors plus momentum, estimated over 36-month rolling window ending
+      December 2024.
+    exposures:
+      - "MKT-RF beta: 0.97 (t-stat: 28.4)"
+      - "SMB beta: 0.08 (t-stat: 1.1)"
+      - "HML beta: 0.35 (t-stat: 3.8)"
+      - "RMW beta: 0.12 (t-stat: 1.4)"
+      - "CMA beta: 0.09 (t-stat: 0.9)"
+      - "UMD beta: -0.05 (t-stat: -0.6)"
+      - "Regression alpha (annualized): +1.4% (t-stat: 1.3)"
+      - "R-squared: 0.94"
+
+  market_environment: >
+    2024 featured a pronounced Value-over-Growth rotation in the second
+    half. For the full year, Value (HML) outperformed Growth by approximately
+    800bps (HML factor return: +8.1%). This was driven by rising long-term
+    rates in Q3, a rotation out of mega-cap tech concentration, and energy
+    and financial sector strength. The S&P 500 Value index returned +26.8%
+    vs the S&P 500 Growth index at +18.2%. Quality (RMW) returned +4.8%.
+    Size (SMB) returned +3.2%. Momentum (UMD) returned -1.8% as the
+    rotation punished prior winners. Investment (CMA) returned +2.4%.
+
+  pm_claims: >
+    The PM's quarterly letter states: "Ridgeline generated 420 basis points
+    of excess return over the S&P 500 in 2024, driven by disciplined
+    bottom-up stock selection. Our research process identified several
+    multi-bagger opportunities in financials and industrials, while
+    avoiding the worst performers in technology. We believe this
+    outperformance validates our fundamental, valuation-conscious
+    approach to equity investing."
+
+  additional_data:
+    factor_returns_2024:
+      - "MKT-RF: +16.9%"
+      - "SMB: +3.2%"
+      - "HML: +8.1%"
+      - "RMW: +4.8%"
+      - "CMA: +2.4%"
+      - "UMD: -1.8%"
+    sector_active_weights:
+      - "Financials: +4.2% overweight"
+      - "Industrials: +3.1% overweight"
+      - "Energy: +2.5% overweight"
+      - "Technology: -6.8% underweight"
+      - "Consumer Discretionary: -2.1% underweight"
+      - "Healthcare: +0.8% overweight"
+      - "Other sectors: within +/-1%"
+    historical_hml_beta:
+      - "2022: 0.31"
+      - "2023: 0.33"
+      - "2024: 0.35"
+      - "Note: Persistent value tilt across all measured periods"
+
+  as_of_date: "2025-01-15"
+
+  additional_context: >
+    The fund has been running for approximately 5 years. In 2022 (a year
+    when Value outperformed Growth), the fund outperformed by 310bps. In
+    2023 (when Growth outperformed Value), the fund underperformed by
+    220bps. This pattern suggests the fund's relative performance is
+    correlated with the Value factor cycle. The PM's stated philosophy
+    of "attractive valuations" is consistent with a Value tilt, but the
+    investor letter attributes outperformance to "stock selection" rather
+    than factor exposure. The fund charges 75bps management fee with no
+    performance fee. A passive Value ETF (VLUE) returned +25.8% in 2024
+    with a fee of 15bps.
+
+task:
+  prompt: >
+    You are an investment analyst at a pension fund that allocates to
+    Ridgeline Capital Equity Fund. The PM claims +420bps of alpha from
+    stock selection. Your task:
+
+    1. Decompose the fund's 420bps excess return into factor-attributable
+       components (market beta, value, size, quality, investment,
+       momentum) and residual stock selection alpha
+    2. Specifically quantify how much of the outperformance is likely
+       explained by the fund's persistent Value factor tilt (HML beta
+       of 0.35) in a year where Value outperformed by 800bps
+    3. Assess the statistical significance of the residual alpha using
+       the regression output provided (alpha t-stat of 1.3)
+    4. Evaluate the PM's claim that outperformance was "bottom-up stock
+       selection" rather than factor exposure. Is this characterization
+       accurate, misleading, or somewhere in between?
+    5. Consider whether the allocator should continue paying active fees
+       for what may be largely factor replication, referencing the
+       passive Value alternative (VLUE at 15bps vs Ridgeline at 75bps)
+
+    Reference Paleologo's framework for factor attribution, AQR/UBS
+    factor model literature for decomposition methodology, and the
+    Deflated Sharpe Ratio (Bailey & Lopez de Prado) for assessing
+    statistical significance of short track records.
+
+  expected_output_type: "risk_attribution_analysis"
+
+  constraints:
+    - "Must show arithmetic for factor-by-factor return attribution"
+    - "Must explicitly calculate the Value factor contribution (0.35 * 8.1%)"
+    - "Must address the t-statistic of the regression alpha and what it implies"
+    - "Must evaluate the PM's narrative against the quantitative evidence"
+    - "Must consider the fee-adjusted comparison to passive alternatives"
+    - "Must use probabilistic language - no certainty claims about skill"
+
+  time_horizon: "backward-looking (2024 full year), with 5-year context"
+
+data_sources:
+  - type: "fund_fact_sheet"
+    description: "Ridgeline Capital 2024 Year-End Report"
+    date: "2025-01-15"
+    key_data_points:
+      - "Fund return: +26.3%"
+      - "Benchmark return: +22.1%"
+      - "Active share: 63%"
+      - "Tracking error: 4.8%"
+
+  - type: "factor_regression"
+    description: "Multi-factor regression output (36-month rolling)"
+    date: "2024-12-31"
+    key_data_points:
+      - "HML beta: 0.35 (t-stat: 3.8)"
+      - "Alpha (ann.): +1.4% (t-stat: 1.3)"
+      - "R-squared: 0.94"
+
+  - type: "factor_return_data"
+    description: "Kenneth French Data Library / AQR Factor Returns"
+    date: "2024-12-31"
+    key_data_points:
+      - "HML: +8.1%"
+      - "RMW: +4.8%"
+      - "SMB: +3.2%"
+      - "CMA: +2.4%"
+      - "UMD: -1.8%"
+
+  - type: "academic_reference"
+    description: "Paleologo, Advanced Portfolio Management (2021)"
+    date: "2021"
+    key_data_points:
+      - "Factor attribution methodology"
+      - "Separating beta from alpha in active management"
+
+  - type: "academic_reference"
+    description: "Bailey & Lopez de Prado, The Deflated Sharpe Ratio (2014)"
+    date: "2014"
+    key_data_points:
+      - "Adjusting Sharpe ratios for short sample sizes"
+      - "Multiple testing bias in performance evaluation"
+      - "Minimum track record length for statistical significance"
+
+  - type: "academic_reference"
+    description: "UBS Factor Model / Barra Risk Model methodology"
+    date: "2023"
+    key_data_points:
+      - "Multi-factor risk decomposition"
+      - "Style factor definitions and construction"
+
+key_facts:
+  - fact: "HML beta of 0.35 * HML return of +8.1% = ~2.8% attributed to Value tilt alone"
+    source: "Calculated from regression and factor data"
+    importance: "critical"
+
+  - fact: "2.8% of the 4.2% excess return is Value factor, leaving ~1.4% as other factors + residual"
+    source: "Arithmetic decomposition"
+    importance: "critical"
+
+  - fact: "Regression alpha t-statistic of 1.3 is below the 2.0 threshold for conventional significance"
+    source: "Regression output"
+    importance: "critical"
+
+  - fact: "Fund's HML beta has been persistently 0.31-0.35 across 2022-2024"
+    source: "Historical factor exposures"
+    importance: "important"
+
+  - fact: "Fund outperformed in 2022 (Value up) and underperformed in 2023 (Growth up), consistent with factor-driven returns"
+    source: "Historical performance"
+    importance: "important"
+
+  - fact: "Passive Value ETF (VLUE) returned +25.8% at 15bps fee vs fund's +26.3% at 75bps"
+    source: "Comparative performance data"
+    importance: "important"
+
+pitfalls:
+  - description: "Accepting the PM's 420bps alpha claim without factor decomposition"
+    failure_type: "narrative_attribution"
+    severity: "critical"
+
+  - description: "Failing to calculate the Value factor contribution explicitly"
+    failure_type: "incomplete_decomposition"
+    severity: "critical"
+
+  - description: "Treating a t-stat of 1.3 as evidence of statistically significant alpha"
+    failure_type: "significance_error"
+    severity: "major"
+
+  - description: "Not comparing the fund's fee-adjusted return to passive factor alternatives"
+    failure_type: "missing_benchmark"
+    severity: "major"
+
+  - description: "Ignoring the cyclical pattern of outperformance correlated with Value factor"
+    failure_type: "missing_context"
+    severity: "moderate"
+
+  - description: "Concluding with certainty that the PM has no skill, rather than acknowledging the evidence is inconclusive"
+    failure_type: "overconfident_conclusion"
+    severity: "moderate"
+
+evaluation_criteria:
+  dimensions:
+    - name: "Attribution Discipline"
+      weight: 0.35
+      criteria:
+        - "Shows factor-by-factor decomposition with arithmetic"
+        - "Correctly calculates Value contribution (~2.8%)"
+        - "Accounts for all Fama-French factors plus momentum"
+        - "Arrives at an explicit residual alpha estimate (~1.2-1.4%)"
+        - "Notes that most of the 420bps excess is factor-attributable"
+
+    - name: "Hypothesis Testing"
+      weight: 0.35
+      criteria:
+        - "Correctly interprets the alpha t-stat of 1.3 as statistically insignificant"
+        - "References appropriate significance thresholds (t > 2.0 or p < 0.05)"
+        - "Notes that 5 years is likely too short for reliable alpha estimation"
+        - "References or applies Deflated Sharpe Ratio logic for short track records"
+        - "Appropriately hedges conclusions about skill vs luck"
+
+    - name: "Contextual Evaluation"
+      weight: 0.30
+      criteria:
+        - "Notes the Value cycle correlation in the fund's historical returns"
+        - "Compares to passive Value alternative on a fee-adjusted basis"
+        - "Evaluates whether the Value tilt is intentional (consistent with stated philosophy)"
+        - "Distinguishes between intentional factor exposure and stock selection alpha"
+        - "Provides a nuanced recommendation rather than binary keep/fire"
+
+  critical_failures:
+    - "Accepts 420bps as pure stock selection alpha without decomposition"
+    - "States with certainty that the PM has skill (or lacks skill) based on available evidence"
+    - "Material arithmetic errors in factor attribution"
+    - "Ignores the Value factor contribution entirely"
+    - "Treats a t-stat of 1.3 as statistically significant"
+
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2025-01-20"
+  tags:
+    - "risk_attribution"
+    - "factor_decomposition"
+    - "value_factor"
+    - "statistical_significance"
+    - "active_vs_passive"
+    - "hypothesis_testing"
+  notes: >
+    This scenario tests the ability to decompose a multi-sector equity fund's
+    outperformance into factor contributions and residual alpha, with emphasis
+    on the Value factor tilt. The key insight is that roughly two-thirds of
+    the excess return is attributable to a persistent Value tilt, and the
+    residual alpha is not statistically significant. A strong response will
+    show the arithmetic, correctly interpret the t-statistic, and provide a
+    nuanced assessment that avoids both uncritical acceptance of the PM's
+    narrative and overconfident rejection of skill.

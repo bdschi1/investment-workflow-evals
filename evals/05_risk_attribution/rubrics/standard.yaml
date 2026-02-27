@@ -1,0 +1,297 @@
+# Standard Risk Attribution Rubric
+# For evaluating risk attribution and performance decomposition quality
+
+id: standard_risk_attribution
+title: "Standard Risk Attribution Evaluation Rubric"
+version: "1.0.0"
+module: "05_risk_attribution"
+
+description: >
+  This rubric evaluates AI-generated risk attribution and performance
+  decomposition analyses against institutional standards for factor
+  decomposition rigor, hypothesis testing discipline, and contextual
+  evaluation. Use this for all risk attribution scenarios in Module 05.
+
+# Scoring Overview
+total_points: 100
+pass_threshold: 70
+excellence_threshold: 85
+
+# Dimension Definitions
+dimensions:
+  - name: "Attribution Discipline"
+    id: "attribution_discipline"
+    weight: 35
+    description: >
+      Evaluates the quality and completeness of factor decomposition,
+      including correct identification of systematic factor contributions,
+      accurate arithmetic, and explicit residual alpha calculation.
+
+    scoring_levels:
+      - score: "31-35"
+        label: "Excellent"
+        description: >
+          Complete multi-factor decomposition with step-by-step arithmetic.
+          All major factors accounted for. Residual alpha explicitly
+          calculated and bounded. Distinguishes between gross alpha vs
+          benchmark and net idiosyncratic alpha. Shows awareness of
+          estimation uncertainty in factor betas.
+        anchor_examples:
+          - "Shows factor-by-factor table with betas, factor returns, and contributions"
+          - "Correctly identifies that Value tilt explains 67% of excess return"
+          - "Notes that factor beta estimation introduces uncertainty into decomposition"
+
+      - score: "24-30"
+        label: "Good"
+        description: >
+          Solid multi-factor decomposition covering major factors. Arithmetic
+          is mostly correct. Residual alpha calculated. May miss some
+          secondary factors or estimation uncertainty discussion.
+        anchor_examples:
+          - "Calculates market beta and Value contributions correctly but omits momentum"
+          - "Arrives at residual alpha but doesn't bound the estimate"
+
+      - score: "17-23"
+        label: "Acceptable"
+        description: >
+          Basic factor decomposition attempted. At least market beta and
+          one additional factor addressed. Some arithmetic shown. Residual
+          concept understood but calculation may have gaps.
+        anchor_examples:
+          - "Calculates market beta contribution but treats remaining excess as alpha"
+          - "Mentions factor exposures qualitatively without showing arithmetic"
+
+      - score: "9-16"
+        label: "Poor"
+        description: >
+          Minimal decomposition. May only address market beta or single
+          factor. Arithmetic errors present. Residual alpha not properly
+          isolated from factor returns.
+        anchor_examples:
+          - "States 'some returns are from beta' without calculation"
+          - "Confuses gross return with excess return in decomposition"
+
+      - score: "0-8"
+        label: "Fail"
+        description: >
+          No meaningful factor decomposition attempted. Accepts stated
+          alpha claims at face value. No arithmetic shown. Fundamental
+          misunderstanding of factor attribution.
+        anchor_examples:
+          - "Accepts PM's alpha claim without any decomposition"
+          - "No mention of systematic factors in return analysis"
+
+  - name: "Hypothesis Testing"
+    id: "hypothesis_testing"
+    weight: 35
+    description: >
+      Evaluates the rigor of evidence-based conclusions about skill vs
+      luck, including appropriate use of statistical tests, recognition
+      of sample size limitations, and calibrated confidence in conclusions.
+
+    scoring_levels:
+      - score: "31-35"
+        label: "Excellent"
+        description: >
+          Explicitly addresses statistical significance of alpha estimate.
+          References appropriate tests (t-stat, information ratio, or
+          Deflated Sharpe Ratio). Notes minimum track record length
+          requirements. Appropriately hedges conclusions. Considers
+          multiple testing and selection bias.
+        anchor_examples:
+          - "Notes t-stat of 1.3 is below 2.0 significance threshold"
+          - "References Deflated Sharpe Ratio for short track record adjustment"
+          - "States 'insufficient data to distinguish skill from luck' rather than concluding either way"
+
+      - score: "24-30"
+        label: "Good"
+        description: >
+          Addresses statistical significance with appropriate skepticism.
+          Notes track record length limitation. Uses probabilistic language.
+          May not reference specific test frameworks but demonstrates
+          correct intuition about evidence standards.
+        anchor_examples:
+          - "Notes that one year is insufficient for alpha determination"
+          - "Correctly interprets t-stat as insignificant but doesn't cite specific framework"
+
+      - score: "17-23"
+        label: "Acceptable"
+        description: >
+          Acknowledges that skill determination is uncertain. Some
+          recognition of sample size issues. May use directional
+          language ('likely' factor-driven) without formal testing.
+        anchor_examples:
+          - "States 'the short track record makes it hard to assess skill'"
+          - "Uses appropriate hedging language but no quantitative test"
+
+      - score: "9-16"
+        label: "Poor"
+        description: >
+          Limited recognition of skill/luck distinction. May draw firm
+          conclusions from insufficient data. No statistical framework
+          applied. Overconfident or underconfident without justification.
+        anchor_examples:
+          - "Concludes 'the PM clearly has skill' based on one year"
+          - "Declares 'no alpha' without acknowledging data limitations"
+
+      - score: "0-8"
+        label: "Fail"
+        description: >
+          No hypothesis testing framework. Draws definitive conclusions
+          about skill or lack thereof. Uses certainty language. No
+          recognition that observed returns could be noise.
+        anchor_examples:
+          - "States the PM 'definitely generated alpha' or 'has no skill'"
+          - "No mention of statistical significance or sample size"
+
+  - name: "Contextual Evaluation"
+    id: "contextual_evaluation"
+    weight: 30
+    description: >
+      Evaluates the quality of performance assessment conditional on
+      market environment, including identification of factor cycles,
+      intentionality of exposures, fee-adjusted comparisons, and
+      nuanced recommendations.
+
+    scoring_levels:
+      - score: "27-30"
+        label: "Excellent"
+        description: >
+          Thorough environmental contextualization. Evaluates whether
+          factor exposures are intentional vs accidental. Compares to
+          passive alternatives on fee-adjusted basis. Provides nuanced,
+          actionable recommendations. Identifies patterns across
+          multiple periods where data is available.
+        anchor_examples:
+          - "Notes fund outperforms in Value years and underperforms in Growth years"
+          - "Calculates fee-adjusted comparison to passive Value ETF"
+          - "Recommends fee negotiation rather than binary hire/fire"
+
+      - score: "21-26"
+        label: "Good"
+        description: >
+          Good environmental context. Notes factor cycle relevance.
+          Some comparison to alternatives. Reasonable recommendations
+          that account for uncertainty.
+        anchor_examples:
+          - "Notes that 2024 was a favorable Value environment"
+          - "Mentions passive alternatives but doesn't calculate fee comparison"
+
+      - score: "15-20"
+        label: "Acceptable"
+        description: >
+          Basic market context provided. Some awareness of factor
+          cycles. Limited alternative comparison. Recommendations
+          present but may be too binary or lack nuance.
+        anchor_examples:
+          - "Notes it was a good year for equities"
+          - "Recommends 'continue monitoring' without specifics"
+
+      - score: "8-14"
+        label: "Poor"
+        description: >
+          Minimal environmental context. No factor cycle discussion.
+          No comparison to alternatives. Recommendations are generic
+          or missing entirely.
+        anchor_examples:
+          - "Evaluates performance in isolation without market context"
+          - "No mention of passive alternatives or fee comparison"
+
+      - score: "0-7"
+        label: "Fail"
+        description: >
+          No contextual evaluation. Performance treated as absolute
+          measure of skill. No environmental awareness. No actionable
+          recommendations.
+        anchor_examples:
+          - "Treats 18% return as proof of skill without any context"
+          - "No discussion of market environment or alternatives"
+
+# Critical Failures
+# Any of these result in automatic fail regardless of score
+critical_failures:
+  - id: "no_factor_decomposition"
+    description: "Accepts stated alpha/outperformance claims without any factor decomposition"
+    examples:
+      - "Repeats PM's claim of 600bps alpha without questioning it"
+      - "No mention of factor exposures or systematic return drivers"
+      - "Treats gross excess return as alpha"
+
+  - id: "certainty_language"
+    description: "Uses certainty language about skill or lack thereof based on short track record"
+    examples:
+      - "States 'the PM clearly has alpha-generating skill'"
+      - "Concludes 'this is definitely just factor exposure, no skill'"
+      - "Uses 'guaranteed', 'certain', or '100% attributable'"
+
+  - id: "material_arithmetic_error"
+    description: "Material arithmetic error in factor decomposition that changes conclusions"
+    examples:
+      - "Calculates Value contribution as 0.35 * 8.1% = 0.28% (decimal error)"
+      - "Adds factor contributions incorrectly, leading to wrong residual alpha"
+      - "Confuses percentage points with percentages in factor math"
+
+  - id: "ignores_dominant_factor"
+    description: "Fails to identify the primary systematic factor driving returns"
+    examples:
+      - "Misses that Value tilt explains majority of excess return"
+      - "Ignores market beta contribution in L/S fund analysis"
+      - "Attributes all excess return to stock selection without checking factors"
+
+  - id: "treats_insignificant_as_significant"
+    description: "Treats statistically insignificant alpha as evidence of skill"
+    examples:
+      - "Concludes PM has skill based on t-stat below 2.0"
+      - "Ignores p-value when drawing skill conclusions"
+      - "Treats one year of positive alpha as proof of skill"
+
+# Scoring Instructions
+scoring_instructions:
+  general:
+    - "Score each dimension independently before calculating total"
+    - "Use anchor examples for calibration"
+    - "Document reasoning for borderline scores"
+    - "Check for critical failures before final scoring"
+
+  calibration:
+    - "An 'Excellent' score requires meeting all criteria, not just most"
+    - "'Good' is the expected baseline for competent institutional analysis"
+    - "'Acceptable' means usable with significant caveats"
+    - "'Poor' indicates the dimension has material deficiencies"
+    - "'Fail' means the dimension is fundamentally inadequate"
+
+  module_specific:
+    - "Arithmetic must be shown, not just stated -- check the math"
+    - "Probabilistic language is required; certainty language is a critical failure"
+    - "Factor decomposition must be multi-factor, not single-factor (market beta only)"
+    - "Hypothesis testing must address statistical significance, not just narrative plausibility"
+    - "Contextual evaluation must include comparison to passive or factor-based alternatives"
+
+  weighting:
+    - "Apply weights to calculate total score"
+    - "Round final score to nearest integer"
+    - "Document any critical failures found"
+
+# Output Format
+output_format:
+  required_fields:
+    - "overall_score"
+    - "dimension_scores"
+    - "critical_failures_found"
+    - "pass_fail_status"
+    - "summary_feedback"
+
+  optional_fields:
+    - "detailed_dimension_feedback"
+    - "improvement_suggestions"
+    - "exemplary_elements"
+    - "arithmetic_verification"
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2025-01-20"
+  version_notes: "Initial version for risk attribution module (05)"
+  applicable_scenarios:
+    - "All risk attribution and factor decomposition scenarios"
+    - "Performance attribution for L/S and long-only strategies"
+    - "Skill vs luck assessment for active managers"

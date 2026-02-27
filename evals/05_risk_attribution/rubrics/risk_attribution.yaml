@@ -1,0 +1,395 @@
+# Risk Attribution Module - Standard Rubric
+# For evaluating factor decomposition, alpha/beta separation, and risk attribution quality
+#
+# Inspired by:
+#   - Paleologo (2021): Multi-factor attribution framework
+#   - AQR/Frazzini (2015): Deactivating Active Share
+#   - Bailey & Lopez de Prado (2014): Deflated Sharpe Ratio
+#   - PRBench (2025): Binary criteria with integer weights
+
+id: risk_attribution_standard
+title: "Risk Attribution Standard Rubric"
+version: "1.0.0"
+module: "05_risk_attribution"
+
+description: >
+  Evaluates AI ability to decompose portfolio returns into systematic factor
+  contributions and residual idiosyncratic alpha. Tests whether the model can
+  accurately perform multi-factor attribution arithmetic, apply appropriate
+  hypothesis testing for skill vs luck determination, distinguish intentional
+  from accidental factor exposures, and provide contextualized evaluation
+  within the market environment. Applicable to both long/short and long-only
+  strategies across sector-focused and multi-sector mandates.
+
+total_points: 100
+pass_threshold: 70
+excellence_threshold: 85
+
+dimensions:
+  - name: "Factor Attribution Accuracy"
+    id: "attribution_accuracy"
+    weight: 25
+    description: >
+      Evaluates correctness and completeness of the multi-factor return
+      decomposition, including identification of all material systematic
+      factors, accurate arithmetic, and explicit calculation of each
+      factor's contribution.
+
+    scoring_levels:
+      - score: "23-25"
+        label: "Excellent"
+        description: >
+          Complete multi-factor decomposition with step-by-step arithmetic
+          shown. All major factors (market, size, value, momentum, quality)
+          accounted for. Each factor contribution correctly calculated as
+          beta x factor return. Totals sum correctly. Awareness of
+          estimation uncertainty in factor betas acknowledged.
+        anchor_examples:
+          - "Shows table: MKT 0.48 x 16.9% = 8.1%, SMB 0.18 x 8.3% = 1.5%, etc."
+          - "Correctly identifies that HML tilt of 0.35 x 8.1% = 2.8% explains 67% of excess"
+          - "Notes that factor betas are estimates with confidence intervals"
+
+      - score: "18-22"
+        label: "Good"
+        description: >
+          Solid decomposition covering major factors. Arithmetic mostly
+          correct. May miss secondary factor or have minor rounding
+          differences. Factor contributions directionally correct.
+
+      - score: "13-17"
+        label: "Acceptable"
+        description: >
+          Basic decomposition attempted. At least market beta and one
+          additional factor addressed. Some arithmetic shown. May treat
+          remaining excess as undifferentiated alpha.
+
+      - score: "7-12"
+        label: "Poor"
+        description: >
+          Minimal decomposition. Only single-factor (market beta) or
+          qualitative discussion without arithmetic. Material calculation
+          errors present.
+
+      - score: "0-6"
+        label: "Fail"
+        description: >
+          No factor decomposition attempted. Accepts stated alpha claims
+          at face value. No arithmetic shown.
+
+  - name: "Risk Decomposition Methodology"
+    id: "risk_decomposition"
+    weight: 20
+    description: >
+      Evaluates the quality of the risk decomposition framework, including
+      separation of systematic risk from idiosyncratic risk, understanding
+      of how factor exposures drive portfolio-level risk, and treatment
+      of estimation uncertainty.
+
+    scoring_levels:
+      - score: "18-20"
+        label: "Excellent"
+        description: >
+          Clear framework for separating systematic and idiosyncratic risk.
+          Discusses R-squared and what it implies about factor explanatory
+          power. Addresses estimation uncertainty in betas and how it
+          affects the decomposition. Notes that different factor models
+          may produce different attribution results.
+        anchor_examples:
+          - "Notes R-squared of 0.94 means 94% of return variance is factor-explained"
+          - "Discusses that residual alpha is measured with error and provides a range"
+          - "Acknowledges that factor model choice (FF3 vs FF5 vs Barra) affects results"
+
+      - score: "14-17"
+        label: "Good"
+        description: >
+          Sound decomposition framework. Separates systematic from
+          idiosyncratic clearly. Some discussion of estimation uncertainty.
+          May not address model choice sensitivity.
+
+      - score: "10-13"
+        label: "Acceptable"
+        description: >
+          Basic systematic/idiosyncratic separation. Limited discussion
+          of methodology assumptions or estimation error.
+
+      - score: "5-9"
+        label: "Poor"
+        description: >
+          Weak methodology. Conflates systematic and idiosyncratic
+          contributions. No discussion of estimation uncertainty.
+
+      - score: "0-4"
+        label: "Fail"
+        description: >
+          No coherent risk decomposition methodology. Treats total
+          excess return as alpha or beta without separation.
+
+  - name: "Alpha vs Beta Separation"
+    id: "alpha_beta_separation"
+    weight: 25
+    description: >
+      Evaluates the quality of separating genuine idiosyncratic alpha from
+      systematic factor returns, including explicit residual alpha
+      calculation, hypothesis testing for statistical significance, and
+      appropriate treatment of the skill vs luck question.
+
+    scoring_levels:
+      - score: "23-25"
+        label: "Excellent"
+        description: >
+          Explicitly calculates residual alpha after removing all factor
+          contributions. Addresses statistical significance of the alpha
+          estimate using t-statistics, information ratio, or Deflated
+          Sharpe Ratio. Notes minimum track record length for reliable
+          alpha estimation. Uses probabilistic language throughout.
+          Considers multiple testing if relevant.
+        anchor_examples:
+          - "Residual alpha of ~1.4% with t-stat 1.3 is not statistically significant"
+          - "References Deflated Sharpe Ratio for short track record adjustment"
+          - "States 'insufficient data to determine skill vs luck' rather than making a definitive claim"
+
+      - score: "18-22"
+        label: "Good"
+        description: >
+          Clear alpha calculation. Acknowledges significance issue.
+          Uses appropriate skepticism. May not reference formal
+          test frameworks but demonstrates correct intuition.
+
+      - score: "13-17"
+        label: "Acceptable"
+        description: >
+          Alpha concept understood. Some recognition that residual
+          may be noise. Limited formal testing. May draw stronger
+          conclusions than evidence supports.
+
+      - score: "7-12"
+        label: "Poor"
+        description: >
+          Alpha not properly isolated. May conflate factor returns
+          with alpha. Draws firm skill/luck conclusions from
+          insufficient data.
+
+      - score: "0-6"
+        label: "Fail"
+        description: >
+          No alpha/beta separation. Accepts stated alpha claims.
+          Uses certainty language about skill determination.
+
+  - name: "Residual Risk Treatment"
+    id: "residual_risk"
+    weight: 15
+    description: >
+      Evaluates treatment of residual (unexplained) risk, including
+      recognition of omitted factors, non-linear exposures, and
+      the limitations of linear factor models.
+
+    scoring_levels:
+      - score: "14-15"
+        label: "Excellent"
+        description: >
+          Discusses limitations of the factor model used. Considers
+          omitted factors (industry-specific, thematic, or non-standard).
+          Addresses non-linear exposures (options, convexity) if relevant.
+          Notes that residual risk may contain both genuine alpha and
+          unexplained systematic risk.
+        anchor_examples:
+          - "Notes GLP-1 exposure is not captured by standard Fama-French factors"
+          - "Considers that intra-year timing of factor exposures may differ from annual averages"
+          - "Acknowledges that short book alpha may reflect subsector allocation, not stock selection"
+
+      - score: "11-13"
+        label: "Good"
+        description: >
+          Recognizes some limitations of the factor model. Mentions
+          potential omitted factors. Basic awareness that residual
+          is not purely alpha.
+
+      - score: "8-10"
+        label: "Acceptable"
+        description: >
+          Limited treatment of residual risk. May assume residual
+          equals alpha without qualification.
+
+      - score: "4-7"
+        label: "Poor"
+        description: >
+          No meaningful residual risk discussion. Treats unexplained
+          variance as definitively alpha or definitively noise.
+
+      - score: "0-3"
+        label: "Fail"
+        description: >
+          No awareness of residual risk concepts or factor model
+          limitations.
+
+  - name: "Contextual Evaluation"
+    id: "contextual_evaluation"
+    weight: 15
+    description: >
+      Evaluates the quality of contextualized performance assessment,
+      including market environment, factor cycles, intentionality of
+      exposures, comparison to passive alternatives, and actionable
+      recommendations.
+
+    scoring_levels:
+      - score: "14-15"
+        label: "Excellent"
+        description: >
+          Thorough environmental contextualization. Evaluates whether
+          factor exposures are intentional or accidental. Compares to
+          passive alternatives on fee-adjusted basis. Provides nuanced,
+          actionable recommendations. Identifies performance patterns
+          across multiple periods where available.
+        anchor_examples:
+          - "Notes fund outperforms in Value years, underperforms in Growth years"
+          - "Calculates fee-adjusted comparison: fund net 25.6% vs VLUE net 25.7%"
+          - "Recommends fee negotiation and factor-adjusted attribution going forward"
+
+      - score: "11-13"
+        label: "Good"
+        description: >
+          Good environmental context. Notes factor cycle relevance.
+          Some comparison to alternatives. Reasonable recommendations.
+
+      - score: "8-10"
+        label: "Acceptable"
+        description: >
+          Basic market context. Limited alternative comparison.
+          Recommendations present but may lack nuance.
+
+      - score: "4-7"
+        label: "Poor"
+        description: >
+          Minimal context. No factor cycle discussion. Generic
+          or missing recommendations.
+
+      - score: "0-3"
+        label: "Fail"
+        description: >
+          No contextual evaluation. Performance treated in isolation.
+
+critical_failures:
+  - condition: "Accepts stated alpha/outperformance claims without any factor decomposition"
+    score_penalty: null
+    automatic_fail: true
+
+  - condition: "Uses certainty language about skill or lack thereof (e.g., 'the PM definitely has alpha')"
+    score_penalty: null
+    automatic_fail: true
+
+  - condition: "Material arithmetic error in factor decomposition that changes conclusions"
+    score_penalty: null
+    automatic_fail: true
+
+  - condition: "Ignores the dominant systematic factor driving returns (e.g., misses Value tilt or market beta contribution)"
+    score_penalty: 30
+    automatic_fail: false
+
+  - condition: "Treats statistically insignificant alpha (t-stat < 2.0) as evidence of skill"
+    score_penalty: 25
+    automatic_fail: false
+
+  - condition: "Fails to address market environment context entirely"
+    score_penalty: 15
+    automatic_fail: false
+
+  - condition: "No comparison to passive or factor-based alternatives"
+    score_penalty: 10
+    automatic_fail: false
+
+calibration_examples:
+  - score: 95
+    summary: >
+      Complete multi-factor decomposition with correct arithmetic for all
+      factors. Explicitly identifies dominant factor (Value or momentum)
+      and calculates its contribution as a percentage of total excess.
+      Residual alpha calculated and bounded with a range. T-statistic
+      correctly interpreted as insignificant. References Deflated Sharpe
+      Ratio for track record length. Notes intentionality of factor
+      exposure. Fee-adjusted comparison to passive alternative. Nuanced
+      recommendation with specific conditions. Probabilistic language
+      throughout.
+
+  - score: 78
+    summary: >
+      Good multi-factor decomposition covering major factors. Arithmetic
+      mostly correct. Residual alpha identified. Acknowledges significance
+      issue but does not reference formal frameworks. Some market context.
+      Mentions passive alternatives but does not calculate fee comparison.
+      Reasonable recommendations.
+
+  - score: 60
+    summary: >
+      Basic factor decomposition with market beta and one or two additional
+      factors. Some arithmetic errors or omissions. Residual called "alpha"
+      without testing significance. Limited market context. No passive
+      comparison. Directional recommendations without specifics.
+
+  - score: 40
+    summary: >
+      Only market beta addressed. No multi-factor decomposition. Accepts
+      much of the PM's narrative. No significance testing. No market
+      context or alternative comparison. Generic conclusions.
+
+  - score: 20
+    summary: >
+      Accepts PM's alpha claim with minimal questioning. No factor
+      decomposition. May use overconfident language about skill. No
+      arithmetic shown. No environmental awareness.
+
+scoring_instructions:
+  general:
+    - "Score each dimension independently before calculating weighted total"
+    - "Use anchor examples for calibration"
+    - "Document reasoning for borderline scores"
+    - "Check for critical failures before final scoring"
+
+  calibration:
+    - "'Excellent' requires meeting substantially all criteria, not just most"
+    - "'Good' is the expected baseline for competent institutional analysis"
+    - "'Acceptable' means usable but with significant gaps"
+    - "'Poor' indicates material deficiencies that undermine the analysis"
+    - "'Fail' means the dimension is fundamentally inadequate"
+
+  module_specific:
+    - "Arithmetic must be shown, not just stated -- verify the math"
+    - "Probabilistic language is required; certainty language is a critical failure"
+    - "Factor decomposition must be multi-factor, not single-factor"
+    - "Hypothesis testing must address statistical significance quantitatively"
+    - "Contextual evaluation must include comparison to passive or factor alternatives"
+    - "For L/S scenarios: must address both long and short book attribution separately if data permits"
+    - "For long-only scenarios: must identify the dominant factor tilt and its contribution"
+
+output_format:
+  required_fields:
+    - "overall_score"
+    - "dimension_scores"
+    - "critical_failures_found"
+    - "pass_fail_status"
+    - "summary_feedback"
+
+  optional_fields:
+    - "detailed_dimension_feedback"
+    - "improvement_suggestions"
+    - "exemplary_elements"
+    - "arithmetic_verification"
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-27"
+  version_notes: >
+    Risk attribution rubric with five dimensions: factor attribution accuracy,
+    risk decomposition methodology, alpha/beta separation, residual risk
+    treatment, and contextual evaluation. Emphasis on arithmetic rigor,
+    statistical testing discipline, and probabilistic language.
+  references:
+    - "Paleologo (2021): Advanced Portfolio Management - factor attribution framework"
+    - "Frazzini, Friedman, & Pomorski (2015): Deactivating Active Share"
+    - "Bailey & Lopez de Prado (2014): The Deflated Sharpe Ratio"
+    - "Harvey, Liu, & Zhu (2016): ...and the Cross-Section of Expected Returns"
+    - "Fama & French (2015): A Five-Factor Asset Pricing Model"
+    - "PRBench (2025): Expert-curated binary criteria with integer weights"
+  applicable_scenarios:
+    - "Healthcare L/S fund factor decomposition (healthcare_ls_factor_decomposition)"
+    - "Multi-sector factor tilt attribution (factor_tilt_attribution)"
+    - "Any risk attribution or performance decomposition scenario in Module 05"
