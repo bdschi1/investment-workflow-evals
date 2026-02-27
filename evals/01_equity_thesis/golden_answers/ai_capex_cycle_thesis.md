@@ -228,11 +228,10 @@ A return to even 25x forward P/E — still well below the 5-year average — rep
 
 1. ServiceNow 10-K 2025, filed January 29, 2026
 2. ServiceNow Q4 2025 Earnings Call Transcript, January 29, 2026
-3. Goldman Sachs US Software Sector Outlook, February 5, 2026
-4. Bloomberg consensus estimates as of February 10, 2026
-5. Gartner ITSM Market Share Report, 2025
-6. Enterprise AI Spending Survey (Morgan Stanley CIO Survey), Q4 2025
-7. Company investor presentations and product documentation
+3. Bloomberg consensus estimates as of February 10, 2026
+4. Gartner ITSM Market Share Report, 2025
+5. Enterprise AI spending survey (sell-side CIO survey), Q4 2025
+6. Company investor presentations and product documentation
 
 ---
 

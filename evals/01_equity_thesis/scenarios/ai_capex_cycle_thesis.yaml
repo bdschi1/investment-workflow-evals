@@ -123,7 +123,7 @@ data_sources:
       - "Enterprise AI budget reallocation benefiting platform layer"
 
   - type: "sell_side_research"
-    description: "Goldman Sachs US Software Sector Outlook"
+    description: "Sell-side US Software Sector Outlook"
     date: "2026-02-05"
     key_data_points:
       - "NOW rated Buy with $1,050 price target"
@@ -149,7 +149,7 @@ key_facts:
     importance: "critical"
 
   - fact: "Hyperscaler AI capex projected at $533B for 2026"
-    source: "Goldman Sachs research"
+    source: "Sell-side research"
     importance: "important"
 
   - fact: "Now Assist generating $100M+ incremental ACV in early adoption"
