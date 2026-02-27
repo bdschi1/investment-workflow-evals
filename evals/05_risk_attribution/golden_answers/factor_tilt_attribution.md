@@ -198,8 +198,7 @@ Given that the estimated residual alpha is ~120-140bps pre-fee (and not statisti
 3. Frazzini, A., Friedman, J., & Pomorski, L. (2015). "Deactivating Active Share." AQR Working Paper.
 4. Fama, E. & French, K. (2015). "A Five-Factor Asset Pricing Model." *Journal of Financial Economics,* 116(1).
 5. Kenneth French Data Library -- Fama-French five-factor plus momentum returns, 2024.
-6. UBS Equity Risk Model documentation, 2023.
-7. Ridgeline Capital Equity Fund Year-End Report, January 15, 2025.
+6. Ridgeline Capital Equity Fund Year-End Report, January 15, 2025.
 8. Bloomberg market data: SPY, VLUE, sector returns as of December 31, 2024.
 
 ---

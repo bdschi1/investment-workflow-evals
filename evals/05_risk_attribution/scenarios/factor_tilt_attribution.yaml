@@ -195,7 +195,7 @@ data_sources:
       - "Minimum track record length for statistical significance"
 
   - type: "academic_reference"
-    description: "UBS Factor Model / Barra Risk Model methodology"
+    description: "Barra / MSCI multi-factor risk model methodology"
     date: "2023"
     key_data_points:
       - "Multi-factor risk decomposition"
