@@ -11,12 +11,19 @@ This module evaluates AI-generated risk attribution and performance analysis, te
 
 ## Status
 
-🚧 **Under Development** — Scenarios and rubrics coming soon.
+Active -- 2 scenarios, 1 rubric, 2 golden answers.
+
+## Scenarios
+
+| Scenario | File | Focus |
+|----------|------|-------|
+| Healthcare L/S Factor Decomposition | `scenarios/healthcare_ls_factor_decomposition.yaml` | Multi-factor decomposition of a healthcare L/S fund's returns; tests whether claimed alpha survives factor adjustment |
+| Factor Tilt Attribution | `scenarios/factor_tilt_attribution.yaml` | Value factor tilt vs stock selection in a long-only multi-sector fund; tests statistical significance assessment |
 
 ## Planned Scenarios
 
-- Alpha vs Environment Attribution
-- Capital vs Risk Concentration
+- Alpha vs Environment Attribution (macro regime conditioning)
+- Capital vs Risk Concentration (position-level risk decomposition)
 
 ## Scoring Dimensions
 

@@ -37,8 +37,7 @@ htmlcov/
 
 # Environment & Secrets — NEVER commit these
 .env
-.env.local
-.env.*.local
+.env.*
 !.env.example
 *.key
 **/*.pem
@@ -86,3 +85,19 @@ TECHNICAL_DOCUMENTATION.md
 Thumbs.db
 *.whl
 *.tar.gz
+
+HOW_IT_WORKS.md
+
+# ML model weights / large binaries
+offload_temp/
+*.pt
+*.bin
+*.safetensors
+*.gguf
+hf_cache/
+
+# Logs
+logs/
+
+# Windows
+Desktop.ini
