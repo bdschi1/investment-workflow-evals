@@ -263,15 +263,9 @@ Both pipelines emit a unified JSONL schema (see `schemas/preference_pair.json`):
 
 ## Contributing
 
-Contributions welcome. Areas for improvement:
-- Additional evaluation modules and scenarios
-- New rubric dimensions and scoring anchors
-- Extended adversarial test cases
-- RLHF Studio enhancements and new annotation modes
+Under active development. Contributions welcome — areas for improvement include evaluation scenarios, rubric dimensions, adversarial test cases, and RLHF Studio annotation modes.
 
-## Status
-
-This project is under active, ongoing development. Seven evaluation modules are live with 17 scenarios, 17 golden answers, and rubrics across all active modules. Core evaluation modules, grading engine, and RLHF Studio are stable. New scenarios, rubrics, and adversarial variants are added as new investment tasks and AI failure modes are identified.
+***Curiosity compounds. Rigor endures.***
 
 ## License
 
