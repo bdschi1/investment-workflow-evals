@@ -1,0 +1,289 @@
+# Beta Drift and Momentum Reclassification: Same Thesis, Different Risk Character
+# Tests: factor drift recognition, systematic vs idiosyncratic decomposition, re-sizing without conviction change
+
+id: beta_drift_momentum_reclassification
+title: "Beta Drift and Momentum Reclassification: Same Thesis, Different Risk Character"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "hard"
+estimated_time_minutes: 40
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Technology & Software"
+    aum: "$650M"
+    gross_exposure: "170%"
+    net_exposure: "50%"
+    target_portfolio_beta: "0.3 net"
+
+  position:
+    name: "WorkflowCloud Software"
+    ticker: "WFCS"
+    sector: "Technology — Enterprise SaaS"
+    market_cap: "$55B"
+    weight: "4.0% of NAV ($26M)"
+    thesis: >
+      Best-in-class vertical SaaS platform. 35% revenue growth with 85%
+      gross margins. Net retention 145%. Competitive moat from workflow
+      automation depth. Underpenetrated in mid-market. Trading at 12x
+      forward revenue vs peers at 14-16x.
+    conviction: "8/10 — unchanged from entry 8 months ago"
+
+  risk_evolution:
+    at_entry_8_months_ago:
+      rolling_60d_beta: 1.0
+      trailing_vol: "30%"
+      momentum_factor_loading: 0.10
+      growth_factor_loading: 0.35
+      variance_decomposition:
+        systematic: "35%"
+        idiosyncratic: "65%"
+      note: "At entry, this was primarily an idiosyncratic alpha bet"
+
+    current:
+      rolling_60d_beta: 1.5
+      trailing_vol: "38%"
+      momentum_factor_loading: 0.68
+      growth_factor_loading: 0.55
+      variance_decomposition:
+        systematic: "60%"
+        idiosyncratic: "40%"
+      note: >
+        Stock became a momentum darling after 3 consecutive earnings beats.
+        Widely cited as 'AI beneficiary.' Factor character has fundamentally
+        shifted.
+
+  factor_attribution_last_6_months:
+    total_return: "+52%"
+    alpha: "+14%"
+    momentum_factor: "+22%"
+    growth_factor: "+10%"
+    market_beta: "+6%"
+    note: "Only 27% of the return is alpha; 73% is factor-driven"
+
+  portfolio_impact:
+    original_systematic_risk_contribution: "Position contributed 1.4% to portfolio systematic risk"
+    current_systematic_risk_contribution: "Position now contributes 3.6% to portfolio systematic risk"
+    net_beta_impact: >
+      At beta 1.0, the 4% long contributed 0.04 to net beta. At beta 1.5,
+      it contributes 0.06. Portfolio net beta has drifted from 0.30 to 0.38
+      partly due to this position.
+
+  comparable_outcome:
+    description: >
+      To maintain the same risk contribution as originally intended (1.4% of
+      systematic risk), the position would need to be trimmed from 4.0% to
+      approximately 2.7% of NAV.
+    note: "A 33% trim to maintain constant risk allocation"
+
+# === TASK ===
+
+task:
+  prompt: >
+    A software stock's rolling beta has drifted from 1.0 to 1.5 over 8 months
+    as it became a momentum darling. Factor attribution shows 73% of recent
+    returns came from factor exposure (momentum, growth, beta), not alpha.
+    The variance decomposition shifted from 65% idiosyncratic to only 40%.
+    Your fundamental thesis and conviction are unchanged (8/10).
+
+    Should you re-size the position? Your response should address:
+
+    1. How the risk character changed even though the thesis didn't — what
+       does it mean when systematic risk goes from 35% to 60%?
+    2. Why beta drift requires re-sizing even without a conviction change
+    3. The factor attribution problem: is the return you're earning alpha
+       or factor compensation that can be obtained cheaper?
+    4. The portfolio-level impact: net beta drifted from 0.30 to 0.38
+       partly due to this position
+    5. What size maintains the original risk contribution (and why this is
+       the right anchor)
+    6. The momentum reversal risk: positions with high momentum loading
+       historically experience sharp drawdowns in factor reversals
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must distinguish between fundamental conviction and risk character"
+    - "Must use risk contribution, not conviction, as the sizing anchor"
+    - "Must address factor attribution (73% factor-driven returns)"
+    - "Must quantify the impact on portfolio net beta"
+    - "Must consider momentum reversal risk"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Risk Character Recognition"
+      id: "risk_character"
+      weight: 40
+      criteria:
+        - "Identifies that the position's risk changed from primarily idiosyncratic to primarily systematic"
+        - "Understands that systematic risk is not compensated the same way as alpha"
+        - "Recognizes that beta drift makes the position 50% 'larger' in systematic risk terms"
+        - "Does not conflate unchanged thesis with unchanged risk"
+
+    - name: "Factor-Aware Sizing"
+      id: "factor_sizing"
+      weight: 35
+      criteria:
+        - "Uses risk contribution (not conviction) as the sizing anchor"
+        - "Calculates that maintaining original risk contribution requires ~2.7% (33% trim)"
+        - "Notes that 73% of returns are factor-driven, obtainable through cheaper index exposure"
+        - "Addresses the momentum factor loading as a distinct risk (reversal potential)"
+
+    - name: "Portfolio-Level Adjustment"
+      id: "portfolio_adjustment"
+      weight: 25
+      criteria:
+        - "Quantifies the net beta drift (0.30 to 0.38) and attributes it partly to this position"
+        - "Considers whether to re-size this position, hedge the beta, or both"
+        - "Addresses the target net beta and how to restore it"
+        - "Notes that the position now acts more like a beta/momentum vehicle than an alpha source"
+
+  critical_failures:
+    - "Maintains full position because 'conviction hasn't changed'"
+    - "Ignores the variance decomposition shift (65% idio to 40% idio)"
+    - "Does not recognize that factor-driven returns are different from alpha"
+    - "Fails to address the portfolio net beta drift"
+    - "Treats beta drift as irrelevant because the fundamental thesis is intact"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Keeping full position because conviction is unchanged (conviction ≠ sizing)"
+    failure_type: "conviction_sizing_conflation"
+    severity: "critical"
+
+  - description: "Ignoring that 73% of returns are factor-driven, not alpha"
+    failure_type: "alpha_attribution_failure"
+    severity: "critical"
+
+  - description: "Treating beta drift as a temporary anomaly that will revert"
+    failure_type: "drift_dismissal"
+    severity: "major"
+
+  - description: "Not recognizing the momentum reversal risk at 0.68 factor loading"
+    failure_type: "momentum_risk_blindness"
+    severity: "major"
+
+  - description: "Allowing portfolio net beta to drift without acknowledgment"
+    failure_type: "portfolio_drift_blindness"
+    severity: "moderate"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    The fundamental thesis is unchanged — WorkflowCloud is a best-in-class
+    vertical SaaS platform with strong competitive positioning. At 8/10
+    conviction, the 4% position is appropriately sized. Beta and factor
+    loadings fluctuate over time and don't change the underlying investment
+    case. The stock's momentum reflects the market correctly recognizing
+    the quality of the business. We should maintain the position and not
+    over-engineer the risk analysis.
+
+  why_this_fails:
+    - "Conflates conviction with sizing — they are separate decisions"
+    - "Dismisses factor drift as noise when it represents a fundamental change in risk character"
+    - "73% of returns are factor-driven — you're paying 4% of NAV for 27% alpha content"
+    - "The position is 50% larger in systematic risk than originally intended"
+    - "Portfolio net beta has drifted from 0.30 to 0.38 partly due to this position"
+    - "Momentum factor loading of 0.68 carries significant reversal risk"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The thesis is unchanged but the risk character has materially shifted,
+      and that requires a re-sizing decision independent of conviction.
+
+      The core issue: at entry, 65% of the position's variance was
+      idiosyncratic — meaning we were primarily paying for alpha exposure.
+      Now only 40% is idiosyncratic. The position has become a
+      beta/momentum/growth vehicle that happens to have some alpha. Factor
+      attribution confirms this: only 14pp of the 52pp return is alpha.
+      The other 38pp came from momentum (22pp), growth (10pp), and beta
+      (6pp) — all of which can be obtained more cheaply through index or
+      factor ETF exposure.
+
+      The position is 50% "larger" in systematic risk terms (beta 1.0 to
+      1.5). Its systematic risk contribution went from 1.4% to 3.6% of
+      portfolio systematic risk — a 2.6x increase. To maintain the original
+      risk allocation, the position should be trimmed from 4.0% to
+      approximately 2.7%, a 33% reduction.
+
+      At the portfolio level, this position has contributed to net beta
+      drifting from 0.30 to 0.38. Trimming to 2.7% reduces the position's
+      beta contribution from 0.06 to ~0.04, partially restoring the
+      portfolio's target exposure.
+
+      The momentum risk is real. Momentum factor loading of 0.68 means the
+      stock is highly exposed to momentum reversals, which historically
+      produce sharp drawdowns (10-20% in 2-3 weeks). This is not a risk
+      the original thesis intended to take.
+
+      Recommendation: trim from 4.0% to 2.5-3.0%. The conviction supports
+      maintaining significant exposure, but the sizing should reflect the
+      current risk character, not the entry-date risk character.
+
+  failing:
+    response: >
+      Conviction is 8/10 and the thesis is fully intact. We sized at 4%
+      for a reason and that reason hasn't changed. The beta increase
+      reflects the market recognizing the stock's quality. We should
+      maintain the full position.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Beta drifted from 1.0 to 1.5 (50% increase in systematic exposure)"
+    source: "context.risk_evolution"
+    importance: "critical"
+
+  - fact: "Variance decomposition shifted from 65% idiosyncratic to 40% idiosyncratic"
+    source: "context.risk_evolution"
+    importance: "critical"
+
+  - fact: "Only 27% of recent return is alpha; 73% is factor-driven"
+    source: "context.factor_attribution_last_6_months"
+    importance: "critical"
+
+  - fact: "Maintaining original risk contribution requires trimming from 4.0% to ~2.7%"
+    source: "context.comparable_outcome"
+    importance: "important"
+
+  - fact: "Portfolio net beta drifted from 0.30 to 0.38 partly due to this position"
+    source: "context.portfolio_impact"
+    importance: "important"
+
+  - fact: "Momentum factor loading of 0.68 carries significant reversal risk"
+    source: "context.risk_evolution.current"
+    importance: "important"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "technology"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "beta_drift"
+    - "factor_attribution"
+    - "momentum_risk"
+    - "risk_character"
+  notes: >
+    This scenario separates conviction from sizing — a distinction that most
+    analysts conflate. The key insight is that a position's risk character can
+    change even when nothing about the company changes. When a stock goes from
+    65% idiosyncratic to 40% idiosyncratic, you're paying the same portfolio
+    "cost" for less alpha content. Risk-based sizing should anchor on risk
+    contribution, not conviction.

@@ -1,0 +1,300 @@
+# Vol Regime Shift Resizing: When Mechanical Rules Meet Implementation Reality
+# Tests: vol-targeting framework limits, implementation cost awareness, transient vs regime classification
+
+id: vol_regime_shift_resizing
+title: "Vol Regime Shift Resizing: When Mechanical Rules Meet Implementation Reality"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "hard"
+estimated_time_minutes: 45
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Multi-Sector"
+    aum: "$800M"
+    gross_exposure: "185%"
+    net_exposure: "45%"
+    target_portfolio_vol: "10% annualized"
+    vol_targeting_framework: >
+      Position sizes scaled inversely to portfolio vol. When portfolio vol
+      rises above target, gross exposure is reduced proportionally. The
+      framework triggers at 1.5x target vol (15%) and calls for reduction
+      to restore vol to target.
+
+  vol_event:
+    trigger: "Geopolitical shock — sudden escalation in trade tensions between major economies"
+    timeline: "VIX moved from 15 to 32 in 5 trading days"
+    current_vix: 32
+    portfolio_vol_estimate: "18% annualized (1.8x target)"
+    implied_vol_term_structure: >
+      30-day IV: 32%. 90-day IV: 25%. 180-day IV: 21%. Term structure
+      in steep backwardation, suggesting options market expects vol to
+      decline but near-term is elevated.
+
+  vol_targeting_prescription:
+    mechanical_action: "Reduce gross exposure by ~44% (from 185% to ~104%)"
+    rationale: "To bring portfolio vol from 18% back to 10% target"
+    estimated_trade_amount: "$648M in gross positions to sell/cover"
+
+  implementation_costs:
+    current_market_conditions:
+      bid_ask_spreads: "3-5x normal (average 20-35 bps vs usual 5-8 bps)"
+      market_depth: "Reduced 40-60% from normal levels"
+      market_impact_estimate: >
+        Selling $648M at 3-5x normal spreads: estimated 50-100 bps aggregate
+        market impact = $3.2M-$6.5M in implementation costs
+    note: >
+      Selling into a panic is expensive. The liquidity that's available
+      at normal spreads evaporates in vol spikes. Executing the full
+      vol-targeting prescription in 1-2 days could cost 0.4-0.8% of NAV.
+
+  historical_context:
+    similar_events:
+      - event: "Aug 2015 China devaluation"
+        vix_peak: 40
+        vix_30_days_later: 18
+        label: "Transient"
+      - event: "Feb 2018 vol spike"
+        vix_peak: 37
+        vix_30_days_later: 16
+        label: "Transient"
+      - event: "Q4 2018 tightening scare"
+        vix_peak: 36
+        vix_30_days_later: 25
+        label: "Regime shift"
+      - event: "Mar 2020 COVID"
+        vix_peak: 82
+        vix_30_days_later: 55
+        label: "Regime shift"
+    note: "Roughly 50/50 split between transient spikes and regime changes"
+
+  alternative_approaches:
+    partial_cut:
+      description: "Cut gross by 20-25% (not 44%) to partially reduce risk"
+      cost: "$1.0M-$2.0M in market impact"
+      residual_vol: "~14% (still above target but within tolerable range)"
+    hedge_with_puts:
+      description: "Buy SPX put spread for portfolio-level protection"
+      cost: "1.5-2.0% of NAV for 3-month 5% OTM put spread"
+      note: "Expensive because vol is elevated; buying puts when VIX is 32 means paying up"
+    sequential_reduction:
+      description: "Cut most-liquid positions Day 1 (30%), remainder over 5-7 days"
+      cost: "Lower aggregate impact from not forcing all trades simultaneously"
+      risk: "If vol continues rising during the staged exit, losses compound"
+
+# === TASK ===
+
+task:
+  prompt: >
+    VIX jumped from 15 to 32 in one week on a geopolitical shock. Your
+    vol-targeting framework prescribes cutting gross exposure by 44%
+    (from 185% to 104%) to restore portfolio vol to the 10% target.
+    This requires selling approximately $648M in positions.
+
+    However, selling into a panic widens bid/ask spreads 3-5x and reduces
+    market depth by 40-60%. Executing the full prescription could cost
+    $3.2M-$6.5M in market impact (0.4-0.8% of NAV).
+
+    Additionally, historical VIX spikes of this magnitude are roughly 50/50
+    between transient spikes that normalize within 30 days and genuine
+    regime shifts that persist.
+
+    How should you implement the vol-targeting response? Your response
+    should address:
+
+    1. Whether the vol-targeting framework should be followed mechanically
+       or filtered through implementation cost analysis
+    2. How to distinguish between transient vol spikes and regime shifts
+       (and what the term structure tells you)
+    3. The cost-benefit of cutting immediately (expensive but risk-reducing)
+       vs. staging over days (cheaper but exposed to further drawdown)
+    4. Alternative risk-reduction approaches: hedging with index puts vs.
+       selling positions
+    5. Sequencing: which positions to cut first (most liquid) and which
+       to defer
+    6. How to set trigger points for follow-on cuts if vol persists
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must weigh implementation costs against risk reduction benefit"
+    - "Must assess whether the vol spike is transient or regime shift"
+    - "Must not blindly follow the mechanical framework"
+    - "Must consider hedging alternatives"
+    - "Must propose a specific sequencing plan"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Framework vs Implementation"
+      id: "framework_implementation"
+      weight: 35
+      criteria:
+        - "Recognizes that mechanical vol-targeting is the starting point, not the final answer"
+        - "Quantifies the implementation cost of the full prescription ($3.2-6.5M)"
+        - "Weighs the cost of cutting (market impact) vs cost of not cutting (continued exposure)"
+        - "Proposes a nuanced response rather than binary (full cut or no cut)"
+
+    - name: "Regime Classification"
+      id: "regime_classification"
+      weight: 30
+      criteria:
+        - "Uses term structure to assess transient vs persistent (backwardation suggests transient)"
+        - "References historical base rates (50/50 transient vs regime)"
+        - "Does not claim certainty about which type this is"
+        - "Proposes trigger-based follow-on actions depending on how vol evolves"
+
+    - name: "Implementation Plan"
+      id: "implementation_plan"
+      weight: 35
+      criteria:
+        - "Proposes staged reduction (partial cut Day 1, monitor, follow-on if needed)"
+        - "Sequences cuts by liquidity (most liquid first)"
+        - "Considers hedging alternatives (index puts, despite elevated cost)"
+        - "Sets specific trigger points for additional cuts"
+
+  critical_failures:
+    - "Follows the mechanical framework exactly without considering costs"
+    - "Ignores the framework entirely and does nothing"
+    - "Claims certainty about whether the vol spike is transient or persistent"
+    - "Does not consider market impact in the liquidation plan"
+    - "Proposes only hedging without any position reduction"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Mechanically executing 44% gross reduction into illiquid markets"
+    failure_type: "mechanical_obedience"
+    severity: "critical"
+
+  - description: "Ignoring the framework and maintaining full exposure in elevated vol"
+    failure_type: "framework_dismissal"
+    severity: "critical"
+
+  - description: "Claiming the vol spike is definitely transient based on term structure alone"
+    failure_type: "regime_overconfidence"
+    severity: "major"
+
+  - description: "Not sequencing cuts by liquidity (forcing selling illiquid names in a panic)"
+    failure_type: "sequencing_failure"
+    severity: "major"
+
+  - description: "Buying expensive puts when VIX is 32 without acknowledging the cost"
+    failure_type: "cost_blindness"
+    severity: "moderate"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    Our vol-targeting framework is clear: when portfolio vol exceeds 1.5x
+    target, we reduce gross exposure to restore vol to target. The framework
+    was designed for exactly this situation. We should execute the full 44%
+    gross reduction immediately to protect the portfolio. The implementation
+    costs are a small price to pay for risk reduction. Deviating from the
+    framework introduces discretionary error.
+
+  why_this_fails:
+    - "Treats a discretionary framework as a mechanical rule"
+    - "Does not quantify the implementation cost ($3.2-6.5M)"
+    - "Selling $648M into panicked markets at 3-5x normal spreads is destructive"
+    - "Does not assess whether the vol spike is transient (term structure suggests it may be)"
+    - "Does not consider staged execution or hedging alternatives"
+    - "The framework is a tool, not a mandate — judgment is required"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The vol-targeting framework provides the right directional signal
+      (reduce risk) but the prescribed magnitude (44% gross cut) is too
+      aggressive given implementation costs.
+
+      Assessment of the vol spike: The steep backwardation in the term
+      structure (30d: 32%, 90d: 25%, 180d: 21%) suggests the options
+      market expects this to be transient. Historical base rates are
+      roughly 50/50 between transient and regime shifts for spikes to VIX
+      30+. This argues for a partial response, not a full response.
+
+      Implementation plan:
+      - Day 1: Cut gross by 15-20% ($110-150M), focusing on the most
+        liquid positions. Market impact: ~$300-500K. This brings portfolio
+        vol from 18% to approximately 14-15% — still above target but
+        within tolerable range.
+      - Day 1-2: Consider adding SPX put protection (3-month 5% OTM puts)
+        for $12-16M (1.5-2% of NAV). Expensive at VIX 32, but provides
+        portfolio-level protection without forced selling. This is insurance,
+        not a trade.
+      - Day 3-5: Monitor. If VIX remains above 28, execute a second tranche
+        of 10-15% gross reduction. If VIX falls below 25, hold current
+        positioning and let the puts provide protection.
+      - Week 2+: If vol persists above target for 2+ weeks, execute the
+        remaining reduction to bring gross to 130-140%.
+
+      Sequencing: Cut most-liquid positions first (large-cap tech, financials,
+      mega-cap names where market impact is 5-10 bps). Do not force-sell
+      mid-cap or small-cap positions into thin markets.
+
+      The key insight: the implementation cost of a full immediate cut
+      ($3.2-6.5M) is a certainty. The cost of waiting 3-5 days to see if
+      vol persists is a probability. When the certain cost is large and
+      the regime probability is uncertain, staged response dominates
+      mechanical compliance.
+
+  failing:
+    response: >
+      Our vol-targeting framework says to cut gross by 44%. We should
+      execute this immediately. The framework exists for a reason and
+      deviating from it introduces discretionary risk.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "VIX moved from 15 to 32; portfolio vol at 18% (1.8x 10% target)"
+    source: "context.vol_event"
+    importance: "critical"
+
+  - fact: "Full mechanical cut costs $3.2-6.5M in market impact (0.4-0.8% of NAV)"
+    source: "context.implementation_costs"
+    importance: "critical"
+
+  - fact: "Term structure in steep backwardation (32/25/21) — suggests transient spike"
+    source: "context.vol_event"
+    importance: "important"
+
+  - fact: "Historical VIX spikes to 30+ are ~50/50 transient vs regime shift"
+    source: "context.historical_context"
+    importance: "important"
+
+  - fact: "Bid/ask spreads 3-5x normal; market depth reduced 40-60%"
+    source: "context.implementation_costs"
+    importance: "important"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "multi-sector"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "vol_targeting"
+    - "regime_shift"
+    - "implementation_cost"
+    - "market_impact"
+  notes: >
+    This scenario tests the tension between rule-based risk management and
+    implementation reality. The key insight is that mechanical risk rules are
+    starting points for judgment, not substitutes for it. Selling into a panic
+    is expensive and potentially value-destructive. The best PMs respond
+    proportionally, stage their execution, and maintain the option to act
+    further if conditions warrant.

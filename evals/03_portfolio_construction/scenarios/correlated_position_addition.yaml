@@ -1,0 +1,292 @@
+# Correlated Position Addition: When 3% in Context Is Not 3% in Isolation
+# Tests: pairwise correlation impact, portfolio-level concentration, diversification benefit erosion
+
+id: correlated_position_addition
+title: "Correlated Position Addition: When 3% in Context Is Not 3% in Isolation"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "hard"
+estimated_time_minutes: 40
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Technology"
+    aum: "$800M"
+    gross_exposure: "180%"
+    net_exposure: "50%"
+    tech_sector_weight: "28% of gross"
+    sector_concentration_limit: "35% of gross"
+
+  existing_position:
+    name: "SemiEquipment Leaders"
+    ticker: "SEML"
+    sector: "Semiconductors — Equipment"
+    market_cap: "$95B"
+    weight: "4.0% of NAV ($32M)"
+    thesis: >
+      Leading semiconductor equipment supplier benefiting from AI-driven
+      capex cycle. 40% YoY revenue growth from leading-edge foundry
+      spending. Moat from technological complexity and customer lock-in.
+    conviction: "8/10"
+    trailing_vol: "35%"
+    beta: 1.4
+    risk_contribution: "3.8% of portfolio risk"
+
+  new_idea:
+    name: "ChipDesign Innovators"
+    ticker: "CDIV"
+    sector: "Semiconductors — Design"
+    market_cap: "$55B"
+    thesis: >
+      Emerging semiconductor design company with novel architecture for
+      AI inference chips. Recently won 3 hyperscaler contracts. Revenue
+      inflecting from $2B to projected $5B in 2 years. Trading at 10x
+      forward revenue vs 15x for established AI chip companies.
+    conviction: "7/10"
+    proposed_weight: "3.0% of NAV ($24M)"
+    trailing_vol: "45%"
+    beta: 1.6
+
+  correlation_analysis:
+    pairwise_correlation_seml_cdiv: 0.65
+    shared_drivers:
+      - "Both benefit from AI capex cycle"
+      - "Both sensitive to hyperscaler spending budgets"
+      - "Both trade on semiconductor sector sentiment"
+      - "Revenue cyclicality correlated (same CapEx cycle)"
+    distinct_drivers:
+      - "SEML: equipment orders, foundry spending decisions"
+      - "CDIV: design wins, product architecture differentiation"
+      - "Different customer concentration"
+      - "Different competitive dynamics"
+
+  combined_risk_analysis:
+    individual_risk:
+      seml: "1.4% of portfolio risk (4% * 35% vol)"
+      cdiv: "1.35% of portfolio risk (3% * 45% vol)"
+      sum_if_uncorrelated: "1.94% combined (sqrt of sum of squares)"
+    actual_combined_risk:
+      combined_risk: "2.44% of portfolio risk (accounting for 0.65 correlation)"
+      note: >
+        The correlation adds 0.50% of risk that doesn't appear in
+        standalone analysis. The diversification benefit is 26% lower
+        than for an uncorrelated position (2.44% vs 1.94%).
+    sector_downturn_scenario:
+      description: "If semiconductor sector drops 20% (2-sigma sector move)"
+      seml_loss: "$32M * 1.4 * 20% = $8.96M (1.12% of NAV)"
+      cdiv_loss: "$24M * 1.6 * 20% = $7.68M (0.96% of NAV)"
+      combined_loss: "$16.64M (2.08% of NAV) from 7% combined weight"
+      note: "A sector downturn hits both positions simultaneously — combined loss is material"
+
+  analyst_argument: >
+    CDIV is a differentiated opportunity in the semiconductor design space,
+    distinct from our equipment position in SEML. While both are in
+    semiconductors, they operate in different parts of the value chain.
+    At 7/10 conviction and 10x forward revenue vs 15x for peers, the
+    valuation gap is compelling. 3% is appropriate for this conviction level.
+
+# === TASK ===
+
+task:
+  prompt: >
+    Your portfolio holds a 4% position in a semiconductor equipment company
+    (your largest holding in tech). A new semiconductor design idea has 0.65
+    pairwise correlation with that existing position. Both benefit from the
+    same AI capex cycle. The analyst proposes a 3% position, which would
+    put 7% of the portfolio in correlated semiconductor exposure.
+
+    Evaluate the sizing proposal. Your response should address:
+
+    1. How the 0.65 correlation reduces the diversification benefit of the
+       second position (combined risk is higher than sum of standalone risks)
+    2. The sector concentration impact: 7% in correlated semis within a
+       tech book already at 28% of gross
+    3. Whether the position should be sized smaller (e.g., 1.5-2%) to
+       account for the correlation
+    4. The sector downturn scenario: both positions draw down simultaneously
+       in a semiconductor selloff
+    5. Whether one position should be trimmed to make room for the other
+    6. How to think about "different parts of the value chain" when
+       correlation is 0.65 (analyst's argument vs statistical reality)
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must quantify the correlation-adjusted combined risk"
+    - "Must compare to the uncorrelated case"
+    - "Must address sector concentration"
+    - "Must evaluate the analyst's 'different value chain' argument against correlation data"
+    - "Must propose a specific adjusted size"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Correlation-Adjusted Sizing"
+      id: "correlation_sizing"
+      weight: 40
+      criteria:
+        - "Calculates combined risk with correlation (2.44%) vs without (1.94%)"
+        - "Recognizes that 0.65 correlation substantially reduces diversification benefit"
+        - "Proposes a reduced size for CDIV that reflects the portfolio context"
+        - "Notes that the same position in a portfolio without SEML could be larger"
+
+    - name: "Sector Concentration Analysis"
+      id: "sector_concentration"
+      weight: 30
+      criteria:
+        - "Evaluates total semiconductor exposure (7% combined)"
+        - "Checks tech sector weight against the 35% limit"
+        - "Considers the sector downturn scenario (2.08% combined loss in 2-sigma sector move)"
+        - "Notes that correlated positions in the same sector amplify concentration risk"
+
+    - name: "Practical Recommendation"
+      id: "recommendation"
+      weight: 30
+      criteria:
+        - "Proposes a specific size for CDIV (likely 1.5-2% instead of 3%)"
+        - "Evaluates whether SEML should be trimmed to create room"
+        - "Considers which position has stronger forward-looking marginal thesis"
+        - "Addresses the analyst's 'different value chain' argument with correlation data"
+
+  critical_failures:
+    - "Approves 3% without adjusting for correlation with SEML"
+    - "Ignores the 0.65 pairwise correlation"
+    - "Accepts the 'different value chain' argument without checking correlation data"
+    - "Does not evaluate sector concentration impact"
+    - "Treats the new position in isolation rather than in portfolio context"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Sizing CDIV at 3% as if it were the only semiconductor position"
+    failure_type: "isolation_sizing"
+    severity: "critical"
+
+  - description: "Accepting 'different value chain' as proof of low correlation"
+    failure_type: "narrative_over_data"
+    severity: "major"
+
+  - description: "Not calculating the combined risk at 0.65 correlation"
+    failure_type: "correlation_blindness"
+    severity: "critical"
+
+  - description: "Ignoring the sector downturn scenario (2.08% combined loss)"
+    failure_type: "stress_test_omission"
+    severity: "major"
+
+  - description: "Not considering trimming SEML to create room for CDIV"
+    failure_type: "portfolio_rigidity"
+    severity: "moderate"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    CDIV operates in semiconductor design, which is a different part of the
+    value chain from SEML's equipment business. They have different customers,
+    different competitive dynamics, and different revenue drivers. The 0.65
+    correlation reflects broad tech sector moves, not business model overlap.
+    At 7/10 conviction, a 3% position is appropriate. The combined 7%
+    semiconductor exposure is diversified across equipment and design, which
+    provides natural hedging within the sector.
+
+  why_this_fails:
+    - "The 0.65 correlation IS the relevant data — regardless of narrative explanation"
+    - "'Different value chain' doesn't overcome 0.65 statistical correlation"
+    - "Combined risk at 0.65 correlation is 26% higher than the uncorrelated case"
+    - "In a semiconductor downturn, both positions lose simultaneously — no 'natural hedging'"
+    - "7% in correlated semis is a meaningful concentration risk"
+    - "The position should be sized in context, not in isolation"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The analyst's narrative about different value chains is contradicted
+      by the 0.65 pairwise correlation. Whatever the fundamental
+      differences, these positions move together — and in a semiconductor
+      downturn, they'll draw down together.
+
+      Risk math: SEML contributes 1.4% risk; CDIV at 3% would contribute
+      1.35%. If uncorrelated, combined risk would be 1.94%. At 0.65
+      correlation, combined risk is 2.44% — a 26% increase from the
+      interaction term alone. The diversification benefit of the second
+      position is substantially eroded.
+
+      Stress test: a 2-sigma semiconductor sector decline (20%) would
+      produce: SEML loss of 1.12% of NAV + CDIV loss of 0.96% = 2.08%
+      combined. That's a meaningful hit from one sector in one event.
+
+      The right approach is to size CDIV at 1.5-2% (not 3%), which keeps
+      the combined semiconductor risk closer to what two uncorrelated
+      3% positions would produce. At 1.5%, CDIV contributes 0.675% risk.
+      Combined risk with SEML at 0.65 correlation is ~1.82% — much more
+      reasonable.
+
+      Alternatively, if CDIV's thesis is stronger than SEML's on a
+      forward-looking basis, consider trimming SEML from 4% to 3% and
+      adding CDIV at 2%. This keeps total semi exposure at 5% with
+      better diversification within the sector.
+
+      The sector concentration picture also matters: tech at 28% with
+      7% in correlated semis is manageable below the 35% limit, but the
+      semi-specific concentration within tech should be monitored.
+
+  failing:
+    response: >
+      CDIV is in a different part of the semiconductor value chain from
+      SEML. A 3% position is appropriate for 7/10 conviction. The combined
+      exposure is diversified across equipment and design segments.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Pairwise correlation between SEML and CDIV is 0.65"
+    source: "context.correlation_analysis"
+    importance: "critical"
+
+  - fact: "Combined risk at 0.65 correlation: 2.44% vs 1.94% if uncorrelated (+26%)"
+    source: "context.combined_risk_analysis"
+    importance: "critical"
+
+  - fact: "Sector downturn scenario: combined loss of 2.08% of NAV in 2-sigma semi selloff"
+    source: "context.combined_risk_analysis.sector_downturn_scenario"
+    importance: "important"
+
+  - fact: "Tech sector already at 28% of gross (limit 35%); 7% in correlated semis"
+    source: "context.portfolio"
+    importance: "important"
+
+  - fact: "Both positions benefit from the same AI capex cycle (shared driver)"
+    source: "context.correlation_analysis"
+    importance: "important"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "technology"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "correlation"
+    - "sector_concentration"
+    - "diversification"
+    - "semiconductors"
+  notes: >
+    This scenario tests whether the model sizes positions in portfolio context
+    rather than in isolation. The key insight is that a 3% position in a name
+    with 0.65 correlation to your largest holding is not the same as a 3%
+    position in an uncorrelated name. The analyst's narrative about different
+    value chains is irrelevant when the statistical correlation is 0.65.
+    Sizing must reflect the portfolio interaction, not just the standalone
+    thesis quality.

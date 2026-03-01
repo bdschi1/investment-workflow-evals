@@ -27,8 +27,8 @@ context:
     start_date: "2024-01-01"
     end_date: "2024-12-31"
     fund_return: "+18.2%"
-    benchmark_xlv_return: "+12.4%"
-    spy_return: "+22.1%"
+    benchmark_xlv_return: "+12.4%"  # Stylized for teaching purposes; actual 2024 XLV ~+3%
+    spy_return: "+22.1%"  # Stylized for teaching purposes; actual 2024 SPY ~+25%
     risk_free_rate: "5.2%"
 
   fund_characteristics:

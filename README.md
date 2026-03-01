@@ -31,7 +31,7 @@ The materials serve two related uses: benchmarking AI model performance on inves
 | **Qualification** | 1 | [qualification_standard.yaml](evals/00_qualification/rubrics/qualification_standard.yaml) | Onboarding assessment, basic equity analysis |
 | **Equity Thesis** | 3 | [standard.yaml](evals/01_equity_thesis/rubrics/standard.yaml) | Thesis construction, catalyst analysis, capex cycle, risk/reward |
 | **DCF Valuation** | 2 | [standard.yaml](evals/02_dcf_valuation/rubrics/standard.yaml) | Alpha vs environment, terminal value, margin normalization |
-| **Portfolio Construction** | 5 | [standard.yaml](evals/03_portfolio_construction/rubrics/standard.yaml) | Risk-based sizing, crowding risk, hedging, policy risk |
+| **Portfolio Construction** | 27 | [standard.yaml](evals/03_portfolio_construction/rubrics/standard.yaml) | Risk-based sizing, crowding risk, hedging, policy risk |
 | **Assumption Validation** | 3 | [assumption_validation.yaml](evals/04_assumption_validation/rubrics/assumption_validation.yaml) | Discount rate stress-testing, commodity assumptions, statistical significance |
 | **Risk Attribution** | 2 | [risk_attribution.yaml](evals/05_risk_attribution/rubrics/risk_attribution.yaml) | Factor decomposition, hypothesis testing, alpha vs environment |
 | **Research Translation** | 1 | [translation_quality.yaml](evals/06_research_translation/rubrics/translation_quality.yaml) | IC memo to retail-readable summary |

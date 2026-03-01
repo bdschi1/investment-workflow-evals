@@ -1,0 +1,317 @@
+# Pair Trade Leg Divergence: When the Hedge Ratio Goes Stale
+# Tests: pairs maintenance, vol-ratio rebalancing, cost of rebalancing, leg management
+
+id: pair_trade_leg_divergence
+title: "Pair Trade Leg Divergence: When the Hedge Ratio Goes Stale"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "hard"
+estimated_time_minutes: 45
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Healthcare"
+    aum: "$550M"
+    gross_exposure: "170%"
+    net_exposure: "35%"
+
+  pair_trade:
+    description: >
+      Long a large-cap diversified pharma / short a mid-cap biotech.
+      Originally constructed as a relative value pair isolating
+      idiosyncratic alpha while hedging sector beta.
+    inception: "3 months ago"
+    original_thesis: >
+      Long: undervalued pipeline optionality in diversified pharma with
+      stable cash flows. Short: overvalued biotech with Phase 3 binary
+      risk and declining probability of success.
+
+  long_leg:
+    name: "DiversifiedPharma Inc"
+    ticker: "DPHI"
+    sector: "Large-Cap Pharmaceuticals"
+    market_cap: "$140B"
+    original_entry:
+      notional: "$60M"
+      price: "$85.00"
+      vol: "18%"
+      beta: 0.75
+    current:
+      notional: "$69M (stock up 15%)"
+      price: "$97.75"
+      vol: "15%"
+      beta: 0.70
+      pnl: "+$9M"
+      note: "Long leg working — pharma re-rated on pipeline data"
+
+  short_leg:
+    name: "OverhypedBiotech Ltd"
+    ticker: "OHBL"
+    sector: "Mid-Cap Biotechnology"
+    market_cap: "$8B"
+    original_entry:
+      notional: "$20M (short)"
+      price: "$52.00"
+      vol: "50%"
+      beta: 1.5
+      note: "Sized at $20M to vol-match the $60M pharma long (20M * 50% ≈ 60M * 18%)"
+    current:
+      notional: "$21.6M (stock up 8% — wrong direction for short)"
+      price: "$56.16"
+      vol: "55%"
+      beta: 1.7
+      pnl: "-$1.6M"
+      borrow_rate: "4% annualized"
+      note: "Short leg moved against us — stock rallied on speculative biotech rebound"
+
+  pair_analysis:
+    net_pnl: "+$7.4M (long +$9M, short -$1.6M)"
+    original_construction:
+      notional_ratio: "3:1 long-to-short"
+      vol_ratio: "2.78:1 (50%/18%) — justifying the 3:1 notional"
+      dollar_risk_balance: "$60M * 18% = $10.8M vs $20M * 50% = $10M — approximately risk-matched"
+      net_beta: "0.75 * (60/550) - 1.5 * (20/550) = 0.082 - 0.055 = 0.027 (approximately hedged)"
+    current_state:
+      notional_ratio: "3.19:1 (long grew, short grew slightly)"
+      vol_ratio: "3.67:1 (55%/15%) — vol ratio diverged significantly"
+      dollar_risk_balance: "$69M * 15% = $10.35M vs $21.6M * 55% = $11.88M — short now contributes MORE risk"
+      net_beta: "0.70 * (69/550) - 1.7 * (21.6/550) = 0.088 - 0.067 = 0.021"
+      note: >
+        The pair is now unbalanced. The short leg contributes more dollar
+        risk than the long leg (11.88M vs 10.35M) — the opposite of
+        the original intention. The vol ratio changed from 2.78:1 to
+        3.67:1, meaning the short is "bigger" in risk terms than designed.
+
+  rebalancing_options:
+    option_1:
+      description: "Increase short to restore original risk balance"
+      action: "Add $5M to short ($21.6M → $26.6M)"
+      cost: "Borrow cost increases proportionally (4% on larger notional)"
+      concern: "Adding to a losing short — behavioral resistance + squeeze risk"
+    option_2:
+      description: "Trim long to match current short risk"
+      action: "Trim $7M from long ($69M → $62M)"
+      cost: "Realize $1.4M in short-term capital gains"
+      concern: "Trimming the working leg feels wrong but restores the risk balance"
+    option_3:
+      description: "Let it run and reassess"
+      action: "No action"
+      cost: "$0 implementation"
+      concern: >
+        The pair continues to drift. If biotech vol spikes further (Phase 3
+        data pending), the short leg's risk contribution could exceed the
+        long leg's by 2x or more. The pair becomes a net short-vol bet,
+        not a relative value trade.
+    option_4:
+      description: "Close both legs and take the +$7.4M gain"
+      action: "Sell long, cover short"
+      cost: "Tax on realized gains"
+      concern: "Abandons the thesis if still valid"
+
+# === TASK ===
+
+task:
+  prompt: >
+    Your pharma/biotech pair is 3 months old. The long leg is up 15%
+    ($60M → $69M) and the short leg moved against you (stock up 8%,
+    short notional $20M → $21.6M). Net P&L is +$7.4M.
+
+    However, the pair is now unbalanced: pharma vol dropped to 15% while
+    biotech vol rose to 55%. The vol ratio went from 2.78:1 to 3.67:1.
+    The short leg now contributes MORE dollar risk ($11.88M) than the long
+    leg ($10.35M) — the opposite of the original construction.
+
+    How should you manage the pair? Your response should address:
+
+    1. How the vol-ratio change distorted the original risk balance
+    2. Why the short leg is now "bigger" in risk terms despite being
+       smaller in notional terms
+    3. The four rebalancing options and their tradeoffs (increase short,
+       trim long, hold, close both)
+    4. The behavioral challenge: adding to a losing short or trimming
+       a winning long
+    5. How pending Phase 3 data on the biotech could further distort
+       the pair
+    6. Which rebalancing approach best preserves the original trade intent
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must identify the vol-ratio drift as the core problem"
+    - "Must quantify the risk imbalance (short > long in dollar risk)"
+    - "Must evaluate all four rebalancing options"
+    - "Must address the behavioral resistance to adding to losing short / trimming winning long"
+    - "Must consider the pending biotech catalyst"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Risk Balance Recognition"
+      id: "risk_balance"
+      weight: 35
+      criteria:
+        - "Identifies that the vol-ratio change (2.78 to 3.67) distorted the pair"
+        - "Quantifies that the short now contributes more risk than the long"
+        - "Explains why notional balance is insufficient — risk balance is what matters"
+        - "Recognizes that the pair has become a net short-vol position"
+
+    - name: "Rebalancing Analysis"
+      id: "rebalancing"
+      weight: 35
+      criteria:
+        - "Evaluates all four options with specific tradeoffs"
+        - "Recommends option 2 (trim long) or a hybrid as the most disciplined approach"
+        - "Addresses the cost of each option (borrow, taxes, opportunity cost)"
+        - "Notes that 'let it run' transforms the trade's risk character"
+
+    - name: "Behavioral Awareness"
+      id: "behavioral"
+      weight: 30
+      criteria:
+        - "Acknowledges the behavioral resistance to adding to a losing short"
+        - "Recognizes that trimming a winning long is psychologically difficult"
+        - "Frames the decision in risk terms, not P&L terms"
+        - "Considers the pending biotech catalyst as a time-sensitive factor"
+
+  critical_failures:
+    - "Recommends doing nothing because the pair is profitable overall"
+    - "Does not identify the vol-ratio drift"
+    - "Does not recognize that the short is now the larger risk contributor"
+    - "Ignores the pending Phase 3 data on the biotech (which could further distort)"
+    - "Treats the pair as two independent positions rather than a constructed trade"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Ignoring the vol-ratio drift because net P&L is positive"
+    failure_type: "pnl_anchoring"
+    severity: "critical"
+
+  - description: "Not recognizing that the short leg is now the larger risk contributor"
+    failure_type: "notional_bias"
+    severity: "critical"
+
+  - description: "Refusing to trim the winning long because 'it's working'"
+    failure_type: "winner_attachment"
+    severity: "major"
+
+  - description: "Adding to the losing short without addressing squeeze risk and borrow cost"
+    failure_type: "rebalancing_without_assessment"
+    severity: "major"
+
+  - description: "Treating the pair as a static trade rather than a dynamic risk structure"
+    failure_type: "static_trade_assumption"
+    severity: "moderate"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    The pair is working — we're up $7.4M. The long is performing as expected
+    and the short leg's underperformance is minor (-$1.6M). We should let
+    the trade run and focus on the strong P&L. The vol ratio may normalize
+    as the biotech sector settles. We can reassess after the Phase 3 data.
+
+  why_this_fails:
+    - "Focuses on P&L rather than risk balance"
+    - "Does not recognize the short is now the larger risk contributor"
+    - "Waiting for Phase 3 data without rebalancing means the pair could blow out"
+    - "If biotech vol spikes further on Phase 3 data, the pair becomes a leveraged short-vol bet"
+    - "'Let it run' transforms the trade's character from relative value to directional"
+    - "The original construction logic (risk-matched) is violated — the pair needs maintenance"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The P&L is positive but the pair is broken in risk terms. The
+      original construction was risk-matched: $60M * 18% vol ≈ $20M * 50%
+      vol (approximately equal dollar risk on each leg). Now: $69M * 15%
+      = $10.35M long-side risk vs $21.6M * 55% = $11.88M short-side risk.
+      The short is now the larger risk contributor — the pair has flipped.
+
+      The vol ratio went from 2.78:1 to 3.67:1. To restore the original
+      risk balance at current vols, we need: long notional * 15% = short
+      notional * 55%. At $69M long, the risk-matched short is $69M * 15%
+      / 55% = $18.8M. We're currently at $21.6M short — we're oversized
+      on the short leg.
+
+      Recommended approach: trim the long by $5M (to $64M) AND reduce the
+      short by $3M (cover to $18.6M). This produces: $64M * 15% = $9.6M
+      long risk vs $18.6M * 55% = $10.23M short risk. Approximately
+      risk-matched again.
+
+      Why not add to the short? The biotech has Phase 3 data pending.
+      Adding to a short ahead of a binary event increases risk asymmetrically.
+      If the data is positive, the short squeeze on a larger position would
+      be more damaging.
+
+      Why not just let it run? Because the pair is no longer expressing
+      the intended thesis. At current risk levels, a biotech vol spike
+      would cause the short leg to dominate the pair's P&L — the trade
+      becomes a short-vol bet, not a relative value alpha trade.
+
+      Trimming the winning long feels wrong but is the disciplined
+      approach. The goal is maintaining the pair's risk structure, not
+      maximizing each leg independently.
+
+      Close both legs? Only if the thesis is exhausted. If both theses
+      remain valid, the pair should be rebalanced, not abandoned.
+
+  failing:
+    response: >
+      The pair is up $7.4M — it's working well. We should let it run and
+      reassess after the biotech Phase 3 data. The vol ratio will
+      likely normalize as markets settle.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Vol ratio drifted from 2.78:1 to 3.67:1 (biotech vol up, pharma vol down)"
+    source: "context.pair_analysis"
+    importance: "critical"
+
+  - fact: "Short leg now contributes MORE dollar risk ($11.88M) than long leg ($10.35M)"
+    source: "context.pair_analysis.current_state"
+    importance: "critical"
+
+  - fact: "Net P&L is +$7.4M but the risk balance is inverted from original intent"
+    source: "context.pair_analysis"
+    importance: "important"
+
+  - fact: "Biotech has Phase 3 data pending — could further distort the pair"
+    source: "context.short_leg.current"
+    importance: "important"
+
+  - fact: "Original construction was risk-matched ($10.8M vs $10M); now inverted"
+    source: "context.pair_analysis"
+    importance: "critical"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "healthcare"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "pairs_trading"
+    - "risk_balance"
+    - "vol_ratio"
+    - "rebalancing"
+  notes: >
+    This scenario tests pairs trade maintenance — the ongoing sizing discipline
+    that most analysts neglect after initial construction. The key insight is
+    that the initial construction is the easy part; managing the ongoing risk
+    balance as vols, prices, and betas change is where most pairs fail. A pair
+    that isn't rebalanced eventually becomes a directional bet that happens to
+    have two legs.

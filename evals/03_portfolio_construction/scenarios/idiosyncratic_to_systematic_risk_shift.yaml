@@ -1,0 +1,307 @@
+# Idiosyncratic to Systematic Risk Shift: When Your Alpha Becomes Everyone's Beta
+# Tests: crowding-driven risk transformation, diversification benefit erosion, deleveraging correlation
+
+id: idiosyncratic_to_systematic_risk_shift
+title: "Idiosyncratic to Systematic Risk Shift: When Your Alpha Becomes Everyone's Beta"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "hard"
+estimated_time_minutes: 45
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Healthcare"
+    aum: "$700M"
+    gross_exposure: "175%"
+    net_exposure: "40%"
+
+  position:
+    name: "SpecialtyPharma Growth"
+    ticker: "SPGR"
+    sector: "Specialty Pharmaceuticals"
+    market_cap: "$22B"
+    weight: "5.0% of NAV ($35M)"
+    thesis: >
+      Differentiated specialty pharma with 3 commercial-stage rare disease
+      drugs. 40% revenue growth, high barriers to entry (orphan drug
+      exclusivity), 25%+ operating margins. Underfollowed by generalist
+      investors. Pricing power protected by small patient populations.
+    conviction: "8/10 — unchanged"
+
+  crowding_evolution:
+    six_months_ago:
+      hf_ownership_pct_of_float: "15%"
+      number_of_hf_holders: 45
+      gs_vip_basket: false
+      variance_decomposition:
+        idiosyncratic: "80%"
+        systematic: "20%"
+      beta_to_hf_crowding_factor: 0.15
+      correlation_to_hf_hotel_basket: 0.20
+      note: "6 months ago, this was a genuine idiosyncratic alpha position"
+
+    current:
+      hf_ownership_pct_of_float: "35%"
+      number_of_hf_holders: 120
+      gs_vip_basket: true
+      ms_crowded_longs: true
+      consecutive_earnings_beats: 4
+      variance_decomposition:
+        idiosyncratic: "50%"
+        systematic: "50%"
+      beta_to_hf_crowding_factor: 0.70
+      correlation_to_hf_hotel_basket: 0.62
+      note: >
+        After 4 consecutive earnings beats, the stock entered multiple
+        crowded-long baskets. HF ownership more than doubled. The stock
+        now moves with the 'hedge fund hotel' factor, not just company
+        fundamentals.
+
+  thirteen_f_analysis:
+    new_hf_holders_last_2_quarters: 75
+    notable_holders: >
+      Added to top-10 of 8 large multi-manager platforms (pods).
+      Appeared in VIP baskets of GS, MS, and JPM. Three pod-based funds
+      each own 2-3% of float.
+    crowding_dynamics: >
+      When pod-based multi-managers own the same name, they create
+      correlated selling pressure in drawdowns — all face the same
+      stop-loss constraints and deleveraging triggers. This transforms
+      idiosyncratic positions into pseudo-systematic ones.
+
+  historical_precedent:
+    example: >
+      Similar specialty pharma (DifferentiatedBio Inc) went through identical
+      crowding trajectory in 2021. Idiosyncratic variance dropped from 75%
+      to 35%. When a large pod was forced to deleverage in Q4 2021, the stock
+      dropped 18% in 3 days despite no company-specific news. Other pods
+      hit their stop-losses and sold too, creating a cascade. The stock
+      recovered to prior levels within 4 months, but the drawdown breached
+      risk limits for most holders.
+
+  portfolio_context:
+    other_crowded_positions:
+      - name: "TechPlatform Innovators"
+        weight: "4.5%"
+        hf_ownership: "28% of float"
+        correlation_to_hf_crowding: 0.55
+      - name: "GrowthIndustrials Corp"
+        weight: "3.0%"
+        hf_ownership: "25% of float"
+        correlation_to_hf_crowding: 0.48
+    total_crowding_exposed_weight: "12.5% of NAV (including SPGR)"
+
+# === TASK ===
+
+task:
+  prompt: >
+    A specialty pharma stock in your portfolio entered multiple hedge fund
+    VIP and crowded-long baskets after 4 consecutive earnings beats.
+    HF ownership doubled from 15% to 35% of float. Beta to the "hedge fund
+    crowding factor" went from 0.15 to 0.70. Variance decomposition shifted
+    from 80/20 idiosyncratic/systematic to 50/50.
+
+    Your fundamental thesis and conviction are unchanged (8/10). The company
+    is executing well. Nothing has changed about the business.
+
+    Should you adjust the position? Your response should address:
+
+    1. How crowding transformed the risk profile: same company, same thesis,
+       fundamentally different risk character
+    2. What it means when 50% of variance is now systematic (crowding factor)
+       — your diversification benefit from this position has eroded
+    3. The deleveraging cascade risk: when pods own the same name with
+       similar stop-losses, the exit is correlated
+    4. Whether the "alpha" you've been earning is still alpha or has become
+       crowding factor exposure
+    5. How the 12.5% total crowding-exposed weight creates portfolio-level
+       concentration in the crowding factor
+    6. What sizing adjustment maintains the original risk intent
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must distinguish between fundamental thesis and risk character"
+    - "Must address the idiosyncratic-to-systematic shift quantitatively"
+    - "Must consider deleveraging cascade risk"
+    - "Must evaluate portfolio-level crowding exposure"
+    - "Must not dismiss crowding because the thesis is intact"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Risk Transformation Recognition"
+      id: "risk_transformation"
+      weight: 40
+      criteria:
+        - "Identifies the idio-to-systematic shift as a material change in risk character"
+        - "Explains why 50% systematic variance means reduced diversification benefit"
+        - "Recognizes that beta to crowding factor (0.70) exposes position to non-fundamental selling"
+        - "Uses the DifferentiatedBio historical precedent to calibrate the risk"
+
+    - name: "Crowding-Specific Risk Analysis"
+      id: "crowding_analysis"
+      weight: 35
+      criteria:
+        - "Understands the pod-based deleveraging cascade mechanism"
+        - "Recognizes that correlated stop-losses create self-reinforcing selling pressure"
+        - "Notes that VIP basket inclusion increases correlation to other crowded names"
+        - "Evaluates whether recent 'alpha' is actually crowding factor compensation"
+
+    - name: "Portfolio-Level Crowding Assessment"
+      id: "portfolio_crowding"
+      weight: 25
+      criteria:
+        - "Calculates total crowding-exposed weight (12.5% of NAV)"
+        - "Evaluates correlation across crowding-exposed positions"
+        - "Proposes adjustments that reduce aggregate crowding factor exposure"
+        - "Considers both position-level trims and portfolio-level hedges"
+
+  critical_failures:
+    - "Maintains position because 'nothing changed about the company'"
+    - "Dismisses crowding as irrelevant to fundamental investors"
+    - "Ignores the variance decomposition shift (80% idio → 50%)"
+    - "Does not address the deleveraging cascade risk"
+    - "Treats HF ownership increase as validation rather than a risk factor"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Treating crowding as 'smart money validation' rather than a risk factor"
+    failure_type: "crowding_as_validation"
+    severity: "critical"
+
+  - description: "Ignoring the idiosyncratic-to-systematic shift because the thesis hasn't changed"
+    failure_type: "thesis_anchoring"
+    severity: "critical"
+
+  - description: "Not recognizing the deleveraging cascade risk from pod concentration"
+    failure_type: "cascade_blindness"
+    severity: "major"
+
+  - description: "Ignoring portfolio-level crowding exposure (12.5% in correlated crowded names)"
+    failure_type: "portfolio_crowding_blindness"
+    severity: "major"
+
+  - description: "Treating the earnings beats as proof the position is 'working' without questioning factor attribution"
+    failure_type: "returns_as_validation"
+    severity: "moderate"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    Our thesis is unchanged and the company continues to execute. The
+    increased hedge fund ownership reflects smart money recognizing the
+    quality of the business. HF ownership is a positive signal — these
+    are sophisticated investors who've validated our analysis. The stock's
+    inclusion in VIP baskets is a reflection of its quality, not a risk.
+    We should maintain the full position and continue to benefit from the
+    strong fundamentals.
+
+  why_this_fails:
+    - "Treats crowding as validation rather than a distinct risk factor"
+    - "Ignores that variance composition changed from 80% to 50% idiosyncratic"
+    - "Does not address pod-based deleveraging cascade risk"
+    - "Historical precedent (DifferentiatedBio) shows 18% drawdown from crowding unwind, not fundamentals"
+    - "VIP basket inclusion increases correlation to other crowded names — reduces diversification"
+    - "The crowding risk exists regardless of whether the thesis is right"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The company is the same. The risk is not.
+
+      Six months ago, this was an 80/20 idiosyncratic/systematic position
+      — we were primarily buying alpha with limited factor exposure. Today
+      it's 50/50. Half the position's variance is now explained by the hedge
+      fund crowding factor, not company fundamentals. Beta to the crowding
+      factor went from 0.15 to 0.70, meaning this position will sell off
+      in any HF deleveraging event regardless of the company's performance.
+
+      The DifferentiatedBio precedent is instructive: identical crowding
+      trajectory, no company-specific news, 18% drawdown in 3 days from
+      a single pod's forced deleveraging creating a cascade. The stock
+      recovered in 4 months, but the drawdown breached risk limits for most
+      holders — making the recovery irrelevant for constrained investors.
+
+      At the portfolio level, 12.5% of NAV is in positions with elevated
+      crowding factor exposure (SPGR: 5%, TechPlatform: 4.5%, GrowthIndustrials:
+      3%). These positions have 0.48-0.62 correlation to the crowding factor,
+      meaning a crowding unwind hits all three simultaneously.
+
+      The diversification benefit of SPGR has eroded. When it was 80%
+      idiosyncratic, it added meaningful diversification. At 50%, it's
+      partially a crowding factor vehicle — and we already have 7.5% in
+      other crowding-correlated positions.
+
+      Recommendation: trim SPGR from 5.0% to 3.0-3.5%. This preserves
+      meaningful exposure to the alpha thesis while reducing the crowding
+      factor loading. The 1.5-2.0% reduction should be accompanied by
+      smaller trims across the other crowding-exposed names. Target total
+      crowding-exposed weight below 8-9% of NAV. Consider a portfolio hedge
+      (short a crowded-long basket ETF) for the remaining exposure.
+
+  failing:
+    response: >
+      The thesis is unchanged and the company is executing well. HF
+      ownership increasing is a positive signal. We should maintain
+      the full 5% position.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Variance decomposition shifted from 80/20 to 50/50 idiosyncratic/systematic"
+    source: "context.crowding_evolution"
+    importance: "critical"
+
+  - fact: "Beta to HF crowding factor went from 0.15 to 0.70"
+    source: "context.crowding_evolution"
+    importance: "critical"
+
+  - fact: "HF ownership doubled from 15% to 35% of float; now in GS/MS VIP baskets"
+    source: "context.crowding_evolution"
+    importance: "critical"
+
+  - fact: "Historical precedent: similar stock dropped 18% in 3 days from crowding unwind, no company news"
+    source: "context.historical_precedent"
+    importance: "important"
+
+  - fact: "Portfolio has 12.5% of NAV in crowding-exposed positions"
+    source: "context.portfolio_context"
+    importance: "important"
+
+  - fact: "Pod-based holders with similar stop-losses create correlated deleveraging risk"
+    source: "context.thirteen_f_analysis"
+    importance: "important"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "healthcare"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "crowding_risk"
+    - "systematic_risk"
+    - "deleveraging"
+    - "risk_transformation"
+  notes: >
+    This scenario is closely related to crowding_risk_sizing but focuses on a
+    single position's risk transformation rather than portfolio-wide crowding.
+    The key insight is that nothing about the company needs to change for the
+    risk to change fundamentally. When a stock goes from 80% idiosyncratic to
+    50% idiosyncratic, the PM is paying the same portfolio cost for half as
+    much alpha exposure. The crowding factor is a distinct risk that exists
+    regardless of fundamental quality.

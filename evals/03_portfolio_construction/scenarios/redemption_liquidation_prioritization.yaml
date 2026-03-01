@@ -1,0 +1,327 @@
+# Redemption Liquidation Prioritization: Sizing in Reverse
+# Tests: liquidity-weighted liquidation, pro-rata vs risk-priority approaches, market impact, portfolio distortion
+
+id: redemption_liquidation_prioritization
+title: "Redemption Liquidation Prioritization: Sizing in Reverse"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "expert"
+estimated_time_minutes: 55
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Multi-Sector"
+    aum: "$600M"
+    gross_exposure: "175%"
+    net_exposure: "45%"
+    number_of_positions: "50 long, 20 short"
+
+  redemption:
+    amount: "$72M (12% of AUM)"
+    settlement: "T+5 business days"
+    type: "Single large investor — quarterly redemption"
+    note: "Must raise $72M in cash within 5 business days"
+
+  liquidity_profile:
+    high_liquidity:
+      positions: 15
+      total_notional: "$320M"
+      avg_adv_pct: "< 3% of ADV"
+      avg_days_to_exit: "1-2 days"
+      bid_ask_spread: "2-5 bps"
+      example: "Large-cap tech ($85M), Large-cap pharma ($55M), Mega-cap financials ($45M)"
+    medium_liquidity:
+      positions: 20
+      total_notional: "$280M"
+      avg_adv_pct: "5-15% of ADV"
+      avg_days_to_exit: "3-7 days"
+      bid_ask_spread: "8-15 bps"
+      example: "Mid-cap industrials ($30M), Mid-cap healthcare ($25M)"
+    low_liquidity:
+      positions: 15
+      total_notional: "$105M"
+      avg_adv_pct: "20-40% of ADV"
+      avg_days_to_exit: "10-20 days"
+      bid_ask_spread: "25-50 bps"
+      example: "Small-cap specialty pharma ($18M, 35% of ADV, 15 days to exit)"
+
+  approach_options:
+    pro_rata:
+      description: "Sell 12% of every position proportionally"
+      advantages: "Preserves portfolio weights and risk profile"
+      disadvantages: >
+        Forces selling 12% of illiquid names — the small-cap specialty pharma
+        ($18M * 12% = $2.16M) would take 3+ days to exit at 35% of ADV and
+        cost 40-80 bps in market impact. Aggregate market impact across
+        illiquid names estimated at $800K-$1.5M.
+    risk_priority:
+      description: "Cut highest-risk/most-liquid positions first"
+      advantages: "Reduces portfolio risk, minimizes market impact"
+      disadvantages: >
+        Changes portfolio character — removing large liquid positions shifts
+        the portfolio toward a less liquid, more concentrated book. The
+        remaining portfolio has worse liquidity and higher idiosyncratic risk.
+    liquidity_priority:
+      description: "Cut most-liquid positions first"
+      advantages: "Minimizes market impact, fastest execution"
+      disadvantages: >
+        Sells your most liquid, often highest-quality positions. Remaining
+        portfolio is less liquid and more concentrated in mid/small-cap.
+        Could worsen future liquidity if follow-on redemptions occur.
+
+  specific_positions_to_evaluate:
+    - name: "MegaTech Holdings"
+      weight: "5.5% ($33M)"
+      liquidity: "High (0.5% of ADV)"
+      conviction: "8/10"
+      ytd_return: "+18%"
+      unrealized_gain: "$5.1M"
+      note: "Best idea, most liquid — selling here is cheapest but hurts the most"
+    - name: "SpecialtyPharma Therapeutics"
+      weight: "3.0% ($18M)"
+      liquidity: "Low (35% of ADV, 15 days to exit)"
+      conviction: "7/10"
+      ytd_return: "+8%"
+      unrealized_gain: "$1.2M"
+      note: "Good thesis but illiquid — pro-rata forces selling into thin market"
+    - name: "CyclicalMaterials Corp"
+      weight: "2.5% ($15M)"
+      liquidity: "Medium (8% of ADV)"
+      conviction: "4/10"
+      ytd_return: "-12%"
+      unrealized_loss: "-$2.1M"
+      note: "Weakest thesis — logical to cut but generates tax loss (may be beneficial)"
+    - name: "ConsumerStaples Defensive"
+      weight: "4.0% ($24M)"
+      liquidity: "High (1% of ADV)"
+      conviction: "5/10"
+      ytd_return: "+3%"
+      unrealized_gain: "$0.6M"
+      note: "Low conviction, liquid — natural trim candidate"
+
+  constraints_on_approach:
+    time: "5 business days (hard deadline)"
+    market_impact_budget: "Target < $500K in aggregate market impact"
+    tax_considerations: "Short-term gains taxed at ordinary rates; some positions near LTCG"
+    remaining_investor_communication: >
+      Other investors are watching — if the remaining portfolio looks
+      impaired (illiquid, concentrated, distorted), follow-on redemptions
+      may occur.
+
+# === TASK ===
+
+task:
+  prompt: >
+    Your fund has received a $72M redemption (12% of AUM) with T+5
+    settlement. You need to raise $72M in cash within 5 business days.
+    The portfolio spans 70 positions across three liquidity tiers:
+    15 highly liquid names ($320M), 20 medium-liquidity names ($280M),
+    and 15 low-liquidity names ($105M).
+
+    Three approaches are available: pro-rata (preserve weights), risk-priority
+    (cut highest-risk first), or liquidity-priority (cut most-liquid first).
+    Each has significant trade-offs.
+
+    Design a liquidation plan. Your response should address:
+
+    1. Why pro-rata selling is theoretically clean but practically expensive
+       (market impact in illiquid names)
+    2. Why pure liquidity-priority selling is cheap but distorts the
+       portfolio toward illiquidity
+    3. The tax implications of each approach (harvesting losses vs.
+       realizing gains)
+    4. How the remaining portfolio looks to other investors (signaling
+       risk of follow-on redemptions)
+    5. A specific liquidation plan that balances cost, speed, portfolio
+       quality, and investor optics
+    6. Whether any positions should be fully exited vs. partially trimmed
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must address all three liquidation approaches and their tradeoffs"
+    - "Must consider market impact costs across liquidity tiers"
+    - "Must factor in tax implications"
+    - "Must address signaling risk to remaining investors"
+    - "Must provide a specific, implementable plan"
+    - "Must meet the T+5 hard deadline"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Liquidation Strategy Design"
+      id: "liquidation_strategy"
+      weight: 40
+      criteria:
+        - "Proposes a hybrid approach rather than pure pro-rata or pure liquidity-priority"
+        - "Overweights liquid positions in the liquidation to minimize market impact"
+        - "Avoids forced selling of illiquid names (specialty pharma at 35% ADV)"
+        - "Considers full exit of low-conviction positions vs. partial trim of high-conviction"
+
+    - name: "Implementation Awareness"
+      id: "implementation"
+      weight: 35
+      criteria:
+        - "Quantifies market impact across liquidity tiers"
+        - "Plans execution timeline within T+5 constraint"
+        - "Considers tax efficiency (harvest CyclicalMaterials loss, defer near-LTCG gains)"
+        - "Monitors execution risk and has contingency if market moves adversely"
+
+    - name: "Portfolio Quality Preservation"
+      id: "portfolio_quality"
+      weight: 25
+      criteria:
+        - "Evaluates how the remaining portfolio looks post-liquidation"
+        - "Addresses investor optics — does the remaining book look impaired?"
+        - "Considers follow-on redemption risk from portfolio distortion"
+        - "Maintains reasonable liquidity profile in the remaining portfolio"
+
+  critical_failures:
+    - "Proposes pure pro-rata without addressing market impact costs"
+    - "Sells only liquid names, leaving an illiquid concentrated book"
+    - "Does not consider the T+5 time constraint"
+    - "Ignores tax implications of the liquidation"
+    - "Does not address follow-on redemption risk from portfolio distortion"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Defaulting to pro-rata as 'fair' without considering market impact ($800K-$1.5M)"
+    failure_type: "implementation_cost_blindness"
+    severity: "critical"
+
+  - description: "Selling only liquid names, leaving a less liquid and more concentrated portfolio"
+    failure_type: "portfolio_distortion"
+    severity: "major"
+
+  - description: "Ignoring tax efficiency (harvesting CyclicalMaterials loss, avoiding STCG on winners)"
+    failure_type: "tax_inefficiency"
+    severity: "moderate"
+
+  - description: "Not considering how remaining investors perceive the post-liquidation portfolio"
+    failure_type: "signaling_blindness"
+    severity: "major"
+
+  - description: "Treating the liquidation as a one-time event without considering follow-on redemption risk"
+    failure_type: "second_order_blindness"
+    severity: "major"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    The fairest approach is pro-rata liquidation — sell 12% of every position
+    proportionally. This preserves the portfolio's risk profile and treats
+    all positions equally. We'll execute over 5 days and the market impact
+    will be manageable across most names. This approach is cleanest from a
+    governance perspective and ensures no position is unfairly targeted.
+
+  why_this_fails:
+    - "Pro-rata forces selling illiquid positions at extreme market impact (40-80 bps)"
+    - "Aggregate market impact of pro-rata estimated at $800K-$1.5M"
+    - "The specialty pharma position ($18M, 35% ADV) can't be exited 12% in 5 days without severe impact"
+    - "'Fairness' to positions is irrelevant — the goal is to minimize costs and preserve portfolio quality"
+    - "Does not consider tax implications"
+    - "Does not address investor optics or follow-on redemption risk"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The liquidation plan should be a hybrid approach, overweighting liquid
+      and low-conviction positions while protecting illiquid alpha generators.
+
+      Tier 1 — Full exits (executed Day 1-2, ~$39M):
+      - CyclicalMaterials Corp: $15M (4/10 conviction, harvests $2.1M tax
+        loss, medium liquidity but low conviction justifies full exit)
+      - ConsumerStaples Defensive: $24M (5/10 conviction, highly liquid,
+        minimal market impact, low opportunity cost)
+
+      Tier 2 — Partial trims of liquid positions (Day 1-3, ~$33M):
+      - MegaTech Holdings: trim $12M (5.5% to ~3.5%). Painful because it's
+        the best idea, but the most liquid exit. Keeps the core position.
+      - Other large-cap liquid positions: trim $21M across 3-4 names at
+        <5 bps market impact per name
+
+      Tier 3 — No forced selling:
+      - SpecialtyPharma ($18M, 35% ADV): no liquidation. Selling 12%
+        ($2.16M) would take 3+ days and cost 40-80 bps. Protect it.
+      - Other low-liquidity positions: no forced selling
+
+      Total: $72M raised. Estimated market impact: $150-300K (vs $800K-1.5M
+      for pro-rata). Tax benefit: ~$2.1M loss harvested from CyclicalMaterials.
+
+      Post-liquidation portfolio: AUM drops to $528M. The remaining portfolio
+      has slightly higher average conviction (removed 4/10 and 5/10 names)
+      and similar liquidity profile. Gross exposure maintained near 175%.
+      The portfolio looks clean to remaining investors — no illiquid
+      concentration, no distortion.
+
+      Key consideration: the MegaTech trim hurts conviction-weighted
+      returns, but the alternative (selling illiquid names into thin
+      markets) costs more and risks permanent capital impairment. The
+      trim is recoverable when new capital arrives or other positions
+      are exited.
+
+  failing:
+    response: >
+      We should sell 12% of every position proportionally to raise $72M.
+      This is the fairest approach and preserves our portfolio weights.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Pro-rata liquidation costs $800K-1.5M in market impact vs ~$200K for a hybrid approach"
+    source: "context.approach_options"
+    importance: "critical"
+
+  - fact: "SpecialtyPharma at 35% of ADV would take 3+ days and 40-80 bps to exit 12%"
+    source: "context.liquidity_profile"
+    importance: "critical"
+
+  - fact: "CyclicalMaterials has $2.1M unrealized loss — tax loss harvesting opportunity"
+    source: "context.specific_positions_to_evaluate"
+    importance: "important"
+
+  - fact: "T+5 hard deadline constrains which positions can be liquidated in time"
+    source: "context.redemption"
+    importance: "critical"
+
+  - fact: "Post-liquidation portfolio quality affects follow-on redemption risk"
+    source: "context.constraints_on_approach"
+    importance: "important"
+
+  - fact: "Other investors are watching — distorted remaining portfolio may trigger more redemptions"
+    source: "context.constraints_on_approach"
+    importance: "important"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "multi-sector"
+  skill_level: "expert"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "liquidation"
+    - "redemption"
+    - "market_impact"
+    - "liquidity_risk"
+    - "tax_efficiency"
+  notes: >
+    This scenario tests position sizing in reverse — liquidation is the mirror
+    image of construction. The key insight is that pro-rata selling, while
+    theoretically clean, is practically expensive when the portfolio spans
+    multiple liquidity tiers. The best approach overweights liquid, low-conviction
+    positions in the liquidation while protecting illiquid alpha generators.
+    The second-order consideration — how the remaining portfolio looks to other
+    investors — is often overlooked but critically important.

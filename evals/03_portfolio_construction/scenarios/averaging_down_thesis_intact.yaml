@@ -1,0 +1,298 @@
+# Averaging Down with Thesis Intact: When Cheaper Doesn't Mean Better Risk/Reward
+# Tests: drawdown budget impact, vol-adjusted sizing, correlation shift, management credibility
+
+id: averaging_down_thesis_intact
+title: "Averaging Down with Thesis Intact: When Cheaper Doesn't Mean Better Risk/Reward"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "hard"
+estimated_time_minutes: 45
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Healthcare & Life Sciences"
+    aum: "$600M"
+    gross_exposure: "165%"
+    net_exposure: "35%"
+    ytd_return: "-4.2%"
+    max_drawdown_limit: "-8%"
+    current_drawdown_from_peak: "-5.8%"
+
+  position:
+    name: "Genomics Instruments Corp"
+    ticker: "GINC"
+    sector: "Life Sciences Tools"
+    market_cap: "$18B (was $28B at entry)"
+    original_entry:
+      date: "7 months ago"
+      price: "$320"
+      weight: "3.0% of NAV ($18M)"
+      thesis: "Secular growth in drug development drives instrument demand; recurring consumables revenue underappreciated"
+      conviction_at_entry: "7/10"
+    current_state:
+      price: "$208 (-35%)"
+      current_weight: "1.95% of NAV ($11.7M)"
+      unrealized_loss: "-$6.3M (-35%)"
+
+  decline_drivers:
+    primary: "Biotech funding slowdown reduced instrument purchasing budgets 20-30%"
+    secondary: "Management announced $2B acquisition at 15x revenue — market questioned capital allocation discipline"
+    tertiary: "Two sell-side analysts downgraded citing 'broken capital allocation story'"
+    stock_specific_vs_sector: >
+      XBI (biotech ETF) down 12% over same period. GINC down 35%.
+      Approximately 12% of decline is sector-related, 23% is company-specific.
+
+  risk_profile_change:
+    at_entry:
+      trailing_vol_30d: "25%"
+      beta: 1.0
+      correlation_to_xbi: 0.40
+      sell_side_coverage: "18 analysts"
+    current:
+      trailing_vol_30d: "42%"
+      implied_vol_30d: "45%"
+      beta: 1.3
+      correlation_to_xbi: 0.65
+      sell_side_coverage: "14 analysts (4 dropped coverage)"
+      days_to_exit: "6 days (was 3 days)"
+
+  analyst_recommendation:
+    action: "Double the position from $11.7M to $23.4M (buy $11.7M more at $208)"
+    rationale: >
+      Thesis intact — secular growth in drug development is multi-decade. The
+      biotech funding slowdown is cyclical, not structural. At $208, we're
+      buying a premier franchise at 25% below our entry price. Average cost
+      drops from $320 to $264, giving us 27% upside to our original target.
+      Management's acquisition, while poorly received, adds a complementary
+      product line that strengthens the moat.
+    conviction_now: "7/10 (unchanged)"
+
+  portfolio_correlation_context:
+    other_biotech_exposed_positions:
+      - name: "BioEquip Suppliers"
+        weight: "2.5%"
+        correlation_to_ginc: 0.55
+      - name: "Clinical Data Analytics"
+        weight: "1.8%"
+        correlation_to_ginc: 0.45
+      - name: "Pharma Services Partners"
+        weight: "2.2%"
+        correlation_to_ginc: 0.40
+    total_biotech_adjacent_weight: "6.5% plus GINC"
+
+# === TASK ===
+
+task:
+  prompt: >
+    A life sciences tools company is down 35% from your entry 7 months ago.
+    The analyst says the thesis is intact — secular growth in drug development
+    is a multi-decade trend and the funding slowdown is cyclical. They want
+    to double the position at a "cheaper entry point."
+
+    However: volatility has risen from 25% to 42%, beta increased from 1.0 to
+    1.3, correlation to XBI jumped from 0.40 to 0.65, the portfolio is already
+    down 5.8% against an 8% max drawdown limit, and management made a
+    questionable acquisition. Four sell-side analysts dropped coverage.
+
+    Evaluate the averaging-down proposal. Your response should address:
+
+    1. How doubling notional at elevated vol affects risk contribution (the
+       same 4x problem as adding to winners)
+    2. The drawdown budget constraint — with only 2.2% remaining before the
+       max drawdown limit, how much additional risk can the portfolio absorb?
+    3. Whether "thesis intact" adequately addresses the capital allocation
+       concerns raised by the acquisition
+    4. Correlation changes and aggregate biotech exposure (6.5% + GINC in
+       correlated names)
+    5. Liquidity deterioration (days-to-exit doubled)
+    6. The behavioral difference between "cheaper price" and "better
+       risk/reward"
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must quantify risk contribution of the proposed add"
+    - "Must incorporate the drawdown budget as a binding constraint"
+    - "Must address management credibility and thesis re-evaluation"
+    - "Must consider correlation to other biotech-adjacent holdings"
+    - "Must distinguish between price decline and improved risk/reward"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Risk-Adjusted Sizing Under Stress"
+      id: "risk_sizing"
+      weight: 35
+      criteria:
+        - "Calculates that doubling notional at 42% vol (vs 25% at entry) means ~3.4x the original risk contribution"
+        - "Recognizes the position is already consuming more risk budget per dollar due to vol expansion"
+        - "Frames the add in terms of risk contribution, not dollar cost averaging"
+        - "Proposes a size (if any) that respects remaining risk budget"
+
+    - name: "Drawdown Budget Awareness"
+      id: "drawdown_budget"
+      weight: 35
+      criteria:
+        - "Identifies that only 2.2% of drawdown budget remains (8% limit - 5.8% current)"
+        - "Calculates potential loss from proposed add in a continued-decline scenario"
+        - "Recognizes that adding to a losing position in a drawdown amplifies the stop-loss risk"
+        - "Considers that forced liquidation at -8% would crystallize losses across the book"
+
+    - name: "Thesis Reassessment"
+      id: "thesis_reassessment"
+      weight: 30
+      criteria:
+        - "Questions whether the acquisition changes the thesis (capital allocation concerns)"
+        - "Distinguishes between cyclical headwinds (valid averaging-down) and thesis impairment"
+        - "Notes that sell-side coverage drops are information, not noise"
+        - "Evaluates correlation increase as evidence of reduced idiosyncratic opportunity"
+
+  critical_failures:
+    - "Approves doubling without addressing the drawdown budget constraint"
+    - "Equates 'cheaper price' with 'better risk/reward' without adjusting for vol change"
+    - "Ignores the management credibility issue from the acquisition"
+    - "Treats the position in isolation rather than considering correlated biotech exposure"
+    - "Calculates risk as 2x instead of ~3.4x when doubling at elevated vol"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Doubling notional at elevated vol produces ~3.4x risk, not 2x"
+    failure_type: "risk_contribution_error"
+    severity: "critical"
+
+  - description: "Ignoring the drawdown budget constraint (only 2.2% remaining)"
+    failure_type: "constraint_violation"
+    severity: "critical"
+
+  - description: "Treating price decline as automatic improvement in risk/reward"
+    failure_type: "anchoring_bias"
+    severity: "major"
+
+  - description: "Accepting 'thesis intact' without scrutinizing the capital allocation signal"
+    failure_type: "thesis_laziness"
+    severity: "major"
+
+  - description: "Ignoring aggregate biotech correlation exposure (6.5%+ in correlated names)"
+    failure_type: "correlation_blindness"
+    severity: "major"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    The thesis is intact. Drug development is a secular trend and this
+    downturn in biotech funding is temporary. At $208, we're getting a 35%
+    discount to our entry price. Averaging down to $264 gives us 27% upside
+    to our original target with the same franchise quality. The acquisition
+    adds a new product line that strengthens the moat. This is exactly when
+    you want to be adding — buy when others are fearful.
+
+  why_this_fails:
+    - "Confuses cheaper price with better risk/reward (vol nearly doubled)"
+    - "Does not address the drawdown budget constraint (2.2% remaining)"
+    - "Ignores that doubling at 42% vol means ~3.4x the original risk"
+    - "Uncritically accepts the acquisition narrative without addressing market concerns"
+    - "Does not consider aggregate biotech-correlated exposure"
+    - "'Buy when others are fearful' is a slogan, not a sizing framework"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The averaging-down proposal has significant problems that outweigh the
+      thesis argument. Starting with risk math: the original $18M position at
+      25% vol contributed approximately 0.75% of portfolio risk. At current
+      weight ($11.7M) and 42% vol, it contributes ~0.82% — already slightly
+      above original risk intent despite being down 35% in notional terms.
+      Doubling to $23.4M at 42% vol would contribute ~1.65% of portfolio
+      risk — roughly 2.2x the original risk budget for this name.
+
+      The binding constraint is the drawdown budget. The portfolio is down
+      5.8% against an 8% max drawdown limit, leaving only 2.2% of risk
+      budget for the entire book. A $23.4M position at 42% vol could lose
+      3-4% in a 2-sigma move. That single position could trigger the fund's
+      max drawdown limit, forcing liquidation of the entire book.
+
+      The "thesis intact" claim also needs scrutiny. The $2B acquisition at
+      15x revenue raised legitimate capital allocation concerns — 4 analysts
+      dropped coverage, which reduces the information ecosystem around the
+      name. Correlation to XBI jumped from 0.40 to 0.65, meaning the stock
+      is now more of a sector bet than a stock-specific alpha play.
+
+      Additionally, the portfolio already has 6.5% in other biotech-adjacent
+      names with meaningful correlation to GINC. Adding $11.7M further
+      concentrates this cluster.
+
+      If the thesis is truly intact, the right approach is to maintain
+      current sizing ($11.7M) and revisit after: (a) the drawdown budget
+      improves, (b) vol normalizes, and (c) the acquisition integration
+      provides evidence on management's capital allocation.
+
+  failing:
+    response: >
+      The stock is down 35% but the secular thesis is intact. Averaging down
+      at $208 gives us a blended cost of $264 and significant upside to our
+      target. We should double as the analyst recommends — this is the kind
+      of opportunity that only comes when markets overreact to short-term
+      headwinds.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Vol increased from 25% to 42% — doubling notional means ~3.4x risk contribution"
+    source: "context.risk_profile_change"
+    importance: "critical"
+
+  - fact: "Portfolio down 5.8% against 8% max drawdown limit — only 2.2% risk budget remaining"
+    source: "context.portfolio"
+    importance: "critical"
+
+  - fact: "Correlation to XBI jumped from 0.40 to 0.65 (more sector bet, less alpha)"
+    source: "context.risk_profile_change"
+    importance: "important"
+
+  - fact: "Management made a $2B acquisition at 15x revenue, questioned by market"
+    source: "context.decline_drivers"
+    importance: "important"
+
+  - fact: "4 sell-side analysts dropped coverage, reducing information ecosystem"
+    source: "context.risk_profile_change"
+    importance: "moderate"
+
+  - fact: "6.5% of portfolio in other biotech-adjacent names correlated to GINC"
+    source: "context.portfolio_correlation_context"
+    importance: "important"
+
+  - fact: "Days-to-exit doubled from 3 to 6 days (liquidity deterioration)"
+    source: "context.risk_profile_change"
+    importance: "moderate"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "healthcare"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "averaging_down"
+    - "drawdown_budget"
+    - "volatility"
+    - "behavioral_finance"
+  notes: >
+    This is the mirror image of the post-earnings-doubling scenario: adding to
+    a loser faces the same vol-adjusted risk math as adding to a winner. Doubling
+    notional when vol has also expanded means the true risk increase far exceeds
+    the notional increase. The additional trap here is the drawdown budget — when
+    you're already near the max loss limit, adding to losers can be existential.
+    The best PMs know when to hold, not when to double down.

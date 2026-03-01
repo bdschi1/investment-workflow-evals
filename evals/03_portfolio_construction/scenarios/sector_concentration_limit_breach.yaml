@@ -1,0 +1,296 @@
+# Sector Concentration Limit Breach: Discipline Over Conviction
+# Tests: constraint recognition, marginal thesis ranking, concentration risk non-linearity
+
+id: sector_concentration_limit_breach
+title: "Sector Concentration Limit Breach: Discipline Over Conviction"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "hard"
+estimated_time_minutes: 40
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Generalist"
+    aum: "$900M"
+    gross_exposure: "185%"
+    net_exposure: "40%"
+    sector_concentration_limit: "30% of gross"
+
+  healthcare_book:
+    current_weight: "34% of gross ($566M notional)"
+    note: "Already 4% above the 30% limit due to 3-month sector rally (+18%)"
+    positions:
+      - name: "ManagedCare Leaders"
+        ticker: "MCLR"
+        weight: "6.5% of gross"
+        thesis: "Medicare Advantage enrollment growth; competitive positioning"
+        conviction: "7/10"
+        ytd_return: "+22%"
+      - name: "BioProcess Equipment"
+        ticker: "BPEQ"
+        weight: "5.8% of gross"
+        thesis: "Biologics manufacturing capacity buildout"
+        conviction: "6/10"
+        ytd_return: "+15%"
+      - name: "PharmaCo Diversified"
+        ticker: "PHDI"
+        weight: "5.2% of gross"
+        thesis: "Pipeline optionality undervalued; stable cash flows"
+        conviction: "7/10"
+        ytd_return: "+12%"
+      - name: "Diagnostics Innovation"
+        ticker: "DXIN"
+        weight: "4.8% of gross"
+        thesis: "Next-gen diagnostics platform gaining clinical adoption"
+        conviction: "8/10"
+        ytd_return: "+28%"
+      - name: "MedTech Instruments"
+        ticker: "MTIN"
+        weight: "4.2% of gross"
+        thesis: "Robotic surgery penetration curve"
+        conviction: "6/10"
+        ytd_return: "+8%"
+      - name: "HealthData Analytics"
+        ticker: "HDAL"
+        weight: "3.8% of gross"
+        thesis: "AI-driven clinical decision support"
+        conviction: "5/10"
+        ytd_return: "+3%"
+      - name: "Short: OvervaluedBiotech"
+        ticker: "OVBT"
+        weight: "3.7% of gross (short)"
+        thesis: "Phase 3 failure probability underpriced"
+        conviction: "6/10"
+        ytd_return: "+5% (stock up, short losing)"
+
+  new_idea:
+    name: "Precision Oncology Therapeutics"
+    ticker: "POXT"
+    sector: "Biotechnology — Precision Medicine"
+    market_cap: "$12B"
+    thesis: >
+      First-in-class targeted therapy with breakthrough designation in
+      3 tumor types. Phase 3 data in 4 months expected to be transformational.
+      Peer-reviewed data supports 40% response rate vs 15% standard of care.
+      If approved, $5B+ peak sales potential. At current market cap, market
+      is pricing only a 25% probability of success vs. our estimate of 55%.
+    conviction: "9/10 — highest conviction healthcare idea in 18 months"
+    proposed_weight: "4% of gross ($33M)"
+
+  analyst_argument: >
+    POXT is the best healthcare idea we've seen in 18 months. At 9/10
+    conviction, it should be a top-5 position. The sector limit is a
+    guideline, not a law. We should either get an exception or just
+    add it — we can address the concentration when something in the book
+    weakens. Every position we have is working. Selling a winner to make
+    room for another winner feels wrong.
+
+# === TASK ===
+
+task:
+  prompt: >
+    Your healthcare portfolio is at 34% of gross exposure against a 30%
+    internal limit, driven by a sector rally. A new 9/10 conviction
+    biotech idea arrives — the best healthcare idea you've seen in 18 months.
+    Adding 4% would push healthcare to 38% of gross.
+
+    Your analyst argues the limit is a guideline and you should add without
+    trimming. Every existing position is working, and selling a winner to
+    make room feels suboptimal.
+
+    How do you handle this? Your response should address:
+
+    1. Why sector concentration limits exist and why they bind even when
+       every position is working (correlated drawdown risk is non-linear)
+    2. Whether to request a limit exception, trim existing positions, or
+       pass on the new idea
+    3. If trimming, how to rank existing positions on marginal thesis
+       strength (which one has the weakest forward-looking case?)
+    4. The behavioral trap of not wanting to sell winners to fund new ideas
+    5. How to size the new idea given the constraint environment
+    6. Whether the sector rally itself changes the risk profile of the
+       existing concentration
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must enforce or explicitly address the sector concentration limit"
+    - "Must not treat the limit as optional"
+    - "Must evaluate existing positions for trim candidates"
+    - "Must address correlated sector drawdown risk"
+    - "Must provide a specific recommendation (trim, pass, or exception request)"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Constraint Discipline"
+      id: "constraint_discipline"
+      weight: 35
+      criteria:
+        - "Treats the sector limit as a binding constraint, not a guideline"
+        - "Explains why concentration limits exist (correlated drawdown non-linearity)"
+        - "Does not dismiss the limit because 'every position is working'"
+        - "Recognizes that the time to enforce limits is when things are going well, not after a drawdown"
+
+    - name: "Marginal Thesis Ranking"
+      id: "thesis_ranking"
+      weight: 35
+      criteria:
+        - "Evaluates existing positions for relative forward-looking conviction"
+        - "Identifies trim candidates based on lowest marginal expected return"
+        - "Does not default to selling the lowest-performing position (that's backward-looking)"
+        - "Considers which position removal would best improve the portfolio's risk profile"
+
+    - name: "Implementation Framework"
+      id: "implementation"
+      weight: 30
+      criteria:
+        - "Proposes a specific plan (e.g., trim HDAL from 3.8% to 0% and MTIN from 4.2% to 2%, freeing 6%)"
+        - "Sizes the new idea at less than 4% if the constraint remains tight"
+        - "Addresses the sector rally's impact on risk (appreciated positions carry more risk)"
+        - "Considers whether the short (OVBT) should be increased to offset long adds"
+
+  critical_failures:
+    - "Adds the new position without addressing the concentration breach"
+    - "Dismisses the concentration limit as a guideline that can be ignored"
+    - "Refuses to trim any existing position because all are 'working'"
+    - "Proposes requesting an exception without first evaluating the trim path"
+    - "Treats concentration risk as linear when it's non-linear"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Treating sector limits as guidelines rather than constraints"
+    failure_type: "constraint_dismissal"
+    severity: "critical"
+
+  - description: "Refusing to sell winners to fund a new idea (endowment effect)"
+    failure_type: "behavioral_bias"
+    severity: "major"
+
+  - description: "Trimming the worst-performing position instead of the weakest thesis"
+    failure_type: "backward_looking_ranking"
+    severity: "major"
+
+  - description: "Adding without trimming because every position is working"
+    failure_type: "winner_paralysis"
+    severity: "critical"
+
+  - description: "Not recognizing that the sector rally increased the risk of the existing concentration"
+    failure_type: "drift_blindness"
+    severity: "moderate"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    POXT is our highest-conviction idea in 18 months. At 9/10, it deserves
+    to be a top-5 position. Every existing healthcare name is working — selling
+    any of them would reduce alpha. The 30% sector limit is conservative and
+    was set during a time of lower healthcare opportunity. We should request
+    an exception to add POXT at 4% and revisit the concentration when the
+    sector cools off. Risk management should serve investment management,
+    not the other way around.
+
+  why_this_fails:
+    - "Treats the concentration limit as optional"
+    - "Argues that winning positions can't be trimmed (endowment effect)"
+    - "Defers concentration management to 'when the sector cools off' — exactly when it's too late"
+    - "Inverts the risk management hierarchy ('risk should serve investment management')"
+    - "Does not evaluate any trim candidates"
+    - "Correlated healthcare drawdowns are non-linear — 38% concentration in a sector selloff is catastrophic"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      POXT is a compelling idea, but adding it requires portfolio construction
+      discipline. Healthcare is already at 34% vs a 30% limit — we're 4%
+      over constraint before considering the new position. The limit exists
+      because correlated sector drawdowns are non-linear: in a healthcare
+      selloff, all these names draw down together, and 38% concentration
+      would produce portfolio losses well beyond what the risk budget intends.
+
+      The right approach is: first, bring healthcare back within the 30%
+      limit by trimming existing positions. Then allocate room for POXT.
+
+      Ranking existing positions on forward-looking marginal thesis:
+      - HDAL (5/10 conviction, +3% YTD, 3.8%): Weakest conviction, lowest
+        momentum, smallest contribution. Primary trim candidate. Exit fully
+        frees 3.8%.
+      - MTIN (6/10 conviction, +8% YTD, 4.2%): Solid but not differentiated.
+        Trim to 2% frees 2.2%.
+      - BPEQ (6/10 conviction, +15% YTD, 5.8%): Consider trimming to 4%
+        frees 1.8%.
+
+      These three trims free 7.8% of gross, bringing healthcare from 34% to
+      26.2%. Adding POXT at 3% (not 4% — allow buffer below the limit)
+      brings healthcare to 29.2%.
+
+      Note: I'm not selling DXIN (8/10, +28%) despite it being the largest
+      winner — that's the best forward-looking thesis. Rankings must be
+      forward-looking, not backward-looking.
+
+      The sector rally itself is additional risk. Appreciated positions
+      carry higher notional exposure than originally intended. The 34%
+      concentration happened passively through rally-driven drift, which
+      makes active rebalancing more important, not less.
+
+  failing:
+    response: >
+      POXT is our best idea and we should add it. All our healthcare
+      positions are working and we shouldn't sell winners. The 30% limit
+      is conservative and we should request an exception.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Healthcare at 34% of gross vs 30% limit (already 4% over)"
+    source: "context.healthcare_book"
+    importance: "critical"
+
+  - fact: "New idea POXT at 9/10 conviction — highest in 18 months"
+    source: "context.new_idea"
+    importance: "important"
+
+  - fact: "Adding 4% would push healthcare to 38% — 8% above limit"
+    source: "derived"
+    importance: "critical"
+
+  - fact: "HDAL at 5/10 conviction is the weakest forward-looking thesis in the healthcare book"
+    source: "context.healthcare_book.positions"
+    importance: "important"
+
+  - fact: "Correlated sector drawdowns are non-linear — 38% concentration amplifies sector selloff impact"
+    source: "derived"
+    importance: "critical"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "healthcare"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "concentration_limits"
+    - "sector_risk"
+    - "marginal_thesis"
+    - "behavioral_finance"
+  notes: >
+    This scenario tests portfolio construction discipline at its most
+    psychologically difficult: when everything is working. The key insight is
+    that concentration limits exist for states of the world you can't predict
+    (sector-wide drawdowns), and the time to enforce them is when positions
+    are profitable and liquid — not after a selloff when everything is
+    correlated and illiquid. The best PMs trim proactively and rank on
+    forward-looking marginal thesis, not past performance.

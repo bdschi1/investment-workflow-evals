@@ -1,0 +1,290 @@
+# Staged Entry vs Full Allocation: When Patience Helps and When It Hurts
+# Tests: staging rationale, opportunity cost of delay, market impact relevance, catalyst timing
+
+id: staged_entry_vs_full_allocation
+title: "Staged Entry vs Full Allocation: When Patience Helps and When It Hurts"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "moderate"
+estimated_time_minutes: 35
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Technology"
+    aum: "$600M"
+    gross_exposure: "170%"
+    net_exposure: "45%"
+
+  new_idea:
+    name: "NextGenCompute Platforms"
+    ticker: "NGCP"
+    sector: "Technology — Cloud Computing Hardware"
+    market_cap: "$120B"
+    current_price: "$185"
+    adv_20d: "$2.5B"
+    trailing_vol: "32%"
+    beta: 1.2
+
+  thesis:
+    summary: >
+      Next-generation computing platform with architectural advantage over
+      incumbent. Enterprise adoption curve similar to prior platform shifts
+      (mainframe → client-server, on-prem → cloud). Current enterprise
+      penetration is 8% vs management's target of 30% over 3 years.
+    time_horizon: "12-18 months to thesis realization"
+    catalyst: >
+      Product launch event in 6 weeks — expected to announce enterprise
+      partnerships with 3 major cloud providers. This would validate the
+      adoption curve thesis and could drive a 10-15% re-rating.
+    conviction: "8/10"
+
+  proposed_sizing:
+    target_weight: "3.0% of NAV ($18M)"
+    analyst_proposal: "Deploy full $18M immediately"
+    pm_alternative: "Stage 1% per week over 3 weeks ($6M per week)"
+
+  recent_price_action:
+    last_2_weeks: "+8.2% on pre-event hype and analyst initiations"
+    last_month: "+14.5% from cycle low"
+    technical_note: >
+      Stock is at 52-week high. RSI at 72 (overbought territory by
+      conventional measures). Volume has been 1.5x average over the
+      last 5 sessions.
+
+  market_impact_analysis:
+    position_as_pct_adv: "0.72% ($18M / $2.5B ADV)"
+    expected_market_impact: "1-3 bps for full allocation"
+    note: >
+      At $120B market cap and $2.5B ADV, this is one of the most liquid
+      names in the portfolio. Market impact is negligible regardless of
+      whether the allocation is staged or immediate. Market impact is
+      NOT the driver of the staging decision.
+
+  staging_analysis:
+    arguments_for_staging:
+      - "Stock has rallied 14.5% in a month — risk of mean-reversion pullback"
+      - "Pre-event hype may partially reverse before the launch event"
+      - "Staging provides optionality to increase/decrease as new information arrives"
+      - "Reduces 'regret risk' if the stock pulls back after initial purchase"
+    arguments_for_full_allocation:
+      - "Catalyst is imminent (6 weeks) — the thesis is time-dependent"
+      - "If the thesis is right, delaying costs alpha (stock continues higher)"
+      - "Market impact is negligible — staging doesn't reduce execution cost"
+      - "Staging 1% per week means only 2/3 of the position captures the catalyst"
+      - "The conviction is 8/10 — high enough that the opportunity cost of delay exceeds the benefit"
+    arguments_for_waiting:
+      - "Stock is overbought (RSI 72) — tactical pullback likely"
+      - "Pre-event selling often occurs 1-2 weeks before the event"
+      - "Could deploy full position on a pullback at better entry"
+
+# === TASK ===
+
+task:
+  prompt: >
+    Your analyst wants to deploy a full 3% position ($18M) immediately in
+    a large-cap tech name ahead of a product launch event in 6 weeks. The
+    PM suggests staging 1% per week over 3 weeks. The stock has rallied
+    8.2% in the last 2 weeks on pre-event hype.
+
+    However, this is a $120B market cap name with $2.5B ADV — market impact
+    is negligible regardless of staging. The thesis has a 6-week catalyst
+    window.
+
+    Evaluate the full allocation vs staging decision. Your response should
+    address:
+
+    1. When staging adds value (illiquid names, building conviction, no
+       near-term catalyst) vs when it doesn't (liquid names, imminent
+       catalyst, high conviction)
+    2. Why market impact is not the driver here — at 0.72% of ADV, impact
+       is trivial either way
+    3. The opportunity cost of staging when there's a 6-week catalyst
+       window (only 2/3 of position captures the event if staged)
+    4. Whether the recent 8.2% rally is a reason to stage or a reason to
+       either go full or wait entirely
+    5. The risk of "buying the hype" (tactical overbought signal) vs
+       missing the event (strategic opportunity cost)
+    6. A framework for when to stage, when to go full, and when to wait
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must address when staging adds value vs when it doesn't"
+    - "Must note that market impact is not a factor for this name"
+    - "Must consider the catalyst timing in the staging decision"
+    - "Must evaluate the recent rally's relevance"
+    - "Must provide a specific recommendation with rationale"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Staging Framework"
+      id: "staging_framework"
+      weight: 40
+      criteria:
+        - "Articulates when staging is valuable (illiquid names, uncertain conviction, no catalyst)"
+        - "Articulates when staging destroys value (liquid names, imminent catalyst, high conviction)"
+        - "Recognizes that market impact is not the driver for a $120B market cap stock"
+        - "Frames staging as a risk management tool, not a default approach"
+
+    - name: "Catalyst Timing Awareness"
+      id: "catalyst_timing"
+      weight: 35
+      criteria:
+        - "Calculates that staging only captures 2/3 of the position at the catalyst"
+        - "Weighs the opportunity cost of delay against the regret risk of full allocation"
+        - "Notes that the thesis is time-dependent (product launch in 6 weeks)"
+        - "Evaluates whether waiting for a pullback is realistic given the catalyst proximity"
+
+    - name: "Specific Recommendation"
+      id: "recommendation"
+      weight: 25
+      criteria:
+        - "Provides a clear, specific recommendation (full, staged, wait, or hybrid)"
+        - "Justifies the recommendation with the framework above"
+        - "Addresses the counter-arguments to the chosen approach"
+        - "Includes contingency plans (what if stock pulls back? rallies further?)"
+
+  critical_failures:
+    - "Defaults to staging without articulating why (staging-as-reflex)"
+    - "Recommends full allocation without addressing the recent rally"
+    - "Cites market impact as the reason for staging (irrelevant at $2.5B ADV)"
+    - "Does not consider the catalyst timing in the staging decision"
+    - "Provides no framework for when staging is and isn't appropriate"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Defaulting to staging because 'it's always more conservative'"
+    failure_type: "staging_as_reflex"
+    severity: "major"
+
+  - description: "Citing market impact as the reason to stage a $120B market cap name"
+    failure_type: "liquidity_irrelevance"
+    severity: "moderate"
+
+  - description: "Waiting for a pullback that may not come before the catalyst"
+    failure_type: "tactical_over_strategic"
+    severity: "moderate"
+
+  - description: "Going full immediately without acknowledging the 14.5% rally and overbought signals"
+    failure_type: "price_insensitivity"
+    severity: "moderate"
+
+  - description: "Not quantifying the opportunity cost of staging (1/3 of position misses the catalyst)"
+    failure_type: "opportunity_cost_blindness"
+    severity: "major"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    We should stage the entry over 3 weeks to minimize market impact and
+    reduce execution risk. This is the standard best practice for deploying
+    new positions. Staging also protects us if the stock pulls back from
+    its recent rally. 1% per week over 3 weeks gives us time to assess the
+    evolving thesis and adjust sizing as needed.
+
+  why_this_fails:
+    - "Market impact is 1-3 bps — not a factor at $2.5B ADV"
+    - "Staging is not a universal 'best practice' — it depends on context"
+    - "1% per week means only $12M (2/3) is deployed before the catalyst"
+    - "The thesis is time-dependent — the catalyst is in 6 weeks"
+    - "'Assess the evolving thesis' is vague — what new information arrives in weeks 2-3?"
+    - "Staging is a tool, not a default. This context argues against it."
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The staging decision depends on three factors: (1) liquidity and
+      market impact, (2) catalyst timing, and (3) conviction trajectory.
+
+      Liquidity: at $120B market cap and $2.5B ADV, $18M is 0.72% of ADV.
+      Market impact is 1-3 bps regardless of staging approach. Liquidity
+      is not a factor in this decision.
+
+      Catalyst timing: the product launch is in 6 weeks. Staging over 3
+      weeks means only $12M (67% of target) is deployed before the
+      catalyst. If the thesis is right and the event drives a 10-15%
+      re-rating, the $6M not yet deployed misses the move. That's $600K-
+      $900K in opportunity cost — 10-15 bps of portfolio performance.
+
+      Conviction: at 8/10, conviction is high and not building (it's
+      already built). Staging is most valuable when conviction is
+      increasing (you want to learn as you deploy). Here, the learning
+      already happened.
+
+      The recent rally (14.5% in a month, RSI 72) complicates the picture.
+      Buying at a 52-week high into an overbought signal carries tactical
+      risk. But the strategic question is whether the catalyst will
+      validate the thesis — if yes, the 14.5% move is early, not late.
+
+      Recommendation: deploy 2% immediately ($12M) and set a limit order
+      for the remaining 1% at 4-5% below current price (catching a
+      pre-event pullback if it occurs). If no pullback by 2 weeks before
+      the event, deploy the remaining 1% at market. This captures most
+      of the position for the catalyst while maintaining optionality for
+      a better entry on the last tranche.
+
+      When staging IS appropriate: (a) illiquid names where market impact
+      is material, (b) conviction is building rather than established,
+      (c) no near-term catalyst creates time pressure, (d) the position
+      is in a drawdown-sensitive portfolio where entry timing materially
+      affects risk.
+
+  failing:
+    response: >
+      We should stage over 3 weeks to reduce market impact and execution
+      risk. This is the prudent approach for any new position.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Market impact is 1-3 bps at $2.5B ADV — not a factor in the staging decision"
+    source: "context.market_impact_analysis"
+    importance: "critical"
+
+  - fact: "Catalyst in 6 weeks — staging 3 weeks means only 67% deployed for the event"
+    source: "context.staging_analysis"
+    importance: "critical"
+
+  - fact: "Stock up 14.5% in a month, RSI 72 (overbought signal)"
+    source: "context.recent_price_action"
+    importance: "important"
+
+  - fact: "Conviction is 8/10 and already established — not building"
+    source: "context.thesis"
+    importance: "moderate"
+
+  - fact: "Staging opportunity cost: $600K-$900K if catalyst drives 10-15% re-rating"
+    source: "derived"
+    importance: "important"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "technology"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "entry_strategy"
+    - "staging"
+    - "catalyst_timing"
+    - "market_impact"
+  notes: >
+    This scenario tests whether the model applies staging intelligently rather
+    than reflexively. Staging is a tool with specific use cases (illiquid names,
+    building conviction, no catalyst pressure). In this case — large cap, high
+    liquidity, imminent catalyst, established conviction — staging is the wrong
+    tool. The best PMs know when to stage and when to act.

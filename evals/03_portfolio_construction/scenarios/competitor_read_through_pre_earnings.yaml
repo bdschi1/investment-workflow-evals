@@ -1,0 +1,272 @@
+# Competitor Read-Through Pre-Earnings: Sizing for a Double Binary
+# Tests: binary event sizing, read-through pricing, implied vol awareness, catalyst stacking
+
+id: competitor_read_through_pre_earnings
+title: "Competitor Read-Through Pre-Earnings: Sizing for a Double Binary"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "hard"
+estimated_time_minutes: 45
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Technology"
+    aum: "$750M"
+    gross_exposure: "175%"
+    net_exposure: "45%"
+
+  position:
+    name: "DataAccelerator Systems"
+    ticker: "DACS"
+    sector: "Semiconductors — Data Center Accelerators"
+    market_cap: "$280B"
+    current_weight: "3.5% of NAV ($26.25M)"
+    earnings_date: "10 days from now"
+    thesis: "Second-largest data center accelerator supplier; market underestimates share gains from new architecture"
+    conviction: "7/10"
+
+  competitor_event:
+    competitor_name: "LeadChip Technologies"
+    competitor_ticker: "LDCH"
+    competitor_earnings:
+      date: "Reported 2 days ago"
+      results: >
+        Blowout quarter: Data center revenue +85% YoY, guided next quarter
+        +70% YoY. Management explicitly cited accelerating enterprise AI
+        adoption and supply constraints easing. Beat consensus by 22%.
+    read_through_logic: >
+      LDCH's results suggest the entire data center accelerator TAM is
+      expanding faster than expected. If LDCH is seeing +85% growth, DACS
+      should see at least +50% given its share gains. Street consensus for
+      DACS is only +35% YoY.
+
+  market_reaction:
+    dacs_price_move: "+4.2% on LDCH's earnings day"
+    dacs_implied_vol_30d: "52% (vs 38% 2 weeks ago)"
+    dacs_implied_earnings_move: "8.5% (priced via weekly options straddle)"
+    sector_etf_move: "+2.8% (SOXX)"
+    note: "Some read-through already reflected in DACS price and options market"
+
+  analyst_recommendation:
+    action: "Add 2% (from 3.5% to 5.5%, adding $15M)"
+    rationale: >
+      LDCH's results confirm the sector thesis. DACS reports in 10 days and
+      the read-through suggests a significant beat is likely. We should
+      increase our position ahead of what could be a strong catalyst.
+    conviction_if_confirmed: "9/10"
+
+  risk_considerations:
+    pre_earnings_implied_vol: "52% (elevated from 38%)"
+    earnings_straddle_cost: "8.5% (expensive optionality)"
+    historical_dacs_earnings_moves: "Average +/-6.2% over last 8 quarters"
+    read_through_reliability: >
+      Of the last 6 times LDCH reported before DACS, DACS confirmed the
+      directional read-through 4 times (67%). In 2 cases, DACS missed despite
+      LDCH's beat (share loss, different customer mix, inventory dynamics).
+    binary_scenarios:
+      beat_and_confirm: "Stock likely +10-15% (read-through validated)"
+      miss_despite_read_through: "Stock likely -12-18% (double disappointment — market priced in the read-through and it failed)"
+
+# === TASK ===
+
+task:
+  prompt: >
+    Your competitor in the data center accelerator space just reported blowout
+    results (revenue +85% YoY). Your stock is up 4.2% on the read-through
+    and reports its own earnings in 10 days. Your analyst wants to add 2%
+    to the position (3.5% to 5.5%) ahead of earnings.
+
+    However, the stock has already moved +4.2% on the read-through, implied
+    vol is elevated (52% vs 38%), and the earnings straddle is pricing an
+    8.5% move. Historical read-through confirmation rate from this competitor
+    is 67% (4 out of 6 times).
+
+    Evaluate the sizing proposal. Your response should address:
+
+    1. How much of the read-through is already priced (stock +4.2%, sector
+       +2.8%, implied vol repriced)
+    2. The binary nature of the upcoming earnings: the read-through either
+       confirms (+10-15%) or fails (-12-18%, a "double disappointment")
+    3. Whether adding ahead of a binary event is a sizing decision or a
+       speculation decision
+    4. The cost of buying into elevated implied vol (52% vs 38%)
+    5. Read-through reliability as a basis for sizing (67% is meaningful
+       but not overwhelming)
+    6. Alternative approaches: wait for earnings, use options, or reduce
+       ahead of the event
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must address how much read-through is already priced"
+    - "Must frame the earnings as a binary event for sizing purposes"
+    - "Must evaluate implied vol and the cost of pre-event optionality"
+    - "Must assess read-through reliability with appropriate uncertainty"
+    - "Must not treat read-through confirmation as a certainty"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Read-Through Pricing Assessment"
+      id: "pricing_assessment"
+      weight: 30
+      criteria:
+        - "Recognizes that +4.2% stock move already reflects partial read-through"
+        - "Notes that implied vol repricing (38% to 52%) is the market adding event risk"
+        - "Understands that adding now buys exposure at a higher price with more expensive optionality"
+        - "Evaluates how much incremental information is left to be priced"
+
+    - name: "Binary Event Sizing"
+      id: "binary_sizing"
+      weight: 40
+      criteria:
+        - "Frames earnings as a binary outcome with asymmetric payoffs"
+        - "Recognizes the 'double disappointment' risk if read-through fails"
+        - "Sizes for the downside scenario (-12-18%), not just the expected value"
+        - "Distinguishes between adding to a thesis and speculating on a catalyst"
+
+    - name: "Implementation Alternatives"
+      id: "alternatives"
+      weight: 30
+      criteria:
+        - "Considers waiting until after earnings to add (lower vol, confirmed thesis)"
+        - "Evaluates options as an alternative expression (defined risk)"
+        - "Considers reducing existing position ahead of binary event"
+        - "Proposes a framework for when pre-event adds are appropriate vs. not"
+
+  critical_failures:
+    - "Adds position without acknowledging the binary nature of the event"
+    - "Treats read-through as confirming the thesis when earnings haven't occurred"
+    - "Ignores elevated implied vol as a cost of entry"
+    - "Does not consider the 33% historical failure rate of this read-through"
+    - "Sizes based on the upside scenario without addressing the downside"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Treating a competitor's beat as confirmation of your stock's thesis"
+    failure_type: "read_through_overconfidence"
+    severity: "critical"
+
+  - description: "Adding ahead of a binary event without sizing for the downside scenario"
+    failure_type: "binary_event_blindness"
+    severity: "critical"
+
+  - description: "Ignoring that the stock has already moved 4.2% (partial pricing)"
+    failure_type: "price_anchoring"
+    severity: "major"
+
+  - description: "Buying into 52% implied vol when 38% was the norm (paying for expensive optionality)"
+    failure_type: "vol_cost_blindness"
+    severity: "moderate"
+
+  - description: "Using the 67% read-through rate as high confidence instead of acknowledging meaningful miss probability"
+    failure_type: "probability_anchoring"
+    severity: "major"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    LDCH's blowout quarter confirms the entire sector thesis. Data center
+    accelerator demand is accelerating faster than anyone expected, and DACS
+    is positioned to benefit with its new architecture gaining share. We
+    should add 2% ahead of earnings to capture the upside from what is
+    likely to be a strong beat. The +4.2% move is just the beginning —
+    if DACS confirms with +50% growth, the stock could re-rate significantly.
+
+  why_this_fails:
+    - "Treats a competitor's results as confirmation before DACS reports"
+    - "Ignores the 33% historical failure rate of LDCH-to-DACS read-throughs"
+    - "Does not acknowledge the binary risk: -12-18% if read-through fails"
+    - "Dismisses the +4.2% move as 'just the beginning' rather than partial pricing"
+    - "Does not address the cost of buying into elevated implied vol"
+    - "This is speculation dressed as thesis confirmation"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The read-through logic is sound directionally but the sizing proposal
+      is premature. Several factors argue against adding ahead of earnings:
+
+      First, partial pricing: DACS is already up 4.2% and implied vol
+      jumped from 38% to 52%. The market has processed the read-through.
+      Adding now buys exposure at a higher cost basis with more expensive
+      optionality baked into the price.
+
+      Second, binary risk: this is a single-stock earnings event, not a
+      thesis data point. If DACS confirms (+10-15%), the existing 3.5%
+      position captures $2.6M-$3.9M. If DACS disappoints (-12-18%),
+      the 3.5% position loses $3.2M-$4.7M. At 5.5%, the downside becomes
+      $5.0M-$7.4M. The read-through has a 67% confirmation rate — meaningful,
+      but a 33% miss probability is not negligible for a position-sizing
+      decision worth $15M.
+
+      Third, implementation: if the thesis is truly about secular share
+      gains, adding after earnings (when vol normalizes and the thesis is
+      confirmed or denied) is cheaper and lower-risk. Alternatively, if
+      the PM wants to express a bullish view into earnings, a small
+      options position (call spreads) offers defined downside.
+
+      Recommendation: hold the existing 3.5% into earnings. If DACS
+      confirms the read-through, add 1-2% post-earnings when implied vol
+      normalizes to 38-40%. The thesis quality doesn't expire in 10 days.
+
+  failing:
+    response: >
+      LDCH confirmed the sector thesis. We should add ahead of earnings to
+      capture the catalyst. 5.5% is appropriate given our high conviction
+      that DACS will confirm the read-through.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "DACS already up 4.2% on competitor read-through (partial pricing)"
+    source: "context.market_reaction"
+    importance: "critical"
+
+  - fact: "Implied vol jumped from 38% to 52% (expensive optionality)"
+    source: "context.market_reaction"
+    importance: "important"
+
+  - fact: "Historical read-through reliability: 67% (4/6 times confirmed)"
+    source: "context.risk_considerations"
+    importance: "critical"
+
+  - fact: "Binary outcomes: +10-15% if confirmed vs -12-18% if failed"
+    source: "context.risk_considerations.binary_scenarios"
+    importance: "critical"
+
+  - fact: "Earnings straddle pricing 8.5% move (elevated vs 6.2% historical average)"
+    source: "context.risk_considerations"
+    importance: "moderate"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "technology"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "earnings_event"
+    - "read_through"
+    - "binary_risk"
+    - "implied_volatility"
+  notes: >
+    This scenario tests the distinction between thesis development and catalyst
+    speculation. The key insight is that adding ahead of a binary event based
+    on a read-through is fundamentally a bet on the event, not a sizing decision
+    based on thesis conviction. The 67% read-through rate is useful but doesn't
+    justify aggressive pre-event sizing. The disciplined approach is to wait for
+    confirmation and add at lower cost.

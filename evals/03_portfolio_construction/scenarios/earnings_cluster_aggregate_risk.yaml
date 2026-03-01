@@ -1,0 +1,342 @@
+# Earnings Cluster Aggregate Risk: When Individual Sizing Is Right but Portfolio Risk Is Wrong
+# Tests: aggregate binary risk, correlated earnings outcomes, individual vs portfolio risk budgets
+
+id: earnings_cluster_aggregate_risk
+title: "Earnings Cluster Aggregate Risk: When Individual Sizing Is Right but Portfolio Risk Is Wrong"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "expert"
+estimated_time_minutes: 50
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Technology"
+    aum: "$700M"
+    gross_exposure: "175%"
+    net_exposure: "48%"
+    weekly_drawdown_tolerance: "2.0% of NAV max in any single week"
+    ytd_return: "+6.8%"
+
+  earnings_cluster:
+    week: "Q4 earnings week — 5 portfolio positions report in the same week"
+    total_weight: "18.0% of NAV"
+    positions:
+      - name: "CloudInfra Platforms"
+        ticker: "CIFP"
+        weight: "4.2% of NAV ($29.4M)"
+        sector: "Cloud Infrastructure"
+        trailing_vol: "28%"
+        implied_earnings_move: "7.5%"
+        conviction: "8/10"
+        expected_outcome: "Likely beat — cloud spending accelerating"
+      - name: "EnterpriseSaaS Leaders"
+        ticker: "ESSL"
+        weight: "3.8% of NAV ($26.6M)"
+        sector: "Enterprise Software"
+        trailing_vol: "32%"
+        implied_earnings_move: "6.8%"
+        conviction: "7/10"
+        expected_outcome: "Probable beat — net retention stable, billings strong"
+      - name: "SemiDesign Innovation"
+        ticker: "SDIV"
+        weight: "3.5% of NAV ($24.5M)"
+        sector: "Semiconductors"
+        trailing_vol: "38%"
+        implied_earnings_move: "9.2%"
+        conviction: "7/10"
+        expected_outcome: "Should beat — AI inference demand strong"
+      - name: "CyberDefense Systems"
+        ticker: "CYDF"
+        weight: "3.2% of NAV ($22.4M)"
+        sector: "Cybersecurity"
+        trailing_vol: "35%"
+        implied_earnings_move: "8.0%"
+        conviction: "7/10"
+        expected_outcome: "Likely beat — enterprise security budgets expanding"
+      - name: "AdTech Analytics"
+        ticker: "ADAT"
+        weight: "3.3% of NAV ($23.1M)"
+        sector: "Digital Advertising"
+        trailing_vol: "40%"
+        implied_earnings_move: "10.5%"
+        conviction: "6/10"
+        expected_outcome: "Uncertain — ad market recovery uneven"
+
+  correlation_analysis:
+    normal_pairwise_correlation: "0.30 average across the 5 positions"
+    earnings_season_correlation:
+      bad_quarter: "0.70 average — when the sector has a bad earnings season, results are highly correlated"
+      good_quarter: "0.45 average — in strong quarters, beats are somewhat correlated"
+      note: >
+        Correlation is asymmetric and regime-dependent. In a strong quarter,
+        companies can beat independently (different product cycles). In a
+        weak quarter, macro headwinds (IT budget cuts, spending pauses)
+        hit all software/tech companies simultaneously.
+
+  individual_risk_assessment:
+    per_position_earnings_risk:
+      avg_implied_move: "8.4%"
+      avg_position_weight: "3.6%"
+      avg_earnings_risk_per_name: "0.30% of NAV"
+    note: >
+      Each position individually contributes ~0.30% of earnings risk.
+      At our per-position risk tolerance of 0.5%, each is well within
+      budget. Individual sizing is correct.
+
+  aggregate_risk_analysis:
+    scenario_independent:
+      description: "If all 5 earnings were independent events"
+      probability_3plus_miss: "~5% (binomial, p=0.25 miss probability)"
+      expected_cluster_loss: "0.75% of NAV if all miss (5 * 0.30% * downside)"
+    scenario_correlated_bad_quarter:
+      description: "If this is a 'bad quarter' (correlation jumps to 0.70)"
+      probability_3plus_miss: "~25-30%"
+      cluster_loss_if_3_miss: "1.2-1.5% of NAV"
+      cluster_loss_if_4_miss: "1.6-2.0% of NAV"
+      cluster_loss_if_5_miss: "2.0-2.5% of NAV"
+      note: >
+        In a correlated bad quarter, the probability of 3+ misses is
+        5-6x higher than the independent case. The 18% of portfolio in
+        earnings-exposed positions could generate a 2.0-2.5% drawdown
+        in a single week — exceeding the 2.0% weekly drawdown tolerance.
+
+  stress_test:
+    description: "All 5 gap down 8-12% simultaneously"
+    loss_range: "$10.1M to $15.1M (1.44% to 2.16% of NAV)"
+    note: >
+      A simultaneous 8-12% gap across all 5 positions produces a 1.4-2.2%
+      portfolio drawdown from one week of earnings. The upper end breaches
+      the 2.0% weekly tolerance. This is not a tail scenario in a
+      correlated bad quarter — it's a plausible outcome.
+
+  analyst_argument: >
+    Each position is individually well-sized at 3-4% with appropriate
+    risk budgets. The theses are strong across the board — 4 of 5 are
+    likely beats. We should maintain our positions and capture the
+    earnings upside. Trimming ahead of a strong earnings season would
+    sacrifice alpha.
+
+# === TASK ===
+
+task:
+  prompt: >
+    Five positions totaling 18% of your portfolio report earnings in the
+    same week. Each is individually sized at 3-4% with appropriate risk
+    budgets — the individual sizing is correct. But in a "bad quarter"
+    scenario, earnings outcomes become correlated (0.70 pairwise), and
+    the probability of 3+ simultaneous misses jumps from 5% to 25-30%.
+
+    If all 5 gap down 8-12%, the portfolio drawdown is 1.4-2.2% of NAV
+    from a single week — potentially breaching the 2.0% weekly tolerance.
+
+    Evaluate the aggregate earnings risk. Your response should address:
+
+    1. Why individually correct sizing can produce portfolio-level risk
+       that exceeds individual risk budgets
+    2. How correlation changes around earnings seasons (0.30 normal →
+       0.70 in bad quarters) amplify aggregate risk
+    3. The probability analysis: independent vs correlated miss scenarios
+    4. Whether to trim positions ahead of the earnings cluster
+    5. Portfolio hedges as an alternative to trimming (sector puts,
+       index protection)
+    6. How to manage aggregate binary risk without sacrificing
+       individual position quality
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must distinguish between individual and aggregate risk assessment"
+    - "Must address the correlation regime change around earnings"
+    - "Must quantify the aggregate loss scenario"
+    - "Must evaluate both trimming and hedging approaches"
+    - "Must not dismiss aggregate risk because individual sizing is correct"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Aggregate Risk Recognition"
+      id: "aggregate_risk"
+      weight: 40
+      criteria:
+        - "Identifies that individually correct sizing doesn't imply portfolio-level safety"
+        - "Explains how correlated binary outcomes create aggregate risk exceeding individual budgets"
+        - "Calculates the aggregate loss in the correlated bad-quarter scenario"
+        - "Compares the aggregate loss to the weekly drawdown tolerance"
+
+    - name: "Correlation Regime Awareness"
+      id: "correlation_regime"
+      weight: 30
+      criteria:
+        - "Recognizes that earnings correlation is asymmetric (higher in bad quarters)"
+        - "Quantifies the difference: 5% probability of 3+ misses (independent) vs 25-30% (correlated)"
+        - "Notes that the 0.70 correlation in bad quarters is driven by common macro factors"
+        - "Does not assume normal-quarter correlation applies during earnings season"
+
+    - name: "Risk Mitigation Strategy"
+      id: "mitigation"
+      weight: 30
+      criteria:
+        - "Evaluates trimming 1-2 positions to reduce aggregate exposure"
+        - "Considers portfolio hedges (sector/index puts) as an alternative to trimming"
+        - "Identifies the weakest-conviction position (ADAT at 6/10) as the trim candidate"
+        - "Proposes a specific plan that keeps aggregate earnings risk within the weekly tolerance"
+
+  critical_failures:
+    - "Maintains all positions because individual sizing is correct"
+    - "Does not address the correlation regime change around earnings"
+    - "Does not calculate aggregate loss in the correlated scenario"
+    - "Ignores the weekly drawdown tolerance"
+    - "Treats the 5 earnings events as independent when they share macro drivers"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Assuming individual sizing correctness implies portfolio-level safety"
+    failure_type: "composition_fallacy"
+    severity: "critical"
+
+  - description: "Using normal-period correlation (0.30) for earnings-week risk assessment"
+    failure_type: "correlation_regime_error"
+    severity: "critical"
+
+  - description: "Not recognizing that binary outcomes cluster in bad quarters"
+    failure_type: "independence_assumption"
+    severity: "major"
+
+  - description: "Refusing to trim because 'all theses are strong'"
+    failure_type: "thesis_over_portfolio"
+    severity: "major"
+
+  - description: "Buying expensive hedges without comparing cost to trimming alternative"
+    failure_type: "hedge_cost_blindness"
+    severity: "moderate"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    Each position is individually well-sized at 3-4% with appropriate risk
+    budgets. Four of five are likely beats based on our analysis. Trimming
+    ahead of what should be a strong earnings week would sacrifice alpha.
+    The probability of all five missing simultaneously is very low — each
+    company has different revenue drivers and customer mixes. We should
+    maintain our positions and benefit from the expected earnings beats.
+
+  why_this_fails:
+    - "Individual sizing correctness does not imply portfolio-level safety"
+    - "In a bad quarter, earnings outcomes are correlated (0.70, not 0.30)"
+    - "Probability of 3+ simultaneous misses is 25-30% in correlated regime, not 'very low'"
+    - "'Different revenue drivers' doesn't prevent correlated misses when macro headwinds hit"
+    - "2.0-2.5% potential drawdown from a single week exceeds the 2.0% tolerance"
+    - "The analyst is thinking position-by-position, not portfolio-level"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The individual sizing is correct. The aggregate risk is not.
+
+      The core problem: 18% of NAV in positions that report in the same
+      week creates concentrated binary risk. Each position's earnings
+      risk (~0.30% of NAV) is within budget individually. But these are
+      not independent events. In a "bad quarter" — macro headwinds like
+      IT budget cuts, spending pauses, or guidance reductions — the
+      pairwise correlation jumps from 0.30 to 0.70.
+
+      At 0.70 correlation, the probability of 3+ simultaneous misses
+      goes from ~5% (independent) to 25-30%. If all 5 gap down 8-12%
+      simultaneously, the portfolio drawdown is 1.4-2.2% of NAV from a
+      single week — at the upper end, this breaches the 2.0% weekly
+      tolerance.
+
+      Mitigation options:
+
+      1. Trim the weakest-conviction position: ADAT (6/10, $23.1M,
+         "uncertain" outlook) is the natural candidate. Exiting fully
+         reduces earnings-exposed weight from 18% to 14.7% and removes
+         the highest-vol, lowest-conviction name. Max cluster loss drops
+         from 2.2% to 1.7%.
+
+      2. Reduce all positions by 15-20%: brings aggregate earnings
+         exposure from 18% to 14.4-15.3%. More balanced but sacrifices
+         some alpha across all names.
+
+      3. Portfolio hedge: buy sector puts (XLK 3% OTM, 2-week expiry)
+         for 0.3-0.5% of NAV. This provides portfolio-level protection
+         without reducing individual positions. Cost is acceptable if
+         the expected earnings alpha is significant.
+
+      Recommended approach: exit ADAT (weakest conviction) and buy a
+      small sector put position (0.2-0.3% of NAV). This reduces
+      aggregate earnings exposure to ~14.7% and provides tail protection
+      if the remaining 4 positions correlate downward.
+
+      The key insight: portfolio-level thinking is mandatory. Individually
+      well-sized positions can create aggregate risk that exceeds any
+      single position's risk budget. The PM must look across the book,
+      not just position-by-position.
+
+  failing:
+    response: >
+      Each position is well-sized at 3-4%. The theses are strong and we
+      expect beats across the board. We should maintain exposure to
+      capture the earnings upside.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "18% of NAV reports earnings in the same week (5 positions)"
+    source: "context.earnings_cluster"
+    importance: "critical"
+
+  - fact: "Earnings correlation jumps from 0.30 to 0.70 in bad quarters"
+    source: "context.correlation_analysis"
+    importance: "critical"
+
+  - fact: "Probability of 3+ misses: 5% (independent) vs 25-30% (correlated)"
+    source: "context.aggregate_risk_analysis"
+    importance: "critical"
+
+  - fact: "Aggregate loss if all 5 gap down 8-12%: 1.4-2.2% of NAV (breaches 2.0% weekly tolerance)"
+    source: "context.stress_test"
+    importance: "critical"
+
+  - fact: "ADAT is the weakest conviction (6/10) and most uncertain outcome"
+    source: "context.earnings_cluster.positions"
+    importance: "important"
+
+  - fact: "Individual position sizing is correct — the problem is aggregate, not individual"
+    source: "context.individual_risk_assessment"
+    importance: "important"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "technology"
+  skill_level: "expert"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "earnings_risk"
+    - "aggregate_risk"
+    - "correlation"
+    - "binary_events"
+    - "portfolio_level_thinking"
+  notes: >
+    This is the capstone scenario in the set. It tests the highest-level
+    portfolio construction skill: seeing risk at the portfolio level rather
+    than the position level. The key insight is that individually correct
+    sizing decisions can produce portfolio-level risk that exceeds any
+    individual risk budget. Correlation is the mechanism — and around earnings,
+    correlation is regime-dependent (higher in bad quarters). The best PMs
+    monitor aggregate binary risk calendars and manage the cluster, not
+    just the positions.

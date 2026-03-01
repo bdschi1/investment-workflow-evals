@@ -28,7 +28,7 @@ context:
     start_date: "2024-01-01"
     end_date: "2024-12-31"
     fund_return: "+26.3%"
-    benchmark_spy_return: "+22.1%"
+    benchmark_spy_return: "+22.1%"  # Stylized for teaching purposes; actual 2024 SPY ~+25%
     excess_return: "+420bps"
     risk_free_rate: "5.2%"
 

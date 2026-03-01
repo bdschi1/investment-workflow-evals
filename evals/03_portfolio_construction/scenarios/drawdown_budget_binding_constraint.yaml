@@ -1,0 +1,284 @@
+# Drawdown Budget as Binding Constraint: Survival Over Optimization
+# Tests: constraint hierarchy, stop-loss mechanics, Kelly irrelevance at limits, platform risk management
+
+id: drawdown_budget_binding_constraint
+title: "Drawdown Budget as Binding Constraint: Survival Over Optimization"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "expert"
+estimated_time_minutes: 50
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Multi-Sector"
+    aum: "$400M"
+    platform: "Multi-manager (pod-based)"
+    gross_exposure: "160%"
+    net_exposure: "30%"
+    ytd_return: "-3.8%"
+    trailing_30d_return: "-1.4%"
+
+  risk_limits:
+    hard_stop_loss: "-5.0% YTD"
+    warning_level: "-3.5% YTD (breached)"
+    remaining_drawdown_budget: "1.2%"
+    consequence_of_breach: >
+      Hard stop triggers mandatory 50% gross reduction within 48 hours,
+      followed by portfolio review. If -7% is reached, full liquidation
+      and PM is placed on probation. These are non-negotiable platform rules.
+    current_gross_constraint: >
+      At warning level, gross exposure limit reduced from 200% to 160%.
+      No new position initiations above 2% without CRO approval.
+
+  new_idea:
+    name: "IndustrialTech Automation"
+    ticker: "IDAT"
+    sector: "Industrials — Factory Automation"
+    market_cap: "$25B"
+    thesis: >
+      Leading factory automation platform benefiting from reshoring trend.
+      Secular growth in robotics adoption, 30% recurring revenue growing
+      40% YoY. Competitive moat from installed base and software ecosystem.
+    conviction: "8/10"
+    normal_sizing: "3.0% of NAV ($12M) at this conviction level"
+    trailing_vol_30d: "28%"
+    beta: 1.2
+
+  risk_math:
+    proposed_3pct_position:
+      vol_contribution: "0.84% of NAV (3% * 28%)"
+      two_sigma_loss: "1.68% of NAV"
+      note: "A 2-sigma adverse move in a 3% position would consume 1.68% — exceeding the 1.2% remaining drawdown budget"
+    proposed_1pct_position:
+      vol_contribution: "0.28% of NAV (1% * 28%)"
+      two_sigma_loss: "0.56% of NAV"
+      note: "A 2-sigma move in a 1% position would consume 0.56% — nearly half the remaining budget"
+
+  existing_portfolio_risk:
+    portfolio_daily_vol: "0.65%"
+    portfolio_2sigma_daily: "1.30%"
+    note: >
+      The existing portfolio can generate a 1.30% loss in a single
+      bad day — already exceeding the remaining 1.2% budget. Any
+      additional risk compounds this.
+
+  analyst_argument: >
+    This is an 8/10 conviction idea. Our drawdown is from being on the
+    wrong side of a macro rotation, not from bad stock picking. The
+    factory automation thesis is uncorrelated to our recent losses.
+    Kelly criterion at 60% win rate and 2.5:1 payoff suggests 28%
+    allocation. Even at half-Kelly we should be at 14%. A 3% position
+    is already conservative for this conviction level. We can't let
+    recent bad luck prevent us from putting on our best ideas.
+
+# === TASK ===
+
+task:
+  prompt: >
+    You are a PM at a multi-manager platform, down 3.8% YTD against a -5%
+    hard stop-loss. Your remaining drawdown budget is 1.2%. A high-conviction
+    idea (8/10) in factory automation normally warrants a 3% position, but
+    a 2-sigma move in a 3% position at 28% vol would consume 1.68% — more
+    than your remaining drawdown budget.
+
+    Your analyst argues this is your best idea and Kelly criterion supports
+    a much larger position. The drawdown is from macro, not stock-picking,
+    so the conviction should override the constraint.
+
+    Evaluate how to size this position. Your response should address:
+
+    1. Why the drawdown budget is a binding constraint that overrides
+       conviction and Kelly optimization
+    2. The difference between optimizing returns and ensuring survival
+    3. What the maximum position size is given the remaining risk budget
+    4. Why the analyst's Kelly argument is irrelevant in this context
+    5. How the existing portfolio's daily vol (0.65%) already threatens
+       the remaining budget
+    6. The platform consequences of breaching the stop-loss vs. the
+       opportunity cost of a smaller position
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must recognize the stop-loss as the binding constraint"
+    - "Must quantify the maximum tolerable position size"
+    - "Must explain why Kelly/conviction don't override survival constraints"
+    - "Must address the existing portfolio risk relative to remaining budget"
+    - "Must consider platform consequences of stop-loss breach"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Constraint Hierarchy"
+      id: "constraint_hierarchy"
+      weight: 40
+      criteria:
+        - "Recognizes that survival constraints dominate optimization constraints"
+        - "Identifies the drawdown budget as a hard constraint, not a guideline"
+        - "Understands that the problem is 'how much CAN I own' not 'how much SHOULD I own'"
+        - "Articulates that Kelly-optimal sizing is irrelevant if it risks forced liquidation"
+
+    - name: "Risk Quantification"
+      id: "risk_quantification"
+      weight: 35
+      criteria:
+        - "Calculates that 3% at 28% vol produces 1.68% 2-sigma loss (exceeds 1.2% budget)"
+        - "Notes existing portfolio daily vol (0.65%) already threatens remaining budget"
+        - "Proposes a maximum position size that keeps total portfolio risk within budget"
+        - "Considers that the new position's risk adds to existing portfolio risk, not replaces it"
+
+    - name: "Platform Risk Management"
+      id: "platform_risk"
+      weight: 25
+      criteria:
+        - "Addresses the asymmetric consequence of stop-loss breach (forced liquidation, probation)"
+        - "Compares the upside of a larger position vs. the downside of triggering the stop"
+        - "Recognizes that opportunity cost of a smaller position is recoverable; stop-loss breach may not be"
+        - "Considers whether any new position is appropriate given current risk levels"
+
+  critical_failures:
+    - "Sizes at 3% or higher, ignoring the drawdown budget"
+    - "Argues conviction overrides the stop-loss constraint"
+    - "Uses Kelly criterion to justify a large position near the stop-loss"
+    - "Ignores that existing portfolio risk already threatens the remaining budget"
+    - "Treats the stop-loss as a soft guideline rather than a hard constraint"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Using Kelly criterion near a binding stop-loss (Kelly assumes no hard constraints)"
+    failure_type: "optimization_near_constraint"
+    severity: "critical"
+
+  - description: "Treating conviction score as the primary sizing input when survival is at stake"
+    failure_type: "conviction_over_survival"
+    severity: "critical"
+
+  - description: "Ignoring that existing portfolio risk already consumes most of the remaining budget"
+    failure_type: "incremental_risk_blindness"
+    severity: "major"
+
+  - description: "Arguing the drawdown is 'from macro' so it doesn't count for risk management"
+    failure_type: "attribution_rationalization"
+    severity: "major"
+
+  - description: "Sizing for the best-case outcome rather than the worst-case constraint"
+    failure_type: "optimistic_sizing"
+    severity: "critical"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    This is an 8/10 conviction idea and Kelly supports a 14% allocation at
+    half-Kelly. Our recent drawdown was driven by macro rotation, not
+    stock-picking errors, so it shouldn't prevent us from putting on our
+    best ideas. The factory automation thesis is uncorrelated to our recent
+    losses. We should size at 3%, which is already conservative relative
+    to Kelly. Missing this opportunity because of a temporary drawdown
+    would be a bigger mistake than the risk of a slightly larger loss.
+
+  why_this_fails:
+    - "Kelly assumes no hard constraints — it's irrelevant near a stop-loss"
+    - "The source of the drawdown doesn't change the remaining budget"
+    - "3% at 28% vol produces 1.68% 2-sigma loss, exceeding the 1.2% budget"
+    - "Triggering the stop-loss forces 50% gross reduction — destroying the entire book"
+    - "A 'temporary drawdown' becomes permanent if the stop-loss triggers forced liquidation"
+    - "Opportunity cost of a smaller position is recoverable; stop-loss consequences may not be"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The analyst is wrong about the sizing and wrong about the framework.
+      This is not an optimization problem — it's a survival problem.
+
+      The math: at 3% of NAV with 28% vol, a 2-sigma move produces a 1.68%
+      portfolio loss. The remaining drawdown budget is 1.2%. A single bad
+      outcome in this position could trigger the hard stop-loss, forcing a
+      mandatory 50% gross reduction within 48 hours — which would crystallize
+      losses across the entire book and potentially end the PM's tenure.
+
+      Kelly criterion is irrelevant here. Kelly optimizes for geometric
+      growth over an infinite horizon with no hard constraints. The platform
+      stop-loss is a hard constraint that truncates the strategy if breached.
+      Optimizing within the constraint is the only relevant framework.
+
+      The existing portfolio compounds the problem. Daily portfolio vol of
+      0.65% means a 2-sigma day produces a 1.30% loss — already exceeding
+      the remaining 1.2% budget. Any new position adds marginal risk on top
+      of this baseline.
+
+      The maximum tolerable new position, if any, should be sized so that
+      its contribution to portfolio risk keeps the total 2-sigma daily loss
+      well below 1.2%. Depending on correlation with the existing book,
+      this likely means 0.5-1.0% of NAV ($2-4M) — not 3%.
+
+      The asymmetry of outcomes is decisive: missing a good trade costs
+      some alpha (recoverable). Triggering the stop-loss forces liquidation,
+      probation, and potentially loss of the book (not recoverable). When
+      the consequences are this asymmetric, you size for survival.
+
+  failing:
+    response: >
+      At 8/10 conviction and Kelly suggesting 14%, a 3% position is already
+      conservative. The macro-driven drawdown shouldn't prevent us from
+      expressing our best ideas. We should proceed with the 3% position
+      and manage the risk actively.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Remaining drawdown budget: 1.2% (5.0% limit - 3.8% YTD loss)"
+    source: "context.risk_limits"
+    importance: "critical"
+
+  - fact: "3% position at 28% vol: 2-sigma loss = 1.68% (exceeds 1.2% budget)"
+    source: "context.risk_math"
+    importance: "critical"
+
+  - fact: "Stop-loss breach triggers mandatory 50% gross reduction within 48 hours"
+    source: "context.risk_limits"
+    importance: "critical"
+
+  - fact: "Existing portfolio daily vol 0.65% → 2-sigma day = 1.30% loss (already exceeds budget)"
+    source: "context.existing_portfolio_risk"
+    importance: "critical"
+
+  - fact: "Kelly criterion assumes no hard constraints — irrelevant near stop-loss"
+    source: "derived"
+    importance: "important"
+
+  - fact: "Gross exposure already reduced from 200% to 160% at warning level"
+    source: "context.risk_limits"
+    importance: "moderate"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "multi-sector"
+  skill_level: "expert"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "drawdown_budget"
+    - "stop_loss"
+    - "kelly_criterion"
+    - "platform_risk"
+    - "survival_constraint"
+  notes: >
+    This is the purest test of constraint hierarchy in the set. The key insight
+    is that near a binding constraint, the entire optimization framework changes.
+    Kelly, conviction, expected value — none of these matter if the position
+    risks triggering forced liquidation. The best PMs at multi-manager platforms
+    understand that survival is the first objective, and they size accordingly
+    when the drawdown budget is thin.

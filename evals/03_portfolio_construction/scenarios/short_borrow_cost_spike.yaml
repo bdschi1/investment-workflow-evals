@@ -1,0 +1,304 @@
+# Short Borrow Cost Spike: When the Carry Changes the Calculus
+# Tests: carry cost as sizing input, squeeze mechanics, alternative short expressions, borrow as information
+
+id: short_borrow_cost_spike
+title: "Short Borrow Cost Spike: When the Carry Changes the Calculus"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "moderate"
+estimated_time_minutes: 35
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Consumer & Retail"
+    aum: "$450M"
+    gross_exposure: "175%"
+    net_exposure: "30%"
+    short_book_gross: "72.5% ($326M)"
+
+  position:
+    name: "OverhypedBrands Corp"
+    ticker: "OHBC"
+    sector: "Consumer Discretionary — Specialty Retail"
+    market_cap: "$6B"
+    position_type: "Short"
+    weight: "-2.0% of NAV (-$9M)"
+    shares_short: "150,000 shares"
+    entry_price: "$70.50"
+    current_price: "$59.90"
+    unrealized_gain: "+$1.59M (+17.7% on the short — stock has declined)"
+    holding_period: "4 months"
+
+  short_thesis:
+    original: >
+      Overvalued specialty retailer trading on brand hype. Revenue growth
+      decelerating (25% → 15% → 8% over 3 quarters). Gross margins
+      compressing as promotional activity increases. Management guiding
+      aggressively despite competitive headwinds. Comparable company
+      transactions imply 30-40% downside to fair value.
+    remaining_downside: >
+      Target price: $42 (30% further downside from current $59.90).
+      Thesis requires 2 more quarters of deceleration to crystallize.
+    conviction: "7/10 — thesis progressing as expected"
+
+  borrow_cost_change:
+    trigger: >
+      A secondary offering was announced but subsequently pulled due to
+      poor market conditions. The failed secondary increased demand for
+      borrows (short sellers who would have covered against new shares
+      now need to maintain existing borrows). Prime brokers tightened
+      locate availability.
+    pre_event:
+      borrow_rate: "2% annualized"
+      borrow_cost_monthly: "$15,000 on $9M position"
+      short_interest_pct_float: "18%"
+      days_to_cover: "4 days"
+    post_event:
+      borrow_rate: "22% annualized"
+      borrow_cost_monthly: "$165,000 on $9M position"
+      short_interest_pct_float: "30%"
+      days_to_cover: "8 days"
+      note: >
+        At 22% annualized borrow, the carry cost is -$165K/month or
+        approximately -$1.98M annualized on a $9M position. That's 22%
+        of the position's notional. Monthly drag on the portfolio is
+        approximately -3.7 bps per month just from carry.
+
+  hurdle_rate_analysis:
+    at_2pct_borrow: >
+      To break even: stock needs to decline >2% annualized (trivially easy
+      if the thesis is right). Net expected return = 30% downside - 2%
+      carry = ~28% net.
+    at_22pct_borrow: >
+      To break even: stock needs to decline >22% annualized. With 30%
+      remaining downside over ~6 months (60% annualized), the net expected
+      return is still positive but the hurdle is material. And the 30%
+      downside estimate has uncertainty — if only 15% downside remains,
+      the position may not clear the borrow cost.
+
+  squeeze_risk_assessment:
+    short_interest: "30% of float (elevated)"
+    days_to_cover: "8 days"
+    retail_sentiment: "Moderately discussed on social media; not at meme-stock levels"
+    catalyst_for_squeeze: >
+      Any positive surprise (earnings beat, analyst upgrade, management
+      buyback announcement) could trigger a short squeeze. At 30% SI
+      and 8 days to cover, forced covering dynamics could produce a
+      10-20% squeeze in 2-3 days.
+    squeeze_loss_on_current_position: "$0.9M-$1.8M (10-20% on $9M)"
+
+  alternative_expressions:
+    put_spread:
+      description: "Buy $60/$45 put spread, 4-month expiry"
+      cost: "$1.2M premium (13% of notional)"
+      max_gain: "$2.25M if stock reaches $45"
+      max_loss: "$1.2M premium (defined)"
+      borrow_cost: "$0"
+      note: "Defined risk, no borrow cost, no squeeze risk"
+    reduce_and_hold:
+      description: "Cut position to -1.0% ($4.5M) and absorb the borrow"
+      monthly_carry: "$82,500"
+      note: "Reduces squeeze exposure and carry cost by half"
+
+# === TASK ===
+
+task:
+  prompt: >
+    Your short position in a consumer discretionary name has an unrealized
+    gain of +17.7% (stock declined from $70.50 to $59.90). The thesis is
+    progressing — you estimate 30% further downside to fair value.
+
+    However, after a failed secondary offering, the borrow cost spiked from
+    2% to 22% annualized. Short interest jumped to 30% of float with 8 days
+    to cover. The monthly carry on your -2% position is now $165K, or
+    approximately -3.7 bps per month portfolio drag.
+
+    Evaluate whether to maintain, reduce, or restructure the short position.
+    Your response should address:
+
+    1. How the borrow cost spike changes the hurdle rate for the short thesis
+    2. Whether the remaining 30% downside justifies a 22% annualized carry cost
+    3. The squeeze risk at 30% SI and 8 days to cover
+    4. The information content of the borrow cost spike itself (what does
+       heavy short demand tell you?)
+    5. Alternative expressions: put spreads vs equity shorts at high borrow
+    6. Whether taking profit on +17.7% and expressing remaining downside
+       through options is more capital-efficient
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must treat borrow cost as a sizing input that changes the hurdle rate"
+    - "Must address squeeze risk quantitatively"
+    - "Must evaluate alternative short expressions"
+    - "Must consider the information content of the borrow spike"
+    - "Must not ignore carry cost as immaterial"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Carry Cost Analysis"
+      id: "carry_analysis"
+      weight: 35
+      criteria:
+        - "Quantifies the monthly and annualized carry cost ($165K/month, $1.98M/year)"
+        - "Recalculates the hurdle rate at 22% borrow (vs 2% previously)"
+        - "Assesses whether the remaining thesis upside justifies the carry"
+        - "Considers the carry cost relative to the unrealized gain ($1.59M)"
+
+    - name: "Squeeze Risk Assessment"
+      id: "squeeze_risk"
+      weight: 30
+      criteria:
+        - "Quantifies squeeze risk at 30% SI and 8 days to cover"
+        - "Estimates potential squeeze magnitude (10-20% in 2-3 days)"
+        - "Considers catalysts that could trigger a squeeze"
+        - "Evaluates whether the risk/reward is attractive given squeeze probability"
+
+    - name: "Alternative Expression Evaluation"
+      id: "alternatives"
+      weight: 35
+      criteria:
+        - "Evaluates put spread as an alternative (defined risk, no borrow)"
+        - "Compares total cost: put spread ($1.2M) vs 4-month borrow ($660K) + squeeze risk"
+        - "Considers taking profit on the equity short and rolling to options"
+        - "Proposes a specific recommendation (hold, reduce, or restructure)"
+
+  critical_failures:
+    - "Maintains full position without addressing the 22% borrow cost"
+    - "Ignores squeeze risk at 30% SI"
+    - "Does not consider alternative short expressions"
+    - "Dismisses borrow cost as a trivial expense"
+    - "Does not recalculate the hurdle rate at the new borrow level"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Ignoring 22% borrow as immaterial on a 2% position"
+    failure_type: "carry_cost_blindness"
+    severity: "critical"
+
+  - description: "Not recognizing that heavy borrow demand is itself informational"
+    failure_type: "information_blindness"
+    severity: "moderate"
+
+  - description: "Maintaining full position because the thesis is 'working'"
+    failure_type: "thesis_anchoring"
+    severity: "major"
+
+  - description: "Not considering put spreads as a capital-efficient alternative"
+    failure_type: "instrument_inflexibility"
+    severity: "major"
+
+  - description: "Ignoring squeeze risk at 30% SI and 8 days to cover"
+    failure_type: "squeeze_blindness"
+    severity: "major"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    The thesis is working — the stock is down 17.7% and we estimate 30%
+    further downside. The borrow cost increase is unfortunate but manageable
+    at $165K per month on a $450M fund. We should maintain the position and
+    capture the remaining downside. Short squeezes are overblown in the media
+    and our thesis is fundamentally sound.
+
+  why_this_fails:
+    - "Dismisses $1.98M annualized carry as 'manageable' without analyzing the hurdle rate"
+    - "Does not consider that the 22% carry cost consumes a significant portion of remaining upside"
+    - "Dismisses squeeze risk at 30% SI and 8 days to cover"
+    - "Does not evaluate cheaper alternative expressions (put spreads)"
+    - "The thesis being 'right' doesn't mean the expression is optimal"
+    - "At 22% borrow, the same thesis is much better expressed through put options"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The thesis is progressing but the expression needs to change. The
+      borrow cost spike fundamentally alters the economics of this short.
+
+      Carry analysis: at 2% borrow, the monthly cost was $15K — trivial.
+      At 22%, it's $165K/month or $1.98M annualized on a $9M position.
+      That's 22% of notional per year. The remaining thesis upside is 30%
+      ($2.7M on $9M), expected over ~6 months. Net of 6 months of carry
+      ($990K), the expected profit drops to $1.71M — and that's before
+      accounting for squeeze risk.
+
+      The borrow spike itself is information. Heavy borrow demand at 30% SI
+      means many other funds share the bearish thesis. Crowded shorts are
+      vulnerable to squeezes — and at 8 days to cover, a positive surprise
+      could produce a 10-20% squeeze ($0.9-1.8M loss on $9M).
+
+      The risk/reward has shifted: 30% downside potential minus 22% carry
+      cost minus squeeze risk is substantially worse than when borrow was
+      2%. The position that made sense at 2% borrow may not make sense at
+      22%.
+
+      Recommended approach: take profit on the equity short (+$1.59M
+      realized gain) and roll the remaining bearish thesis into a $60/$45
+      put spread (4-month expiry, $1.2M premium). The put spread offers
+      $2.25M max gain, $1.2M max loss (defined), zero borrow cost, and
+      zero squeeze risk. Net of the realized gain, the total P&L ceiling
+      is +$2.64M vs floor of +$0.39M. This is a better risk/reward than
+      maintaining the equity short with 22% carry and open-ended squeeze
+      exposure.
+
+  failing:
+    response: >
+      The thesis is working. The borrow cost is just a cost of doing
+      business. We should maintain the short and capture the remaining
+      30% downside.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Borrow cost spiked from 2% to 22% annualized ($15K to $165K monthly carry)"
+    source: "context.borrow_cost_change"
+    importance: "critical"
+
+  - fact: "Short interest at 30% of float, days to cover 8 days (squeeze vulnerability)"
+    source: "context.borrow_cost_change.post_event"
+    importance: "critical"
+
+  - fact: "Unrealized gain of +$1.59M (+17.7%) — profit already available to harvest"
+    source: "context.position"
+    importance: "important"
+
+  - fact: "Put spread alternative: $1.2M premium, $2.25M max gain, zero borrow, zero squeeze risk"
+    source: "context.alternative_expressions"
+    importance: "important"
+
+  - fact: "At 22% borrow, 6-month carry ($990K) consumes 37% of expected remaining profit ($2.7M)"
+    source: "context.hurdle_rate_analysis"
+    importance: "critical"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "consumer"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "short_selling"
+    - "borrow_cost"
+    - "squeeze_risk"
+    - "options_expression"
+  notes: >
+    This scenario tests whether the model treats borrow cost as a sizing input
+    that changes the hurdle rate. The key insight is that the same thesis may
+    be correct but the expression needs to change when carry costs spike. At
+    22% annualized borrow, put options are almost always a more capital-efficient
+    way to express a bearish thesis. The best short sellers are instrument-flexible,
+    not dogmatic about equity expression.

@@ -1,0 +1,276 @@
+# Adding to a Confirmed Winner: When Appreciation Does the Sizing for You
+# Tests: passive drift recognition, momentum factor loading, tax lot management, risk contribution drift
+
+id: adding_to_a_confirmed_winner
+title: "Adding to a Confirmed Winner: When Appreciation Does the Sizing for You"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "hard"
+estimated_time_minutes: 40
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Technology & Consumer"
+    aum: "$500M"
+    gross_exposure: "170%"
+    net_exposure: "40%"
+    number_of_positions: "45 long, 25 short"
+
+  position:
+    name: "Efficiency Platforms Inc"
+    ticker: "EFPL"
+    sector: "Technology — Enterprise Software"
+    market_cap: "$350B"
+    original_entry:
+      date: "9 months ago"
+      price: "$180"
+      weight: "2.0% of NAV ($10M)"
+      thesis: "Year of Efficiency restructuring would drive margin expansion; market underappreciating operating leverage"
+      conviction_at_entry: "6/10"
+    current_state:
+      price: "$396 (+120%)"
+      weight_from_appreciation: "4.4% of NAV ($22M)"
+      unrealized_gain: "$12M (+120%)"
+      holding_period: "9 months (3 months to LTCG)"
+
+  risk_profile_evolution:
+    at_entry:
+      trailing_vol_30d: "28%"
+      beta: 1.1
+      momentum_factor_loading: 0.15
+      risk_contribution_to_portfolio: "1.8%"
+    current:
+      trailing_vol_30d: "35%"
+      beta: 1.3
+      momentum_factor_loading: 0.72
+      risk_contribution_to_portfolio: "4.8%"
+      note: "Risk contribution is 2.7x original intent despite no active adds"
+
+  analyst_recommendation:
+    action: "Add from 4.4% to 6.0% ($30M total, adding $8M)"
+    rationale: >
+      Thesis fully confirmed. Margin expansion exceeded expectations (op margin
+      from 25% to 38%). Revenue re-acceleration in last two quarters. AI
+      monetization driving new product cycle. Management executing flawlessly.
+      This is the best stock in the portfolio — we should own more.
+    conviction_now: "8/10"
+
+  factor_attribution:
+    last_6_months:
+      total_return: "+78%"
+      alpha_component: "+32%"
+      momentum_factor: "+28%"
+      growth_factor: "+12%"
+      market_beta: "+6%"
+
+  portfolio_context:
+    top_5_long_weights: ["EFPL: 4.4%", "Name2: 3.8%", "Name3: 3.2%", "Name4: 2.9%", "Name5: 2.7%"]
+    single_name_concentration_limit: "5% of NAV"
+    note: "EFPL is already the largest long position by weight"
+
+# === TASK ===
+
+task:
+  prompt: >
+    Nine months ago you initiated a 2% position in an enterprise software
+    company at 6/10 conviction. The stock has appreciated 120%, growing the
+    position to 4.4% of NAV through price appreciation alone. The analyst's
+    conviction has increased to 8/10 and they want to actively add to 6%.
+
+    Evaluate whether adding to this position is appropriate. Your response
+    should address:
+
+    1. How passive appreciation has already "sized up" the position in both
+       notional and risk terms
+    2. Factor attribution: how much of the recent return is alpha vs.
+       momentum factor exposure
+    3. The risk contribution drift (1.8% to 4.8% of portfolio risk) and
+       whether the current risk budget allocation is intentional
+    4. Tax lot management: the position is 3 months from long-term capital
+       gains treatment
+    5. Single-name concentration limits and the marginal risk of going from
+       4.4% to 6.0%
+    6. Whether "thesis confirmed" is sufficient justification for adding to
+       a position that has already more than doubled
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must distinguish between passive drift sizing and active sizing decisions"
+    - "Must address momentum factor loading and factor attribution"
+    - "Must evaluate risk contribution relative to original intent"
+    - "Must consider tax implications of the holding period"
+    - "Must check concentration limits"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Passive Drift Recognition"
+      id: "drift_recognition"
+      weight: 35
+      criteria:
+        - "Recognizes that the position already grew 2.2x in weight through appreciation"
+        - "Quantifies risk contribution drift (1.8% to 4.8% — a 2.7x increase)"
+        - "Distinguishes between intentional sizing and drift-driven oversizing"
+        - "Notes that the position is already the largest in the long book"
+
+    - name: "Factor vs Alpha Analysis"
+      id: "factor_alpha"
+      weight: 35
+      criteria:
+        - "Identifies that 59% of recent returns came from factor exposure, not alpha"
+        - "Recognizes increased momentum loading (0.15 to 0.72) as a risk, not a feature"
+        - "Understands that adding more buys momentum factor exposure at elevated levels"
+        - "Notes that momentum factor reversals historically produce sharp drawdowns"
+
+    - name: "Portfolio Construction Discipline"
+      id: "construction_discipline"
+      weight: 30
+      criteria:
+        - "Checks single-name concentration limit (5%); adding to 6% would breach it"
+        - "Considers tax efficiency (3 months to LTCG treatment)"
+        - "Evaluates whether to actively trim rather than add"
+        - "Proposes a disciplined framework for handling appreciated positions"
+
+  critical_failures:
+    - "Recommends adding without acknowledging passive drift has already oversized the position"
+    - "Ignores factor attribution showing majority of returns from momentum, not alpha"
+    - "Does not check concentration limits"
+    - "Treats 'thesis confirmed' as sufficient justification for adding at any price"
+    - "Fails to consider that trimming may be more appropriate than adding"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Treating appreciation-driven oversizing as evidence the position should be even larger"
+    failure_type: "winner_bias"
+    severity: "critical"
+
+  - description: "Ignoring momentum factor loading and treating all returns as alpha"
+    failure_type: "factor_attribution_failure"
+    severity: "critical"
+
+  - description: "Not recognizing that risk contribution already exceeded original intent by 2.7x"
+    failure_type: "risk_drift_blindness"
+    severity: "major"
+
+  - description: "Adding $8M three months before LTCG qualification on existing $12M gain"
+    failure_type: "tax_inefficiency"
+    severity: "moderate"
+
+  - description: "Anchoring on conviction score without considering position-in-context"
+    failure_type: "conviction_anchoring"
+    severity: "major"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    This is our best-performing position and the thesis is fully confirmed.
+    Revenue re-acceleration, margin expansion, and AI monetization all
+    exceeded expectations. Conviction has rightfully increased from 6/10 to
+    8/10. We should add to 6% to reflect our higher conviction. The stock's
+    strong performance validates our analysis and the trend likely has
+    further to run. We can easily absorb a 6% position given our $500M AUM.
+
+  why_this_fails:
+    - "Ignores that the position already grew from 2% to 4.4% through passive drift"
+    - "Does not address that risk contribution is 2.7x original intent"
+    - "Treats past performance as justification for adding rather than a signal to reassess sizing"
+    - "Ignores that 59% of recent returns are factor-driven, not alpha"
+    - "Would breach the 5% single-name concentration limit"
+    - "Classic behavioral finance error: confusing a winning stock with a well-sized position"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The analyst's thesis assessment may be correct, but the sizing
+      recommendation confuses conviction with construction. The position
+      has already grown 2.2x through appreciation — from 2% to 4.4% of
+      NAV — without any active decision to increase exposure. In risk terms,
+      the growth is even larger: risk contribution went from 1.8% to 4.8%
+      of portfolio risk (2.7x) due to both weight increase and vol/beta
+      expansion.
+
+      Factor attribution raises a separate concern: of the +78% return over
+      the last 6 months, only 32pp came from alpha. Momentum contributed
+      28pp and growth/beta another 18pp. Adding more at current levels buys
+      additional momentum factor exposure at elevated loading (0.72 vs 0.15
+      at entry), which is historically mean-reverting.
+
+      Adding to 6% would breach the 5% single-name concentration limit.
+      Moreover, with $12M in unrealized gains and 3 months to LTCG
+      qualification, any rebalancing should be tax-aware.
+
+      The appropriate action is likely the opposite of the recommendation:
+      consider trimming back toward the original 2-3% risk budget for this
+      name. If conviction truly warrants a larger position, maintain current
+      notional ($22M / 4.4%) and acknowledge that the position is already
+      oversized relative to the original risk allocation. Adding actively
+      to an appreciated, momentum-loaded position at its highest-ever weight
+      is a behavioral trap, not a portfolio construction decision.
+
+  failing:
+    response: >
+      The thesis is confirmed and conviction has increased from 6/10 to 8/10.
+      We should add to 6% as the analyst recommends. The stock's appreciation
+      validates our original analysis and the fundamentals continue to improve.
+      This is our best idea and should be our largest position.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Position grew from 2.0% to 4.4% through appreciation alone (no active adds)"
+    source: "context.position"
+    importance: "critical"
+
+  - fact: "Risk contribution increased 2.7x from 1.8% to 4.8% of portfolio risk"
+    source: "context.risk_profile_evolution"
+    importance: "critical"
+
+  - fact: "Momentum factor loading increased from 0.15 to 0.72"
+    source: "context.risk_profile_evolution"
+    importance: "critical"
+
+  - fact: "Only 32pp of 78pp recent return is alpha; 46pp is factor-driven"
+    source: "context.factor_attribution"
+    importance: "important"
+
+  - fact: "Single-name concentration limit is 5% — adding to 6% would breach it"
+    source: "context.portfolio_context"
+    importance: "important"
+
+  - fact: "Position is 3 months from LTCG qualification on $12M unrealized gain"
+    source: "context.position.current_state"
+    importance: "moderate"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "technology"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "passive_drift"
+    - "momentum_factor"
+    - "concentration_risk"
+    - "behavioral_finance"
+  notes: >
+    This scenario targets a common behavioral trap in L/S equity: the tendency
+    to add to winners because the thesis was "right." The key insight is that
+    appreciation has already done the sizing — the position is 2.7x larger in
+    risk terms than originally intended. Adding more compounds the concentration,
+    increases momentum factor exposure at elevated levels, and may breach
+    portfolio constraints. The disciplined PM recognizes when to let a winner
+    ride vs. when to trim back to risk budget.

@@ -1,0 +1,272 @@
+# Post-Earnings Position Doubling: When Conviction Doubles but Risk Quadruples
+# Tests: vol-adjusted sizing, systematic risk shift, concentration limits, market impact
+
+id: post_earnings_position_doubling
+title: "Post-Earnings Position Doubling: When Conviction Doubles but Risk Quadruples"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "hard"
+estimated_time_minutes: 45
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Technology Focus"
+    aum: "$800M"
+    gross_exposure: "175%"
+    net_exposure: "55%"
+    tech_sector_weight: "26% of gross"
+    sector_concentration_limit: "30% of gross"
+
+  position:
+    name: "Advanced Chip Dynamics"
+    ticker: "ACHP"
+    current_weight: "6.25% ($50M)"
+    market_cap: "$450B"
+    sector: "Semiconductors"
+    thesis: "Leading AI accelerator supplier with 80%+ market share in training chips"
+
+  earnings_event:
+    quarter: "Q1 2024"
+    revenue_surprise: "+18% vs consensus ($28B vs $24B expected)"
+    yoy_growth: "+60%"
+    guidance: "Raised Q2 by 25% above Street; full-year raised by 20%"
+    stock_reaction: "+12% post-earnings"
+    analyst_upgrades: "14 price target increases in 48 hours"
+
+  risk_profile_change:
+    pre_earnings:
+      realized_vol_30d: "35%"
+      beta_to_spy: 1.3
+      beta_to_soxx: 0.9
+      idiosyncratic_variance_share: "65%"
+      correlation_to_ai_basket: 0.45
+    post_earnings:
+      realized_vol_30d: "65%"
+      implied_vol_30d: "58%"
+      beta_to_spy: 1.8
+      beta_to_soxx: 1.3
+      idiosyncratic_variance_share: "40%"
+      correlation_to_ai_basket: 0.78
+      note: "Stock now trades as the de facto AI proxy — moves with the basket, not independently"
+
+  analyst_recommendation:
+    action: "Double position from $50M to $100M"
+    rationale: >
+      Q1 confirmed the thesis. Revenue inflection is real, guidance trajectory
+      is accelerating, and we are in the early innings of a multi-year AI
+      infrastructure buildout. This is the highest-conviction name in the book.
+    proposed_timeline: "Execute over 2 weeks"
+
+  market_impact_estimate:
+    adv_20d: "$8.5B"
+    position_as_pct_adv: "0.6% current, 1.2% if doubled"
+    estimated_slippage_50m_add: "15-25 bps in current elevated-vol environment"
+    note: "Post-earnings volume elevated 3x normal but will normalize within 5-7 days"
+
+# === TASK ===
+
+task:
+  prompt: >
+    Your senior analyst wants to double the fund's position in a leading
+    semiconductor company from $50M (6.25% of NAV) to $100M (12.5%) after
+    blowout Q1 earnings. Revenue beat by 18%, guidance was raised
+    substantially, and the thesis appears fully confirmed.
+
+    However, since the earnings print: realized volatility nearly doubled
+    (35% to 65%), beta to SPY increased from 1.3 to 1.8, correlation to the
+    AI basket jumped from 0.45 to 0.78, and the share of variance explained
+    by idiosyncratic factors dropped from 65% to 40%.
+
+    Evaluate the analyst's proposal. Your response should address:
+
+    1. What doubling notional exposure means in risk-contribution terms when
+       volatility has also doubled
+    2. How the shift from idiosyncratic to systematic risk changes the
+       portfolio-level impact
+    3. Whether the proposed size would breach sector concentration limits
+    4. Market impact considerations for a $50M add in an elevated-vol name
+    5. What the right size increase is (if any) and how to determine it
+    6. How to reconcile strong fundamental conviction with materially
+       changed risk characteristics
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must quantify risk contribution change, not just notional change"
+    - "Must address the idiosyncratic-to-systematic risk shift"
+    - "Must check sector concentration limits"
+    - "Must consider market impact and execution timing"
+    - "Must not conflate thesis confirmation with sizing justification"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Risk-Adjusted Sizing"
+      id: "risk_adjusted_sizing"
+      weight: 40
+      criteria:
+        - "Quantifies that doubling notional at 2x vol means ~4x risk contribution"
+        - "Calculates vol-adjusted position size (e.g., to maintain same risk contribution, notional should stay flat or decrease)"
+        - "Recognizes that the position is already larger in risk terms from vol expansion alone"
+        - "Proposes a size that reflects risk budget, not conviction level"
+
+    - name: "Systematic Risk Recognition"
+      id: "systematic_risk"
+      weight: 30
+      criteria:
+        - "Identifies the idio-to-systematic shift (65% to 40% idiosyncratic)"
+        - "Recognizes increased correlation to AI basket reduces diversification benefit"
+        - "Notes that higher beta means greater sensitivity to broad market moves"
+        - "Understands that factor risk is not compensated the same way as alpha"
+
+    - name: "Portfolio Constraints"
+      id: "portfolio_constraints"
+      weight: 30
+      criteria:
+        - "Checks tech sector concentration (26% + add would approach or breach 30%)"
+        - "Evaluates market impact of $50M add at elevated vol"
+        - "Considers execution timing (post-earnings volume will normalize)"
+        - "Addresses opportunity cost of concentrating in a single name"
+
+  critical_failures:
+    - "Approves doubling without adjusting for volatility change"
+    - "Treats notional increase as equivalent to risk increase (2x not 4x)"
+    - "Ignores sector concentration limit"
+    - "Fails to recognize idiosyncratic-to-systematic risk shift"
+    - "Uses post-earnings euphoria as sizing justification"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Treating 2x notional as 2x risk when vol also doubled (actual risk is ~4x)"
+    failure_type: "risk_contribution_error"
+    severity: "critical"
+
+  - description: "Anchoring on thesis confirmation without re-evaluating risk characteristics"
+    failure_type: "conviction_size_conflation"
+    severity: "critical"
+
+  - description: "Ignoring the sector concentration limit breach at 12.5% position size"
+    failure_type: "constraint_violation"
+    severity: "major"
+
+  - description: "Assuming post-earnings elevated volume persists for execution window"
+    failure_type: "execution_assumption"
+    severity: "moderate"
+
+  - description: "Dismissing the systematic risk shift because the fundamental thesis is intact"
+    failure_type: "risk_character_blindness"
+    severity: "major"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    The Q1 results fully confirmed our thesis — revenue beat by 18%, guidance
+    was raised substantially, and we're in the early innings of a multi-year
+    cycle. This is our highest-conviction name and the market is still
+    underestimating the magnitude of the AI buildout. We should double the
+    position as the analyst recommends. The increased volatility is just
+    noise around a strong trend. At $450B market cap with $8.5B ADV, we can
+    easily execute $50M over two weeks with minimal market impact.
+
+  why_this_fails:
+    - "Ignores that risk contribution is ~4x, not 2x, due to vol doubling"
+    - "Dismisses volatility change as noise rather than a material risk input"
+    - "Does not check sector concentration limits"
+    - "Confuses thesis confirmation with position sizing justification"
+    - "Ignores the shift from idiosyncratic to systematic risk"
+    - "A well-confirmed thesis at $50M may be the right answer — the thesis quality doesn't change the risk math"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The analyst's thesis assessment is sound but the sizing proposal is not.
+      Pre-earnings, the $50M position contributed approximately $17.5M of
+      annualized vol-weighted risk (6.25% * 35% * NAV). Post-earnings, the
+      same $50M now contributes ~$32.5M (6.25% * 65% * NAV) — the position
+      is already nearly 2x larger in risk terms without adding a dollar.
+      Doubling to $100M at 65% vol would produce ~$65M of risk contribution,
+      roughly 3.7x the original risk budget for this name.
+
+      Additionally, the position has shifted from 65% idiosyncratic to 40%
+      idiosyncratic variance. The thesis-driven alpha we're paying for now
+      represents less than half the position's risk. The remaining 60% is
+      systematic exposure to the AI/semiconductor factor, which we can get
+      more cheaply through index products if we want it.
+
+      At the portfolio level, tech is already at 26% of gross. Adding $50M
+      takes it to approximately 32%, breaching the 30% concentration limit.
+
+      The right approach: maintain current notional exposure ($50M) and
+      recognize that the position is already larger in risk terms. If
+      conviction warrants more exposure, consider adding $10-15M (to ~8% of
+      NAV) which would keep risk contribution at roughly 2x the original
+      level — still an aggressive increase. Stage the add over 2-3 weeks
+      as post-earnings volume normalizes. Evaluate whether another tech name
+      should be trimmed to stay within sector limits.
+
+  failing:
+    response: >
+      The Q1 results confirm our thesis and the analyst's recommendation to
+      double is appropriate. The stock is a proven winner with accelerating
+      fundamentals. We should execute the full $50M add over the proposed
+      two-week window to maximize our exposure to this high-conviction name.
+      The increased volatility will settle down as the market digests the
+      strong results.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Realized vol nearly doubled: 35% pre-earnings to 65% post-earnings"
+    source: "context.risk_profile_change"
+    importance: "critical"
+
+  - fact: "Beta to SPY increased from 1.3 to 1.8 (38% increase in systematic exposure)"
+    source: "context.risk_profile_change"
+    importance: "critical"
+
+  - fact: "Idiosyncratic variance share dropped from 65% to 40% (stock now moves with AI basket)"
+    source: "context.risk_profile_change"
+    importance: "critical"
+
+  - fact: "Tech sector at 26% of gross vs 30% limit — doubling would breach the constraint"
+    source: "context.portfolio"
+    importance: "important"
+
+  - fact: "Doubling notional at 2x vol means approximately 4x risk contribution"
+    source: "derived"
+    importance: "critical"
+
+  - fact: "Post-earnings volume elevated 3x but will normalize in 5-7 days"
+    source: "context.market_impact_estimate"
+    importance: "moderate"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "technology"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "post_earnings"
+    - "volatility"
+    - "risk_contribution"
+    - "concentration_limits"
+  notes: >
+    This scenario tests the most common sizing mistake in L/S equity: conflating
+    thesis conviction with position size. The key insight is that doubling
+    notional exposure when volatility has also doubled means approximately 4x
+    the risk contribution, not 2x. The position is already "larger" in risk
+    terms from the vol expansion alone, before adding a single dollar.

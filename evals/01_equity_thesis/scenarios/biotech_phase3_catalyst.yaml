@@ -11,7 +11,7 @@ estimated_time_minutes: 45
 
 context:
   company:
-    name: "Vertex Therapeutics"
+    name: "Vertex Pharmaceuticals"
     ticker: "VRTX"
     sector: "Healthcare - Biotechnology"
     market_cap: "$95B"
@@ -42,12 +42,12 @@ context:
     remains elevated with large pharma seeking pipeline replenishment.
     Opioid crisis has created regulatory tailwinds for non-opioid
     alternatives, but commercial success of prior entrants has been
-    disappointing (e.g., Nektar's NKTR-181 failure).
+    disappointing (e.g., limited commercial traction for novel non-opioid mechanisms).
 
   as_of_date: "2024-12-15"
 
   additional_context: >
-    Vertex's CF franchise generates $8B+ annually with high margins.
+    Vertex's CF franchise generates approximately $10B annually with high margins.
     The company has $13B in cash and no debt. Management has historically
     been conservative in guidance but has recently increased commentary
     on VX-548's commercial potential. Several sell-side analysts have
@@ -55,7 +55,7 @@ context:
 
 task:
   prompt: >
-    Develop an investment thesis for Vertex Therapeutics (VRTX) ahead of
+    Develop an investment thesis for Vertex Pharmaceuticals (VRTX) ahead of
     the VX-548 Phase 3 readout. Your analysis should include:
 
     1. A clear long/short recommendation with position sizing
@@ -83,7 +83,7 @@ data_sources:
     description: "Vertex 2023 Annual Report"
     date: "2024-02-28"
     key_data_points:
-      - "CF franchise revenue: $8.9B"
+      - "CF franchise revenue: $9.9B"
       - "R&D expense: $3.2B"
       - "Cash and investments: $13.2B"
       - "Operating margin: 42%"

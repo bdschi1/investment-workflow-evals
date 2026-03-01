@@ -1,0 +1,299 @@
+# Kelly Criterion with Small Sample: When Statistical Confidence Doesn't Support the Math
+# Tests: Kelly sensitivity to input uncertainty, small-sample inference, conservative sizing under parameter uncertainty
+
+id: kelly_criterion_with_small_sample
+title: "Kelly Criterion with Small Sample: When Statistical Confidence Doesn't Support the Math"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "expert"
+estimated_time_minutes: 50
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Healthcare Catalyst"
+    aum: "$350M"
+    gross_exposure: "150%"
+    net_exposure: "35%"
+    risk_budget_per_trade: "Typically 2-4% of NAV per position"
+
+  strategy_backtest:
+    description: >
+      Systematic healthcare catalyst strategy: takes positions 5-10 days
+      before FDA advisory committee meetings based on a proprietary model
+      that predicts committee vote outcomes using historical voting patterns,
+      drug mechanism similarity, and clinical data quality scores.
+    sample:
+      observations: 18
+      period: "3 years (2023-2025)"
+      wins: 12
+      losses: 6
+      win_rate: "66.7%"
+      avg_win: "+8.2%"
+      avg_loss: "-3.3%"
+      avg_payoff_ratio: "2.48:1"
+      note: "The strategy appears to have a significant edge"
+
+  kelly_calculation:
+    formula: "f* = (bp - q) / b"
+    inputs:
+      p: 0.667
+      q: 0.333
+      b: 2.48
+    full_kelly: "46.2%"
+    half_kelly: "23.1%"
+    note: "Analyst proposes sizing the next trade at half-Kelly (23.1% of risk budget)"
+
+  statistical_uncertainty:
+    win_rate_standard_error: "11.1% (sqrt(0.667 * 0.333 / 18))"
+    win_rate_95_ci: "44.5% to 88.9%"
+    win_rate_at_lower_1se: "55.6% (p = 0.556)"
+    kelly_at_lower_1se: "31.8%"
+    half_kelly_at_lower_1se: "15.9%"
+    win_rate_at_lower_2se: "44.5% (p = 0.445)"
+    kelly_at_lower_2se: "15.3%"
+    half_kelly_at_lower_2se: "7.7%"
+    note: >
+      The Kelly fraction is extremely sensitive to the win rate estimate.
+      A 12% decrease in assumed win rate (from 67% to 55%) cuts Kelly by
+      31%. At the lower bound of the 95% CI (44.5%), Kelly drops to 15.3%.
+
+  additional_concerns:
+    survivorship_bias: >
+      The 18 observations only include FDA events where the model generated
+      a signal. The model did not generate signals for 7 additional events
+      during the period — 4 of which would have been losses. Including these
+      as misses would reduce the win rate to 48% (12/25).
+    regime_change: >
+      FDA advisory committee composition changed in late 2025. 3 of the
+      committee members whose voting patterns the model relies on have
+      been replaced. The model's historical accuracy may not persist.
+    strategy_capacity: >
+      At 23% of risk budget ($80.85M notional), the position would be
+      ~8% of the target company's typical ADV, potentially moving the
+      price on entry and telegraphing the trade.
+
+  analyst_recommendation:
+    action: "Size next AdCom trade at half-Kelly = 23.1% of risk budget (~$81M notional)"
+    rationale: >
+      The backtest shows a clear edge: 67% win rate with 2.48:1 payoff.
+      Half-Kelly is the standard conservative adjustment. The next FDA
+      AdCom is in 3 weeks for a promising oncology drug — our model gives
+      it a 72% probability of favorable vote.
+
+# === TASK ===
+
+task:
+  prompt: >
+    Your analyst has backtested a healthcare catalyst strategy over 18
+    observations (3 years) showing a 67% win rate with a 2.48:1 payoff
+    ratio. Full Kelly suggests 46% allocation; the analyst proposes
+    half-Kelly at 23%.
+
+    However, with only 18 observations, the standard error on the win rate
+    is 11.1%. The true win rate could be anywhere from 45% to 89% (95% CI).
+    At the lower end of this range, Kelly drops from 46% to 15%. There are
+    also survivorship bias concerns and an FDA committee composition change.
+
+    Evaluate the sizing proposal. Your response should address:
+
+    1. Why 18 observations create wide confidence intervals that make the
+       Kelly inputs unreliable
+    2. How sensitive the Kelly fraction is to small changes in win rate
+       (the edge estimate is the fragile input)
+    3. Why "half Kelly" should use the conservative estimate of the edge,
+       not half of the point estimate
+    4. The survivorship bias problem: excluded signals would lower the win rate
+    5. Regime change risk: committee composition changes may invalidate the model
+    6. Strategy capacity constraints at the proposed size
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must address the statistical uncertainty in the win rate estimate"
+    - "Must demonstrate sensitivity analysis on the Kelly inputs"
+    - "Must distinguish between 'half of point-estimate Kelly' and 'half of conservative Kelly'"
+    - "Must address survivorship bias and regime change"
+    - "Must propose a more appropriate size"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Statistical Rigor"
+      id: "statistical_rigor"
+      weight: 40
+      criteria:
+        - "Calculates the standard error on the win rate (~11%)"
+        - "Demonstrates that Kelly is highly sensitive to win rate estimate"
+        - "Uses the lower bound of the confidence interval, not the point estimate"
+        - "Recognizes that 18 observations is insufficient for confident parameter estimation"
+
+    - name: "Kelly Framework Critique"
+      id: "kelly_critique"
+      weight: 30
+      criteria:
+        - "Distinguishes between 'half of Kelly(point estimate)' and 'half of Kelly(conservative estimate)'"
+        - "Notes that fractional Kelly should use the lower bound of the edge estimate"
+        - "Identifies that Kelly assumes known, stationary edge — neither condition holds"
+        - "Proposes an appropriate fractional Kelly based on conservative inputs"
+
+    - name: "Practical Risk Assessment"
+      id: "practical_risk"
+      weight: 30
+      criteria:
+        - "Identifies survivorship bias (excluded signals would lower win rate)"
+        - "Addresses regime change from FDA committee composition change"
+        - "Evaluates strategy capacity constraints at the proposed size"
+        - "Proposes a final size that accounts for all three concerns"
+
+  critical_failures:
+    - "Accepts the point-estimate Kelly without addressing parameter uncertainty"
+    - "Does not calculate or reference the standard error on the win rate"
+    - "Treats 'half Kelly' as automatically conservative"
+    - "Ignores survivorship bias in the backtest"
+    - "Does not address the regime change concern"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Treating half-Kelly as inherently conservative without questioning the inputs"
+    failure_type: "false_conservatism"
+    severity: "critical"
+
+  - description: "Using point-estimate win rate (67%) instead of confidence-adjusted estimate"
+    failure_type: "parameter_overconfidence"
+    severity: "critical"
+
+  - description: "Ignoring survivorship bias (excluded signals would lower win rate to ~48%)"
+    failure_type: "backtest_credulity"
+    severity: "major"
+
+  - description: "Not recognizing that 18 observations produce an 11% standard error"
+    failure_type: "small_sample_blindness"
+    severity: "major"
+
+  - description: "Ignoring strategy capacity constraints (8% of ADV telegraphs the trade)"
+    failure_type: "capacity_blindness"
+    severity: "moderate"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    The backtest demonstrates a clear edge with a 67% win rate and 2.48:1
+    payoff ratio. Kelly criterion gives us a rigorous, mathematically optimal
+    sizing framework. Half-Kelly at 23% is the standard conservative
+    application, providing a good balance between growth rate optimization
+    and drawdown management. The 18 observations across 3 years provide
+    a sufficient sample to calibrate the model. We should proceed with the
+    23% allocation for the next AdCom trade.
+
+  why_this_fails:
+    - "Treats Kelly inputs as known constants when they have wide confidence intervals"
+    - "'Half Kelly' of an uncertain estimate is not conservative — it's half of an uncertain number"
+    - "18 observations is not 'sufficient' for confident parameter estimation (SE = 11%)"
+    - "At the lower 1-SE bound (55.6% win rate), even full Kelly is only 32% — half would be 16%"
+    - "Ignores survivorship bias that could drop win rate to 48%"
+    - "Ignores regime change from FDA committee composition change"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The Kelly framework is mathematically correct but the inputs are
+      unreliable. Kelly is only as good as your edge estimate, and with
+      18 observations, we don't know the edge with any precision.
+
+      Statistical analysis: with 18 trials and 12 wins, the standard error
+      on the win rate is 11.1%. The 95% confidence interval is 44.5% to
+      88.9% — we can't even confirm the win rate is above 50% with high
+      confidence. Kelly at the point estimate (67%) gives 46.2%. Kelly at
+      the lower 1-SE bound (55.6%) gives 31.8%. Kelly at the lower 2-SE
+      bound (44.5%) gives 15.3%. The "correct" Kelly could be anywhere in
+      this range.
+
+      The analyst proposes "half Kelly" as conservative, but half of 46.2%
+      (= 23.1%) uses the point estimate. The conservative approach is half
+      of the lower-bound Kelly: half of 15.3-31.8% = 7.7-15.9%. That's
+      meaningfully different from 23.1%.
+
+      Additional concerns compound the problem:
+      - Survivorship bias: including the 7 events where the model didn't
+        generate a signal (4 losses) drops the win rate to 48% (12/25).
+        At 48% win rate, Kelly is approximately 12% — half-Kelly is 6%.
+      - Regime change: 3 FDA committee members replaced. The model's
+        historical accuracy may not persist with new voting members.
+      - Capacity: $81M notional would be 8% of ADV, creating significant
+        market impact and potentially telegraphing the trade.
+
+      Appropriate sizing: 5-8% of risk budget (~$17.5-28M), which
+      corresponds to half-Kelly using the survivorship-adjusted,
+      lower-bound win rate. This can increase as the sample size grows
+      and the model is validated on the new committee composition.
+
+      The right mental model: Kelly gives you the maximum you should bet
+      given known edge. When edge is uncertain, you should bet much less
+      than Kelly. The uncertainty itself is a reason to be smaller, not
+      a reason to use half-Kelly as a shortcut for conservatism.
+
+  failing:
+    response: >
+      The backtest shows a clear 67% win rate with 2.48:1 payoff. Half-Kelly
+      at 23% is the standard conservative approach. We should proceed with
+      this allocation.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Standard error on 67% win rate with n=18 is 11.1% — confidence interval is huge"
+    source: "context.statistical_uncertainty"
+    importance: "critical"
+
+  - fact: "Kelly at lower 1-SE bound (55.6%) is 31.8% vs 46.2% at point estimate"
+    source: "context.statistical_uncertainty"
+    importance: "critical"
+
+  - fact: "Including excluded signals drops win rate to 48% (12/25) — survivorship bias"
+    source: "context.additional_concerns"
+    importance: "critical"
+
+  - fact: "FDA committee composition changed — 3 members replaced (model may not persist)"
+    source: "context.additional_concerns"
+    importance: "important"
+
+  - fact: "$81M notional = 8% of ADV (telegraphs the trade)"
+    source: "context.additional_concerns"
+    importance: "moderate"
+
+  - fact: "Kelly assumes known, stationary edge — neither condition is met here"
+    source: "derived"
+    importance: "important"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "healthcare"
+  skill_level: "expert"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "kelly_criterion"
+    - "small_sample"
+    - "statistical_inference"
+    - "catalyst_strategy"
+  notes: >
+    This scenario tests statistical literacy in the context of sizing. The key
+    insight is that Kelly is exquisitely sensitive to input quality, and "half
+    Kelly" is not automatically conservative — it depends on which Kelly you're
+    halving. With 18 observations, the edge estimate has such wide confidence
+    intervals that the Kelly fraction could plausibly range from 6% to 46%.
+    The disciplined approach uses conservative parameter estimates, not
+    conservative fractions of optimistic estimates.

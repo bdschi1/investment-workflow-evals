@@ -1,0 +1,288 @@
+# Marginal VaR Contribution: The Position That Looks Fine Alone
+# Tests: component vs marginal VaR, correlation-aware risk budgeting, portfolio context dependence
+
+id: marginal_var_contribution
+title: "Marginal VaR Contribution: The Position That Looks Fine Alone"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "expert"
+estimated_time_minutes: 50
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Growth & Momentum"
+    aum: "$1.5B"
+    gross_exposure: "190%"
+    net_exposure: "55%"
+    portfolio_var_95_1d: "1.85% of NAV ($27.75M)"
+    var_limit: "2.0% of NAV ($30M)"
+    remaining_var_budget: "0.15% of NAV ($2.25M)"
+
+  top_holding:
+    name: "MegaCloud Infrastructure"
+    ticker: "MCLD"
+    weight: "5.5% of NAV ($82.5M)"
+    sector: "Technology — Cloud Infrastructure"
+    trailing_vol: "32%"
+    beta: 1.4
+    contribution_to_portfolio_var: "18% of total portfolio VaR"
+    note: "Largest single risk contributor in the book"
+
+  new_idea:
+    name: "Enterprise AI Platform"
+    ticker: "EAIP"
+    sector: "Technology — AI/ML Software"
+    market_cap: "$45B"
+    thesis: >
+      Enterprise AI platform with 70% YoY growth, expanding from ML Ops
+      into end-to-end AI application development. Net retention 155%.
+      Category creation opportunity — market sizing models underestimate
+      the TAM by 3-5x.
+    conviction: "8/10"
+    proposed_weight: "3% of NAV ($45M)"
+    trailing_vol: "42%"
+    beta: 1.5
+
+  correlation_data:
+    eaip_to_mcld: 0.65
+    eaip_to_spy: 0.55
+    eaip_to_portfolio: 0.58
+    mcld_to_spy: 0.60
+    note: >
+      EAIP and MCLD are both cloud/AI beneficiaries. Their correlation is
+      elevated because they share the same secular theme (enterprise AI
+      infrastructure spending) and customer base overlap.
+
+  risk_analysis:
+    standalone_var:
+      description: "EAIP VaR in isolation (ignoring portfolio context)"
+      var_95_1d: "0.80% of NAV ($12M)"
+      note: "Looks fine — 0.80% is well within a typical 3% position's risk budget"
+    component_var:
+      description: "EAIP's contribution to total portfolio VaR (additive decomposition)"
+      var_contribution: "1.15% of NAV"
+      note: "Higher than standalone due to directional correlation with portfolio"
+    marginal_var:
+      description: "The change in total portfolio VaR from adding EAIP (the actual impact)"
+      marginal_var: "2.10% of NAV"
+      new_total_var: "3.95% of NAV"
+      note: >
+        The 0.65 correlation with MCLD (18% of portfolio VaR) creates a
+        compounding effect. Adding EAIP doesn't just add its own risk — it
+        amplifies the existing risk from MCLD and other correlated positions.
+        Total portfolio VaR nearly doubles, far exceeding the 2.0% limit.
+
+  analyst_argument: >
+    The standalone VaR of 0.80% is well within our risk budget. We have
+    $2.25M of VaR capacity remaining and the position's standalone VaR is
+    only $12M — but that's measured differently. The point is, a 3% position
+    in a $45B market cap name with 42% vol is not unusual for us. We
+    shouldn't let correlation with MCLD prevent us from owning our second-best
+    idea. These are two different companies solving different problems.
+
+# === TASK ===
+
+task:
+  prompt: >
+    Portfolio VaR is at 92% of the risk limit (1.85% vs 2.0% limit). A new
+    AI platform idea has 0.65 correlation with your top holding (a cloud
+    infrastructure company that already contributes 18% of portfolio VaR).
+
+    In isolation, the new position's VaR looks manageable (0.80%). But the
+    marginal VaR — the actual increase in portfolio VaR from adding this
+    position — is 2.10%, which would nearly double the portfolio's total
+    VaR and blow through the limit.
+
+    Evaluate the sizing proposal. Your response should address:
+
+    1. The critical distinction between standalone VaR, component VaR, and
+       marginal VaR — and why marginal VaR is the correct sizing input
+    2. Why the 0.65 correlation with MCLD creates a compounding risk effect
+       that makes the position far more dangerous than it appears in isolation
+    3. How the same position could be correctly sized in a different
+       portfolio with lower correlated exposure
+    4. What the maximum tolerable size is given the VaR budget
+    5. Whether reducing MCLD to make room for EAIP would improve or worsen
+       the portfolio
+    6. Alternative expressions that might achieve the thesis with less
+       marginal VaR contribution
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must distinguish between standalone, component, and marginal VaR"
+    - "Must use marginal VaR as the sizing input, not standalone"
+    - "Must explain the correlation-driven compounding effect"
+    - "Must quantify the maximum position size within the VaR budget"
+    - "Must address whether the portfolio context should change the sizing"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "VaR Decomposition Understanding"
+      id: "var_decomposition"
+      weight: 40
+      criteria:
+        - "Correctly defines and distinguishes standalone, component, and marginal VaR"
+        - "Identifies marginal VaR as the correct input for sizing decisions"
+        - "Explains why standalone VaR understates the portfolio impact when correlations are high"
+        - "Quantifies the difference: 0.80% standalone vs 2.10% marginal"
+
+    - name: "Correlation-Aware Sizing"
+      id: "correlation_sizing"
+      weight: 35
+      criteria:
+        - "Explains the compounding mechanism: EAIP amplifies MCLD's risk and vice versa"
+        - "Recognizes that the position's danger is context-dependent, not inherent"
+        - "Calculates the maximum position size that keeps total VaR within the 2.0% limit"
+        - "Notes that the same position in a differently-constructed portfolio might be fine"
+
+    - name: "Implementation Alternatives"
+      id: "alternatives"
+      weight: 25
+      criteria:
+        - "Evaluates trimming MCLD to create VaR budget for EAIP"
+        - "Considers whether the pair (MCLD + EAIP) delivers better risk-adjusted alpha than MCLD alone"
+        - "Explores option-based expression to cap marginal VaR contribution"
+        - "Proposes a specific size that fits within the VaR constraint"
+
+  critical_failures:
+    - "Uses standalone VaR to justify the 3% position size"
+    - "Does not distinguish between standalone and marginal VaR"
+    - "Ignores the 0.65 correlation with the top holding"
+    - "Proposes a size that would breach the VaR limit"
+    - "Claims the companies are 'different' so correlation doesn't matter"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Using standalone VaR (0.80%) instead of marginal VaR (2.10%) for sizing"
+    failure_type: "var_methodology_error"
+    severity: "critical"
+
+  - description: "Treating two correlated positions as independent risks"
+    failure_type: "correlation_blindness"
+    severity: "critical"
+
+  - description: "Arguing that different company fundamentals override statistical correlation"
+    failure_type: "fundamental_correlation_confusion"
+    severity: "major"
+
+  - description: "Not recognizing that portfolio VaR is already at 92% of limit"
+    failure_type: "budget_awareness_failure"
+    severity: "major"
+
+  - description: "Proposing the full 3% without scaling down for marginal VaR"
+    failure_type: "constraint_violation"
+    severity: "critical"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    EAIP's standalone VaR of 0.80% is well within normal parameters for a
+    3% position. While it has some correlation with MCLD, these are
+    fundamentally different companies — MCLD provides cloud infrastructure
+    while EAIP builds AI application software. The correlation is coincidental
+    and reflects broad tech sector moves, not business model overlap. At 8/10
+    conviction, a 3% position is appropriate and the VaR budget can absorb it.
+
+  why_this_fails:
+    - "Uses standalone VaR instead of marginal VaR"
+    - "Dismisses statistical correlation based on fundamental narrative"
+    - "Marginal VaR of 2.10% would nearly double portfolio VaR to 3.95%, far above the 2.0% limit"
+    - "Whether the correlation is 'coincidental' is irrelevant — it affects portfolio risk regardless of cause"
+    - "The VaR budget cannot absorb it — only $2.25M remaining vs $31.5M marginal VaR"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The analyst is using the wrong risk metric. The standalone VaR of 0.80%
+      measures EAIP's risk as if it were the only position in the portfolio.
+      The relevant metric is marginal VaR — the actual change in total
+      portfolio VaR from adding this position — which is 2.10%.
+
+      Why the difference? EAIP has a 0.65 correlation with MCLD, our largest
+      risk contributor (18% of portfolio VaR). Adding EAIP doesn't just add
+      its own risk — it amplifies the existing MCLD risk through the
+      covariance term. The combined risk of MCLD + EAIP is significantly
+      greater than the sum of their standalone risks.
+
+      The numbers: current portfolio VaR is 1.85% vs a 2.0% limit.
+      Remaining VaR budget is 0.15%. Adding EAIP at 3% would push portfolio
+      VaR to approximately 3.95% — nearly double the limit. This is not a
+      borderline case; it's a 2x breach.
+
+      The maximum tolerable position size, given the 0.15% remaining VaR
+      budget and the 0.65 correlation with MCLD, is approximately 0.5-0.7%
+      of NAV ($7.5-10.5M). That's a fraction of the proposed 3%.
+
+      Alternatives: (1) Trim MCLD from 5.5% to 3.5% to free VaR budget
+      for EAIP at 2% — but only if the combined pair delivers better
+      risk-adjusted alpha than MCLD alone. (2) Express EAIP through call
+      options to cap the marginal VaR contribution. (3) Wait for portfolio
+      VaR to decrease (position exits, vol compression) before adding.
+
+      Importantly, this same position could be perfectly appropriate in a
+      portfolio with lower tech/AI correlation. The problem is the
+      portfolio context, not the position quality.
+
+  failing:
+    response: >
+      A 3% position with 0.80% standalone VaR is normal and within our risk
+      parameters. EAIP and MCLD are different companies in different software
+      segments, so the correlation is overstated. We should proceed with the
+      full 3% allocation.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Standalone VaR: 0.80% vs Marginal VaR: 2.10% — a 2.6x difference driven by correlation"
+    source: "context.risk_analysis"
+    importance: "critical"
+
+  - fact: "Portfolio VaR at 1.85% vs 2.0% limit — only 0.15% remaining budget"
+    source: "context.portfolio"
+    importance: "critical"
+
+  - fact: "EAIP-MCLD correlation: 0.65 (MCLD is 18% of portfolio VaR)"
+    source: "context.correlation_data"
+    importance: "critical"
+
+  - fact: "Adding EAIP at 3% would push total portfolio VaR to ~3.95% (2x the limit)"
+    source: "context.risk_analysis.marginal_var"
+    importance: "critical"
+
+  - fact: "The same position could be correctly sized in a portfolio with different exposures"
+    source: "derived"
+    importance: "important"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "technology"
+  skill_level: "expert"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "var"
+    - "marginal_risk"
+    - "correlation"
+    - "risk_budgeting"
+  notes: >
+    This is the most technically demanding risk concept in the set. The key
+    insight is that a position's risk is not intrinsic — it depends entirely
+    on what else is in the portfolio. Marginal VaR captures the interaction
+    effects that standalone measures miss. The best PMs think in marginal
+    terms, not standalone terms, because that's what matters for portfolio-level
+    risk management.

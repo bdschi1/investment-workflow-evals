@@ -1,0 +1,296 @@
+# Asymmetric Payoff Restructuring Candidate: Positive EV Doesn't Mean Size Aggressively
+# Tests: distribution shape vs mean, discontinuous gap risk, drawdown budget capping, options as sizing tool
+
+id: asymmetric_payoff_restructuring_candidate
+title: "Asymmetric Payoff Restructuring Candidate: Positive EV Doesn't Mean Size Aggressively"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "hard"
+estimated_time_minutes: 45
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Special Situations"
+    aum: "$550M"
+    gross_exposure: "160%"
+    net_exposure: "35%"
+    max_single_name_loss_tolerance: "1.5% of NAV per position"
+
+  position_candidate:
+    name: "TurnaroundIndustries Corp"
+    ticker: "TICR"
+    sector: "Industrials — Manufacturing"
+    market_cap: "$1.8B"
+    current_price: "$24.00"
+    thesis: >
+      Struggling industrial manufacturer hired a new CEO from a successful
+      peer. New management is implementing a restructuring plan: closing 3
+      of 8 plants, divesting non-core divisions, and refocusing on high-margin
+      specialty products. Board includes two activist investors who catalyzed
+      the CEO change.
+
+  scenario_analysis:
+    bull_case:
+      probability: "50%"
+      outcome: "+55% ($37.20)"
+      description: >
+        New CEO executes restructuring. Plant closures completed by Q4.
+        Divestiture proceeds used to retire debt. EBITDA margin improves
+        from 8% to 14%. Market re-rates from 6x to 9x EBITDA.
+    base_case:
+      probability: "35%"
+      outcome: "-10% ($21.60)"
+      description: >
+        Restructuring is partial. 2 of 3 plant closures completed but
+        union pushback delays the third. Divestitures proceed but at
+        lower-than-expected multiples. Incremental improvement but no
+        re-rating.
+    bear_case:
+      probability: "15%"
+      outcome: "-65% ($8.40)"
+      description: >
+        Restructuring fails. Key customer defects during transition.
+        Working capital crisis as inventory builds during plant closures.
+        Covenant breach triggers debt acceleration. Stock gaps to
+        recapitalization value.
+
+  expected_value_analysis:
+    ev_calculation: "0.50 * $37.20 + 0.35 * $21.60 + 0.15 * $8.40 = $27.42"
+    ev_return: "+14.3% from $24.00"
+    note: "Positive expected value — the trade 'works' on average"
+
+  risk_characteristics:
+    return_distribution: "Highly non-normal — bimodal with a fat left tail"
+    volatility_based_sizing: >
+      A vol-targeting framework using 45% trailing vol would suggest a 2.2%
+      position ($12.1M). But vol-targeting assumes normally distributed
+      returns. The -65% bear case is a discontinuous gap, not a gradual decline.
+    gap_risk: >
+      The -65% outcome is a covenant breach scenario — the stock would gap
+      down, not drift down. There's no ability to stop out at -20% or -30%
+      if the covenant trip happens overnight. The loss is discontinuous.
+
+  sizing_approaches:
+    vol_targeted: "2.2% of NAV ($12.1M) — standard approach but misses the tail"
+    ev_optimized: "3.5% of NAV ($19.25M) — Kelly-adjacent based on the EV calculation"
+    loss_capped: >
+      If max single-name loss tolerance is 1.5% of NAV ($8.25M), and the
+      worst case is -65%, then the position must be capped at
+      $8.25M / 0.65 = $12.7M = 2.3% of NAV. This ensures the bear case
+      stays within the loss budget.
+    options_based: >
+      Alternatively: buy $24/$35 call spread (6-month) for $2.80 per share.
+      $5M in premium buys $19.6M notional exposure. Max loss is $5M (0.9%
+      of NAV). Max gain if stock reaches $35 is $5M * ($35-$24)/$2.80 - $5M
+      = ~$14.6M. Eliminates gap risk entirely.
+
+# === TASK ===
+
+task:
+  prompt: >
+    A restructuring candidate has three scenarios: 50% probability of +55%
+    (restructuring succeeds), 35% probability of -10% (partial execution),
+    and 15% probability of -65% (covenant breach/recapitalization). The
+    expected value is +14.3%, making it a positive-EV trade.
+
+    However, the -65% bear case is a discontinuous gap — there's no ability
+    to stop out gradually. The loss is binary and instantaneous if covenant
+    breach occurs. Your portfolio has a 1.5% of NAV max single-name loss
+    tolerance.
+
+    How should this position be sized? Your response should address:
+
+    1. Why positive expected value doesn't mean size aggressively — the
+       distribution shape matters as much as the mean
+    2. How to size when the worst case is a discontinuous gap (can't
+       stop out)
+    3. The max position size given the 1.5% loss tolerance and -65%
+       worst case
+    4. Why vol-targeting understates risk when returns are non-normal
+    5. Options as a sizing tool — how call spreads can express the thesis
+       while eliminating the gap risk
+    6. Whether the 15% probability of -65% is acceptable at any size
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must address non-normal return distribution in sizing"
+    - "Must cap position size for the gap risk scenario"
+    - "Must evaluate options as an alternative expression"
+    - "Must not use vol-targeting alone for a discontinuous-loss position"
+    - "Must respect the 1.5% of NAV max loss tolerance"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Distribution-Aware Sizing"
+      id: "distribution_sizing"
+      weight: 40
+      criteria:
+        - "Recognizes that the return distribution is bimodal with a fat left tail"
+        - "Explains why vol-targeting understates risk for non-normal distributions"
+        - "Distinguishes between gradual drawdowns (stoppable) and gap risk (not stoppable)"
+        - "Sizes based on the worst case, not the expected value or volatility"
+
+    - name: "Loss Budget Application"
+      id: "loss_budget"
+      weight: 30
+      criteria:
+        - "Calculates the max position: $8.25M / 0.65 = $12.7M (2.3% of NAV)"
+        - "Respects the 1.5% max single-name loss tolerance"
+        - "Notes that even at 2.3%, a 15% probability of losing 1.5% of NAV is meaningful"
+        - "Considers whether the position should be even smaller given the loss probability"
+
+    - name: "Instrument Selection"
+      id: "instrument_selection"
+      weight: 30
+      criteria:
+        - "Evaluates call spreads as a defined-risk alternative"
+        - "Compares equity expression (gap risk) to options expression (defined max loss)"
+        - "Notes that options eliminate the covenant breach gap risk entirely"
+        - "Proposes a specific structure with cost and payoff analysis"
+
+  critical_failures:
+    - "Sizes based on expected value without addressing the -65% tail"
+    - "Uses vol-targeting alone for a position with discontinuous gap risk"
+    - "Exceeds the position size that keeps the bear case within loss tolerance"
+    - "Ignores options as an alternative expression"
+    - "Treats the 15% probability of -65% as a monitoring risk rather than a sizing input"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Sizing on expected value (+14.3%) without tail-risk adjustment"
+    failure_type: "mean_only_sizing"
+    severity: "critical"
+
+  - description: "Using vol-targeting for a position with discontinuous gap risk"
+    failure_type: "distributional_assumption_error"
+    severity: "critical"
+
+  - description: "Not calculating the max position given the loss tolerance and worst case"
+    failure_type: "constraint_violation"
+    severity: "major"
+
+  - description: "Ignoring options as a way to eliminate gap risk while maintaining upside"
+    failure_type: "instrument_inflexibility"
+    severity: "major"
+
+  - description: "Treating the -65% outcome as too unlikely to size for"
+    failure_type: "tail_dismissal"
+    severity: "major"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    The expected value is +14.3%, making this a clearly positive trade.
+    Our vol-targeting framework suggests 2.2% of NAV, which is well within
+    normal position sizing parameters. The -65% scenario only has a 15%
+    probability — we should size for the most likely outcome (bull case at
+    50%) and manage the tail risk through monitoring. If we see signs of
+    covenant stress, we can reduce the position.
+
+  why_this_fails:
+    - "Sizes on the mean, not the distribution shape"
+    - "Vol-targeting assumes normal returns — this is bimodal with a fat tail"
+    - "The -65% outcome is a gap, not a drift — you cannot 'monitor and reduce'"
+    - "At 2.2%, the -65% outcome would lose 1.43% of NAV — just below the 1.5% limit but with no margin"
+    - "If you can't stop out, you must size for the worst case ex ante"
+    - "15% probability of -65% is not negligible — it's the same as rolling double sixes"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      Positive EV does not mean size aggressively. The distribution is
+      bimodal with a 15% probability of a -65% gap down. The gap is the
+      key — this is not a gradual drawdown you can stop out of. Covenant
+      breach is a binary event that gaps the stock overnight.
+
+      Loss budget sizing: max single-name loss tolerance is 1.5% of NAV
+      ($8.25M). At -65% worst case, the max position is $8.25M / 0.65 =
+      $12.7M, or 2.3% of NAV. This is the hard ceiling regardless of
+      the expected value.
+
+      But even 2.3% may be too large. At that size, there's a 15%
+      probability of losing $8.25M (1.5% of NAV) — the full loss budget
+      for this name. A more conservative approach would size at 1.5%
+      ($8.25M), limiting the bear case loss to 0.98% of NAV and leaving
+      some buffer within the loss tolerance.
+
+      Vol-targeting is misleading here. The 45% trailing vol suggests 2.2%
+      is appropriate, but vol-targeting assumes normally distributed returns.
+      A -65% gap at 15% probability is not captured by a normal distribution
+      — the Gaussian model puts almost zero probability on a -65% outcome
+      at 45% vol.
+
+      The better instrument is a call spread. A $24/$35 call spread for
+      $2.80/share with 6-month expiry costs $5M for ~$19.6M notional
+      exposure. Max loss: $5M (0.9% of NAV) — well within tolerance.
+      If the bull case materializes, the payoff is approximately
+      $14.6M. The options expression eliminates the gap risk entirely
+      while preserving most of the upside.
+
+      Unless there's a specific reason equity ownership is required (voting
+      rights, activist coordination), the call spread is the superior
+      expression for a restructuring thesis with discontinuous downside.
+
+  failing:
+    response: >
+      The expected value is +14.3%. At 2.2% position via vol-targeting,
+      this is a standard positive-EV trade. The bear case is only 15%
+      probability.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Expected value +14.3% but distribution is bimodal with 15% probability of -65% gap"
+    source: "context.scenario_analysis"
+    importance: "critical"
+
+  - fact: "The -65% outcome is discontinuous — covenant breach gaps overnight, no ability to stop out"
+    source: "context.risk_characteristics"
+    importance: "critical"
+
+  - fact: "Max position given 1.5% loss tolerance and -65% worst case: $12.7M (2.3% of NAV)"
+    source: "context.sizing_approaches.loss_capped"
+    importance: "critical"
+
+  - fact: "Call spread eliminates gap risk: $5M max loss vs $12.7M equity position worst case"
+    source: "context.sizing_approaches.options_based"
+    importance: "important"
+
+  - fact: "Vol-targeting suggests 2.2% but assumes normal distribution — inappropriate for gap risk"
+    source: "context.risk_characteristics"
+    importance: "important"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "multi-sector"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "asymmetric_payoff"
+    - "restructuring"
+    - "gap_risk"
+    - "options_expression"
+    - "distribution_analysis"
+  notes: >
+    This scenario tests whether the model sizes for the distribution shape,
+    not just the mean. The key insight is that positive expected value is
+    necessary but not sufficient for sizing — you must also consider the
+    probability and magnitude of the worst case, especially when the loss
+    is discontinuous. Options are often the right instrument for asymmetric
+    payoffs because they make the max loss explicit.

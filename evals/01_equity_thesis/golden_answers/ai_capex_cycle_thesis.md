@@ -8,7 +8,7 @@
 **Time Horizon:** 12-18 months
 **Expected Return:** +22% base case, +46% bull case, -15% bear case
 
-**Thesis:** NOW's 29% drawdown and compression to 20x forward P/E represents a valuation dislocation driven by indiscriminate sector-wide AI disruption fears. The market is treating platform-layer and application-layer software identically, but NOW's system-of-record ownership in ITSM and positioning as the AI agent orchestration layer likely make it a net beneficiary of enterprise AI adoption. At 20x forward earnings for a business growing 22%+ with 40% operating margins, the stock is trading at a lower multiple than the S&P 500 on a growth-adjusted basis — a rare occurrence for a franchise of this quality.
+**Thesis:** NOW's 29% drawdown and compression to 20x forward P/E represents a valuation dislocation driven by indiscriminate sector-wide AI disruption fears. The market is treating platform-layer and application-layer software identically, but NOW's system-of-record ownership in ITSM and positioning as the AI agent orchestration layer likely make it a net beneficiary of enterprise AI adoption. At 20x forward earnings for a business growing 22%+ with 40% non-GAAP operating margins, the stock is trading at a lower multiple than the S&P 500 on a growth-adjusted basis — a rare occurrence for a franchise of this quality.
 
 ---
 
@@ -119,7 +119,7 @@ The core analytical question is whether NOW is a beneficiary or victim of the AI
 | 2023-2024 avg | 32x | Pre-AI-fear premium |
 | 2022 low | 24x | Rising rates compression |
 | 2020 peak | 45x | COVID digital acceleration |
-| 2014 trough | 18x | Last time at this valuation |
+| 2016 trough | 25x | Last time at comparable discount to sector |
 
 A return to even 25x forward P/E — still well below the 5-year average — represents 25% upside from current levels before any earnings growth.
 

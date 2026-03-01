@@ -1,0 +1,293 @@
+# Liquidity Deterioration and Exit Risk: When the Door Gets Smaller
+# Tests: liquidity as sizing input, days-to-exit recalculation, coverage drop signal, exit risk pricing
+
+id: liquidity_deterioration_exit_risk
+title: "Liquidity Deterioration and Exit Risk: When the Door Gets Smaller"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "hard"
+estimated_time_minutes: 40
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Industrials & Materials"
+    aum: "$500M"
+    gross_exposure: "170%"
+    net_exposure: "35%"
+
+  position:
+    name: "SpecialtyIndustrial Components"
+    ticker: "SPCM"
+    sector: "Industrials — Specialty Components"
+    market_cap: "$4B"
+    weight: "8.0% of NAV ($40M)"
+    shares_held: "800,000 shares"
+    pct_of_float: "1.0% of free float"
+
+  thesis:
+    original: >
+      Best-in-class specialty components manufacturer with 45% market share
+      in mission-critical applications. Secular growth from electrification
+      and automation. Management has 15-year track record of 20%+ ROIC.
+    current_view: >
+      Analyst maintains thesis is intact — the guidance reduction was driven
+      by a temporary inventory destocking at 2 key customers, not structural
+      demand weakness. Expects normalization in 2-3 quarters.
+    conviction: "7/10 (down from 8/10 at entry)"
+
+  liquidity_deterioration:
+    event_trigger: >
+      Company guided down 15% on Q3 earnings call, citing customer
+      inventory destocking. Stock dropped 22% on the day. Management
+      credibility questioned — they had guided for acceleration just 90
+      days earlier.
+    pre_event:
+      avg_daily_volume: "1.2M shares"
+      position_as_pct_adv: "3.3% of ADV"
+      days_to_exit_20pct_adv: "3.3 days"
+      bid_ask_spread: "5-8 bps"
+      sell_side_coverage: "12 analysts"
+      institutional_ownership: "85%"
+    post_event:
+      avg_daily_volume: "780K shares (-35%)"
+      position_as_pct_adv: "5.1% of ADV"
+      days_to_exit_20pct_adv: "5.1 days → but realistic days-to-exit at 10% ADV = 10.3 days"
+      bid_ask_spread: "18-25 bps"
+      sell_side_coverage: "8 analysts (4 dropped coverage, 2 downgraded)"
+      institutional_ownership: "78% (two mid-size holders sold in block trades)"
+      note: "Two institutional holders sold 5M shares combined in block trades at 4-6% discount"
+
+  position_risk_profile:
+    pre_event:
+      trailing_vol: "22%"
+      beta: 0.9
+      risk_contribution: "Moderate — mid-vol, mid-beta industrial"
+    post_event:
+      trailing_vol: "38%"
+      implied_vol: "42%"
+      beta: 1.1
+      risk_contribution: "Elevated — vol almost doubled, liquidity halved"
+
+  analyst_argument: >
+    The thesis is intact. Inventory destocking is cyclical and historically
+    normalizes in 2-3 quarters. The stock is now trading at 14x forward
+    earnings vs historical 18-20x — a valuation gap that will close as
+    earnings normalize. This is exactly the kind of overreaction we should
+    be buying into, not selling into. Cutting the position now locks in
+    the loss. We should hold and potentially add.
+
+# === TASK ===
+
+task:
+  prompt: >
+    A mid-cap industrial component maker ($4B market cap) is in your portfolio
+    at 8% of NAV ($40M). After a guidance reduction, the stock dropped 22%,
+    ADV fell 35%, 4 sell-side analysts dropped coverage, and two institutional
+    holders sold in block trades. Days-to-exit has roughly doubled from 3 to
+    5-10 days depending on participation rate.
+
+    Your analyst says the thesis is intact — inventory destocking is cyclical
+    and the selloff is an overreaction. They want to hold the full position
+    and potentially add.
+
+    Evaluate the position from a sizing perspective. Your response should
+    address:
+
+    1. Why liquidity is a sizing input, not just a monitoring metric
+    2. How the doubling of days-to-exit changes the risk profile even if
+       the thesis is correct
+    3. What the coverage drops and institutional exits signal (information
+       content of sell-side departures)
+    4. The asymmetry of holding: if the thesis is right, you make money on
+       a smaller position too. If it's wrong, you're stuck in a less liquid
+       name with fewer information sources
+    5. How to right-size for the new liquidity reality
+    6. The behavioral distinction between "locking in a loss" and "right-
+       sizing for changed conditions"
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must treat liquidity as a sizing input, not a monitoring metric"
+    - "Must address the information content of coverage drops"
+    - "Must quantify exit risk under the new liquidity profile"
+    - "Must not confuse trimming with abandoning the thesis"
+    - "Must address the vol increase alongside the liquidity decrease"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Liquidity-Adjusted Sizing"
+      id: "liquidity_sizing"
+      weight: 40
+      criteria:
+        - "Treats liquidity deterioration as a sizing event, not just a risk to monitor"
+        - "Quantifies the change: days-to-exit doubled, ADV down 35%, spreads 3x wider"
+        - "Calculates that holding $40M at 5.1% of ADV creates significant exit risk"
+        - "Proposes a reduced position size that reflects the new liquidity reality"
+
+    - name: "Information Signal Recognition"
+      id: "information_signals"
+      weight: 30
+      criteria:
+        - "Recognizes that sell-side coverage drops are informational (fewer eyes on the name)"
+        - "Notes that institutional exits in block trades at 4-6% discount signal forced/urgent selling"
+        - "Understands that reduced coverage means less price discovery and wider information gaps"
+        - "Does not dismiss these signals as noise"
+
+    - name: "Risk Profile Reassessment"
+      id: "risk_reassessment"
+      weight: 30
+      criteria:
+        - "Combines vol increase (22% to 38%) with liquidity decrease in the risk assessment"
+        - "Recognizes that the position is now both more volatile and harder to exit"
+        - "Considers the management credibility issue (guided for acceleration, then cut 15%)"
+        - "Evaluates whether the thesis warrants a conviction reduction (8/10 to 7/10 or lower)"
+
+  critical_failures:
+    - "Holds full position because 'the thesis is intact'"
+    - "Treats liquidity as a monitoring metric rather than a sizing input"
+    - "Ignores the information content of coverage drops and institutional exits"
+    - "Proposes adding to the position without addressing liquidity risk"
+    - "Frames trimming as 'locking in a loss' rather than risk management"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Holding full position in a name where exit risk has doubled"
+    failure_type: "exit_risk_blindness"
+    severity: "critical"
+
+  - description: "Framing a trim as 'locking in the loss' (disposition effect)"
+    failure_type: "behavioral_bias"
+    severity: "critical"
+
+  - description: "Ignoring that 4 analyst coverage drops reduce the information ecosystem"
+    failure_type: "information_signal_dismissal"
+    severity: "major"
+
+  - description: "Not adjusting for vol increase (22% to 38%) alongside liquidity decrease"
+    failure_type: "risk_understatement"
+    severity: "major"
+
+  - description: "Treating management credibility as irrelevant after a 180-degree guidance change"
+    failure_type: "management_credibility_blindness"
+    severity: "moderate"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    The thesis is intact — destocking is cyclical and the market is
+    overreacting. At 14x forward earnings vs historical 18-20x, the stock
+    is significantly undervalued. Selling now would lock in a 22% loss.
+    Instead, we should hold and potentially add at these depressed levels.
+    The liquidity situation will normalize as the stock recovers and
+    analysts reinitiate coverage.
+
+  why_this_fails:
+    - "Treats liquidity as something that 'will normalize' rather than a current sizing input"
+    - "Frames trimming as 'locking in a loss' — classic disposition effect"
+    - "Does not address that exit risk has doubled (days-to-exit from 3 to 5-10)"
+    - "Ignores the information content of 4 coverage drops"
+    - "Proposes adding to a position with deteriorated liquidity and elevated vol"
+    - "The thesis may be right AND the position may be too large for the current liquidity"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The thesis assessment may be correct, but the position is too large
+      for the current liquidity environment. Liquidity is a sizing input,
+      not a monitoring metric.
+
+      The numbers: ADV dropped 35% (1.2M to 780K shares), pushing the
+      position from 3.3% to 5.1% of ADV. At a realistic 10% ADV
+      participation rate, days-to-exit is now 10.3 days. For a $500M fund,
+      having 8% of NAV in a position that takes 10+ days to exit is
+      excessive — particularly when vol has also increased from 22% to 38%.
+
+      The information ecosystem has degraded: 4 of 12 analysts dropped
+      coverage, reducing price discovery and potentially widening future
+      information gaps. Two institutional holders exited via block trades
+      at 4-6% discounts — that's not orderly selling, that's urgency.
+
+      Management credibility is damaged. Guiding for acceleration and then
+      cutting 15% within 90 days is a red flag for visibility and
+      forecasting discipline. The thesis may be right about destocking
+      being cyclical, but the management's ability to forecast their own
+      business is now in question.
+
+      Right-sizing: reduce from 8% to 4-5% of NAV ($20-25M). This keeps
+      the position within a 3-day exit window at 10% ADV participation
+      and reflects the dual headwind of higher vol and lower liquidity.
+      If the thesis plays out (stock recovers, liquidity normalizes), the
+      4-5% position captures most of the upside. If the thesis is wrong,
+      the smaller position limits damage and can be exited more cleanly.
+
+      This is not "locking in a loss." This is right-sizing for changed
+      conditions. The loss already happened. The question is what position
+      size is appropriate going forward given the current risk profile.
+
+  failing:
+    response: >
+      The thesis is intact and selling now would lock in our loss. We
+      should hold the full 8% position and wait for the destocking cycle
+      to normalize.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "ADV dropped 35% (1.2M to 780K shares); days-to-exit doubled"
+    source: "context.liquidity_deterioration"
+    importance: "critical"
+
+  - fact: "4 of 12 sell-side analysts dropped coverage (information ecosystem degraded)"
+    source: "context.liquidity_deterioration.post_event"
+    importance: "critical"
+
+  - fact: "Vol increased from 22% to 38% (73% increase)"
+    source: "context.position_risk_profile"
+    importance: "important"
+
+  - fact: "Two institutional holders sold in block trades at 4-6% discount (urgent selling signal)"
+    source: "context.liquidity_deterioration.post_event"
+    importance: "important"
+
+  - fact: "Management guided for acceleration 90 days ago, then cut guidance by 15%"
+    source: "context.liquidity_deterioration.event_trigger"
+    importance: "important"
+
+  - fact: "Position at 5.1% of ADV; realistic days-to-exit is 10+ days"
+    source: "context.liquidity_deterioration.post_event"
+    importance: "critical"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "industrials"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "liquidity_risk"
+    - "exit_risk"
+    - "information_ecosystem"
+    - "behavioral_finance"
+  notes: >
+    This scenario tests whether the model treats liquidity as a sizing input
+    rather than a monitoring metric. The key insight is that when liquidity
+    deteriorates, the position should shrink even if the thesis is unchanged.
+    The door got smaller — you need to be smaller too. The behavioral trap
+    is framing the trim as "locking in a loss" rather than right-sizing for
+    changed conditions. The loss already happened; the question is whether
+    the current size is appropriate for the current liquidity.

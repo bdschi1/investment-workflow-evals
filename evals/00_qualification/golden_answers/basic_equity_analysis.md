@@ -16,7 +16,7 @@
 
 ### What the Market May Be Missing
 
-1. **The valuation gap overprices the margin risk.** HSB trades at 11x forward earnings vs. a 5-year average of 14x and an EV/EBITDA of 8.5x. The 120bps gross margin compression to 38.1% is real but appears driven by cyclical factors (elevated freight, promotional intensity) rather than structural erosion. If margins stabilize near current levels and revenue grows mid-single digits, the stock should re-rate toward at least 12-13x.
+1. **The valuation gap overprices the margin risk.** HSB trades at 11x forward earnings vs. a 5-year average of 14x and an EV/EBITDA of 12.0x. The 120bps gross margin compression to 38.1% is real but appears driven by cyclical factors (elevated freight, promotional intensity) rather than structural erosion. If margins stabilize near current levels and revenue grows mid-single digits, the stock should re-rate toward at least 12-13x.
 
 2. **Comparable store sales of +4.2% in a weak housing market deserve more credit.** Housing turnover is at multi-year lows, yet HSB is growing same-store sales well above inflation. This suggests share gains and/or the existing home improvement spending trend supporting the category. The e-commerce channel (~22% of sales) provides a growth runway that traditional home furnishing peers lack.
 
@@ -74,7 +74,7 @@
 | Metric | Current | 5-Year Average | Implied at Target |
 |--------|---------|----------------|-------------------|
 | P/E Forward | 11.0x | 14.0x | 13.0x (base) |
-| EV/EBITDA | 8.5x | 10.5x (est.) | 9.5x (base) |
+| EV/EBITDA | 12.0x | 10.5x (est.) | 9.5x (base) |
 | FCF Yield | 4.4% | ~3.5% | ~3.8% |
 | Dividend Yield | 2.8% | ~2.2% | ~2.3% |
 | Revenue Growth | 8% YoY | 4-5% | 5% (base) |

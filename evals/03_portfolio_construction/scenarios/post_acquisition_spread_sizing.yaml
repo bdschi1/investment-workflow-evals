@@ -1,0 +1,271 @@
+# Post-Acquisition Spread Sizing: When 8% Upside Masks 30% Downside
+# Tests: asymmetric payoff sizing, deal-break probability, opportunity cost, merger arb correlation
+
+id: post_acquisition_spread_sizing
+title: "Post-Acquisition Spread Sizing: When 8% Upside Masks 30% Downside"
+version: "1.0.0"
+module: "03_portfolio_construction"
+category: "position_sizing"
+difficulty: "moderate"
+estimated_time_minutes: 40
+
+# === CONTEXT ===
+
+context:
+  portfolio:
+    strategy: "Long/Short Equity - Multi-Sector with Opportunistic Event"
+    aum: "$1B"
+    gross_exposure: "180%"
+    net_exposure: "50%"
+    existing_merger_arb_positions: 2
+    total_merger_arb_weight: "4.5% of NAV"
+
+  deal:
+    target:
+      name: "Interactive Entertainment Group"
+      ticker: "IEGP"
+      market_cap: "$68B"
+      sector: "Interactive Entertainment / Gaming"
+      current_price: "$87.00"
+    acquirer:
+      name: "Global Software Platforms"
+      ticker: "GSPL"
+      market_cap: "$2.1T"
+    terms:
+      offer_price: "$95.00 all-cash"
+      spread: "9.2% ($8.00)"
+      announcement_date: "5 months ago"
+      expected_close: "6-9 months from now"
+      annualized_spread: "12-18% depending on timing"
+
+  regulatory_risk:
+    jurisdictions:
+      - name: "US (FTC)"
+        status: "Extended review, second request issued"
+        risk_assessment: "Moderate — FTC has been aggressive on tech M&A"
+      - name: "UK (CMA)"
+        status: "Phase 2 investigation opened"
+        risk_assessment: "High — CMA blocked a comparable deal 18 months ago"
+      - name: "EU (European Commission)"
+        status: "Phase 1 review, remedies discussion underway"
+        risk_assessment: "Moderate — likely approvable with behavioral remedies"
+    consensus_deal_close_probability: "70-75%"
+    note: "CMA is the swing factor — their Phase 2 investigation has 65% block rate historically for digital markets cases"
+
+  deal_break_scenario:
+    unaffected_price_estimate: "$62-68"
+    implied_downside_on_break: "-22% to -29%"
+    note: "Target was trading at $65 pre-announcement. Break would likely overshoot to $58-62 on forced selling by arb funds"
+
+  analyst_recommendation:
+    action: "Take a 4% position ($40M) based on expected value analysis"
+    rationale: >
+      EV calculation: 72.5% * $95 + 27.5% * $63 = $86.20. Current price $87.
+      Wait — that implies negative EV at current spread. But analyst argues the
+      deal close probability is actually 80%, which gives EV of $88.60, or +1.8%
+      upside. At 80% close probability, a 4% position captures 7.4% spread
+      with 80% probability, for an expected return of +3.3% on invested capital.
+    sizing_logic: "4% of NAV reflects high conviction in deal closure"
+
+  market_conditions:
+    merger_arb_index_ytd: "+2.8%"
+    risk_free_rate: "5.2%"
+    note: "Risk-free rate provides 5.2% annualized with zero risk; spread must compensate for deal-break tail"
+
+# === TASK ===
+
+task:
+  prompt: >
+    A large-cap gaming company is subject to a $95/share all-cash takeout offer,
+    currently trading at $87 (9.2% spread). The deal requires regulatory
+    approval in three jurisdictions, with the UK CMA being the key swing
+    factor. Consensus puts the deal close probability at 70-75%.
+
+    Your analyst proposes a 4% position based on an expected value analysis
+    using an 80% close probability. However, if the deal breaks, the stock
+    likely falls to $62-68 (-22% to -29%).
+
+    Evaluate the sizing proposal. Your response should address:
+
+    1. The asymmetry of the payoff: +9.2% if the deal closes vs. -22% to
+       -29% if it breaks — and what this means for position sizing
+    2. Whether the analyst's 80% deal close probability is well-calibrated
+       given CMA's historical block rate
+    3. The opportunity cost of tying up $40M for 6-9 months vs. the
+       risk-free rate (5.2%)
+    4. Correlation with existing merger arb positions (4.5% of NAV)
+    5. The appropriate size given the asymmetric risk profile
+    6. Alternative expressions (e.g., options) that might better match the
+       payoff structure
+
+  expected_output_type: "portfolio_construction_framework"
+
+  constraints:
+    - "Must address the asymmetric payoff structure in sizing"
+    - "Must evaluate the deal close probability estimate critically"
+    - "Must compare spread return to risk-free alternative"
+    - "Must consider portfolio-level merger arb concentration"
+    - "Must not treat spread capture as low-risk income"
+
+# === EVALUATION CRITERIA ===
+
+evaluation_criteria:
+  dimensions:
+    - name: "Asymmetric Payoff Recognition"
+      id: "payoff_asymmetry"
+      weight: 40
+      criteria:
+        - "Correctly frames the risk/reward as ~9% up vs ~25% down (roughly 3:1 adverse ratio)"
+        - "Recognizes that position size must reflect the conditional loss, not just the expected value"
+        - "Calculates the maximum tolerable position given the deal-break loss and portfolio risk limits"
+        - "Understands that binary outcomes require different sizing than continuous distributions"
+
+    - name: "Probability Calibration"
+      id: "probability_calibration"
+      weight: 30
+      criteria:
+        - "Questions the analyst's 80% probability vs consensus 70-75%"
+        - "Notes CMA Phase 2 has 65% block rate for digital markets cases"
+        - "Recognizes that the analyst's EV calculation is sensitive to small changes in probability"
+        - "At 70% close probability, the expected value may be negative"
+
+    - name: "Portfolio Context"
+      id: "portfolio_context"
+      weight: 30
+      criteria:
+        - "Considers existing 4.5% in other merger arb positions"
+        - "Evaluates aggregate event-driven exposure"
+        - "Compares spread return to risk-free rate (opportunity cost)"
+        - "Considers capital efficiency and time-to-close"
+
+  critical_failures:
+    - "Sizes position without addressing the asymmetric downside"
+    - "Accepts the 80% probability without questioning it"
+    - "Treats merger arb spread as low-risk income"
+    - "Does not compare to risk-free alternative"
+    - "Ignores deal-break correlation with other arb positions"
+
+  pass_threshold: 70
+
+# === PITFALLS ===
+
+pitfalls:
+  - description: "Sizing based on expected value alone without considering conditional loss magnitude"
+    failure_type: "expected_value_trap"
+    severity: "critical"
+
+  - description: "Overestimating deal close probability relative to base rates"
+    failure_type: "probability_overconfidence"
+    severity: "major"
+
+  - description: "Ignoring opportunity cost of capital vs risk-free rate"
+    failure_type: "opportunity_cost_blindness"
+    severity: "moderate"
+
+  - description: "Treating merger arb as uncorrelated to other portfolio positions"
+    failure_type: "correlation_blindness"
+    severity: "moderate"
+
+  - description: "Not considering that deal-break overshoots below unaffected price due to forced selling"
+    failure_type: "downside_underestimation"
+    severity: "major"
+
+# === ADVERSARIAL VARIANT ===
+
+adversarial_example:
+  response: >
+    At 80% deal close probability, the expected value is positive (+1.8%)
+    and the 9.2% spread provides attractive compensation for regulatory risk.
+    Merger arbitrage is a well-established strategy with predictable returns.
+    A 4% position is appropriate given our conviction in deal closure. The
+    regulatory concerns are likely overblown — most large deals eventually
+    close with remedies.
+
+  why_this_fails:
+    - "Uncritically accepts the analyst's 80% probability estimate"
+    - "Treats merger arb as inherently low-risk"
+    - "Does not address the 3:1 adverse asymmetry (+9% vs -25%)"
+    - "Does not compare to risk-free rate (5.2% annualized)"
+    - "Ignores CMA Phase 2 block rate history"
+    - "Does not consider portfolio-level merger arb concentration"
+
+# === ANCHOR ANSWERS ===
+
+anchor_answers:
+  strong:
+    response: >
+      The analyst's sizing proposal is too aggressive for this risk profile.
+      The payoff is highly asymmetric: +$3.2M if the deal closes (+9.2% on
+      $40M) vs. -$8.8M to -$11.6M if it breaks (-22% to -29% on $40M).
+      That's a 2.8-3.6x adverse ratio.
+
+      The probability estimate needs scrutiny. The analyst uses 80%, but
+      consensus is 70-75% and the CMA Phase 2 historically blocks 65% of
+      digital markets cases. At 70%, the EV calculation turns negative:
+      70% * $95 + 30% * $63 = $85.40 — below the current price of $87.
+
+      Even at 75% close probability, the expected return is modest and must
+      be compared to the 5.2% risk-free rate. Tying up $40M for 6-9 months
+      at a risk-free rate earns $1.0-1.6M with zero risk. The spread
+      compensates for the deal-break tail.
+
+      With 4.5% already in other merger arb positions, adding 4% would put
+      8.5% in event-driven situations — all of which have correlated
+      risk in a "deal environment" deterioration scenario.
+
+      Appropriate sizing: 1.5-2% of NAV ($15-20M), which limits the
+      deal-break loss to 0.33-0.58% of NAV — tolerable within the
+      portfolio's risk budget. Consider partial expression through
+      call spreads to cap the downside.
+
+  failing:
+    response: >
+      The 9.2% spread is attractive and our 80% deal close probability gives
+      us positive expected value. We should take the full 4% position to
+      maximize our capture of this spread. Merger arbitrage provides
+      equity-like returns with bond-like risk.
+
+# === KEY FACTS ===
+
+key_facts:
+  - fact: "Payoff asymmetry: +9.2% if deal closes vs. -22% to -29% if deal breaks"
+    source: "context.deal / context.deal_break_scenario"
+    importance: "critical"
+
+  - fact: "CMA Phase 2 historically blocks 65% of digital markets cases"
+    source: "context.regulatory_risk"
+    importance: "critical"
+
+  - fact: "Risk-free rate at 5.2% provides meaningful opportunity cost benchmark"
+    source: "context.market_conditions"
+    importance: "important"
+
+  - fact: "Portfolio already has 4.5% in other merger arb positions"
+    source: "context.portfolio"
+    importance: "important"
+
+  - fact: "At 70% close probability, expected value is negative ($85.40 vs $87 current)"
+    source: "derived"
+    importance: "critical"
+
+# === METADATA ===
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-02-28"
+  sector_focus: "multi-sector"
+  skill_level: "advanced"
+  tags:
+    - "portfolio_construction"
+    - "position_sizing"
+    - "merger_arbitrage"
+    - "asymmetric_payoff"
+    - "regulatory_risk"
+    - "event_driven"
+  notes: >
+    This scenario tests whether the model can size for asymmetric outcomes.
+    The key insight is that merger arb spreads look like "free money" but the
+    conditional loss on a deal break is 3x the potential gain. Sizing must
+    reflect the loss in the bad state, not just the expected value. The
+    additional wrinkle is that the analyst's probability estimate is
+    aggressive relative to base rates.
