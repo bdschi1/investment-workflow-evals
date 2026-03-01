@@ -53,7 +53,7 @@ NON-CONSENSUS VIEW: While consensus focuses on [consensus narrative], the combin
 
 [2-3 paragraph articulation of the investment thesis. Lead with the non-consensus insight. Explain why the market is mispricing this security and what will cause the gap to close.]
 
-*Example: ABBV is executing a superior post-Humira transition with Skyrizi/Rinvoq generating sustainable competitive moats, while the market undervalues the company's operational leverage and margin expansion potential as higher-margin drugs scale.*
+*Example: The company is executing a superior product transition with next-generation therapies generating sustainable competitive moats, while the market undervalues the company's operational leverage and margin expansion potential as higher-margin drugs scale.*
 
 ### Technical Outlook
 
@@ -101,7 +101,7 @@ NON-CONSENSUS VIEW: While consensus focuses on [consensus narrative], the combin
 
 ### Active Short Thesis
 
-> **[One-sentence short thesis -- strong, specific, actionable. Example: "ABBV trading at 94x trailing P/E on 6.9% margins is unsustainable financial engineering masking structural deterioration -- short target $160 on inevitable multiple compression."]**
+> **[One-sentence short thesis -- strong, specific, actionable. Example: "XYZ trading at 94x trailing P/E on 6.9% margins is unsustainable financial engineering masking structural deterioration -- short target $160 on inevitable multiple compression."]**
 
 ### Primary Risks
 

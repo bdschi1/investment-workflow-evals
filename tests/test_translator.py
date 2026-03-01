@@ -124,34 +124,34 @@ class TestTranslatedResearch:
 SAMPLE_INSTITUTIONAL_TEXT = """
 ## Executive Summary
 
-**Recommendation:** BUY ABBV at current levels.
+**Recommendation:** BUY MRK at current levels.
 
-AbbVie reported revenue of $14.3 billion in Q3, up 4% YoY. The company's
-Immunology franchise grew 8% driven by Skyrizi and Rinvoq adoption.
-Humira biosimilar erosion was better than expected at -28% YoY.
+Merck reported revenue of $16.0 billion in Q3, up 7% YoY. The company's
+Oncology franchise grew 12% driven by Keytruda adoption across indications.
+The Gardasil franchise showed resilient demand internationally.
 
 ## Investment Thesis
 
-AbbVie's diversification away from Humira is ahead of schedule. The GLP-1
-pipeline presents a $5 billion revenue opportunity by 2028. Current EV/EBITDA
-of 12x represents a 20% discount to peers.
+Merck's pipeline diversification beyond Keytruda is progressing well. The
+ADC partnership portfolio presents a $5 billion revenue opportunity by 2028.
+Current EV/EBITDA of 12x represents a 20% discount to peers.
 
 Management raised full-year guidance, citing strong commercial execution
 and favorable payer dynamics. The WACC of 8.5% supports our DCF-derived
-price target of $210.
+price target of $140.
 
 ## Risk Factors
 
-- Biosimilar competition continues to pressure Humira revenue
-- GLP-1 clinical trial failure could eliminate pipeline optionality
-- Patent cliff risk on Imbruvica by 2027
+- Keytruda LOE in 2028 creates meaningful patent cliff risk
+- ADC clinical trial failure could eliminate pipeline optionality
+- China revenue exposure adds geopolitical risk
 - Regulatory scrutiny on drug pricing could compress margins
 
 ## Valuation
 
-Our DCF model with a terminal growth rate of 2.5% yields fair value of $210,
+Our DCF model with a terminal growth rate of 2.5% yields fair value of $140,
 implying 15% upside from current levels. Comps analysis supports a range
-of $195-$225.
+of $130-$150.
 """
 
 
@@ -169,10 +169,10 @@ class TestSimplifier:
     ):
         result = translator.translate(
             SAMPLE_INSTITUTIONAL_TEXT, retail_config,
-            ticker="ABBV", company_name="AbbVie Inc.",
+            ticker="MRK", company_name="Merck & Co., Inc.",
         )
         assert isinstance(result, TranslatedResearch)
-        assert result.ticker == "ABBV"
+        assert result.ticker == "MRK"
         assert result.audience == AudienceProfile.RETAIL_INVESTOR
 
     def test_translate_has_summary(
@@ -231,11 +231,11 @@ class TestSimplifier:
     ):
         result = translator.translate(
             SAMPLE_INSTITUTIONAL_TEXT, retail_config,
-            ticker="ABBV",
+            ticker="MRK",
         )
         report = translator.validate_accuracy(
             SAMPLE_INSTITUTIONAL_TEXT, result,
-            key_facts=["ABBV", "$14.3 billion", "BUY", "GLP-1"],
+            key_facts=["MRK", "$16.0 billion", "BUY", "Keytruda"],
         )
         assert isinstance(report, AccuracyReport)
         assert report.facts_checked == 4
@@ -272,10 +272,10 @@ class TestSimplifier:
     ):
         result = translator.translate(
             SAMPLE_INSTITUTIONAL_TEXT, retail_config,
-            ticker="ABBV", company_name="AbbVie Inc.",
+            ticker="MRK", company_name="Merck & Co., Inc.",
         )
         md = result.to_markdown()
-        assert "ABBV" in md
+        assert "MRK" in md
         assert "What You Need to Know" in md
 
 

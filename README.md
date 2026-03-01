@@ -55,7 +55,7 @@ Each scenario includes context, task prompt, evaluation criteria, and an adversa
 | **Assumption Validation** | [Statistical Significance Trap](evals/04_assumption_validation/scenarios/statistical_significance_trap.yaml) | p-hacking, backtest overfitting, multiple comparisons |
 | **Risk Attribution** | [Healthcare L/S Factor Decomposition](evals/05_risk_attribution/scenarios/healthcare_ls_factor_decomposition.yaml) | Multi-factor return decomposition, residual alpha |
 | **Risk Attribution** | [Factor Tilt Attribution](evals/05_risk_attribution/scenarios/factor_tilt_attribution.yaml) | Value factor tilt vs stock selection, statistical significance |
-| **Research Translation** | [IC Memo to Blog](evals/06_research_translation/scenarios/ic_memo_to_blog.yaml) | Institutional-to-retail content adaptation |
+| **Research Translation** | *(scenarios in development)* | Institutional-to-retail content adaptation |
 
 ## Golden Answers
 
@@ -79,7 +79,7 @@ Expert-level reference responses demonstrating proper analytical workflow. Each 
 | **Assumption Validation** | [Statistical Significance Trap](evals/04_assumption_validation/golden_answers/statistical_significance_trap.md) | p-hacking awareness, multiple comparison correction |
 | **Risk Attribution** | [Healthcare L/S Factor Decomposition](evals/05_risk_attribution/golden_answers/healthcare_ls_factor_decomposition.md) | Multi-factor decomposition, residual alpha estimation |
 | **Risk Attribution** | [Factor Tilt Attribution](evals/05_risk_attribution/golden_answers/factor_tilt_attribution.md) | Factor tilt vs selection, statistical significance |
-| **Research Translation** | [ABBV Retail Summary](evals/06_research_translation/golden_answers/abbv_retail_summary.md) | Jargon simplification, actionable takeaways |
+| **Research Translation** | *(golden answers in development)* | Jargon simplification, actionable takeaways |
 
 ## Rubric Structure
 
@@ -271,11 +271,3 @@ Under active development. Contributions welcome — areas for improvement includ
 
 MIT License
 
-## Related Work
-
-This project draws on several recent academic contributions to financial AI evaluation and alignment:
-
-- **Fin-o1** (Qian et al., 2025) — First systematic comparison of PPO, DPO, and GRPO reinforcement learning methods for financial reasoning. GRPO's multi-faceted reward function (accuracy + logic + format + length) directly informs the `studio/rewards.py` reward signal design. [arXiv:2502.08127](https://arxiv.org/abs/2502.08127)
-- **FinanceQA** (Mateega et al., 2025) — Benchmark exposing that frontier LLMs fail ~60% of realistic analyst tasks, with near-zero accuracy on assumption-based questions. Motivates the `04_assumption_validation` eval category. [arXiv:2501.18062](https://arxiv.org/abs/2501.18062)
-- **PRBench** (Akyurek et al., 2025) — 19,356 expert-curated binary criteria with integer weights across 7 finance rubric categories. Informs our rubric-based evaluation methodology and YAML rubric schema design. [arXiv:2511.11562](https://arxiv.org/abs/2511.11562)
-- **FLaME** (Matlin et al., 2025) — First holistic benchmarking suite for financial NLP, evaluating 23 models across 20 datasets and 6 task categories. Provides the taxonomy framework for cross-benchmark comparability. [arXiv:2506.15846](https://arxiv.org/abs/2506.15846)
