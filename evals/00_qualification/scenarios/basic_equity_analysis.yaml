@@ -50,7 +50,7 @@ context:
     free_cash_flow_ttm: "$185M"
     dividend_yield: "2.8%"
     pe_forward: "11x"
-    ev_ebitda: "8.5x"
+    ev_ebitda: "12.0x"
 
 # === TASK ===
 

@@ -63,7 +63,7 @@ The margin recovery narrative for SDC blends two fundamentally different phenome
 ### Bull Case: Full Cyclical + Partial Structural Recovery (20-25% probability)
 - **Price Target:** $68 (+48%)
 - **Scenario:** Procedure volumes recover to 95%+ of pre-pandemic by late 2025. Automation investments deliver 200-250bps of verifiable margin improvement. EBITDA margins reach 24-26%. Market awards premium multiple on margin trajectory.
-- **Valuation:** $5.5B EBITDA x 12x = $66B EV; ~$68/share
+- **Valuation:** ~$1.3B EBITDA (26% margin on ~$5.0B revenue) x 14x = ~$18.2B EV; ~$68/share
 
 ### Base Case: Cyclical Recovery, Structural Partially Realized (40-50% probability)
 - **Price Target:** $52 (+13%)

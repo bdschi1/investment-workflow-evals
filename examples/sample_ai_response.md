@@ -1,4 +1,4 @@
-# Vertex Therapeutics (VRTX) - Investment Analysis
+# Vertex Pharmaceuticals (VRTX) - Investment Analysis
 
 ## Recommendation: BUY
 
@@ -12,7 +12,7 @@ Vertex represents an attractive risk/reward into the VX-548 Phase 3 readout. The
 
 ## Key Supporting Points
 
-1. **CF Franchise Provides Floor:** Vertex's CF business generates over $9B in annual revenue with 40%+ operating margins. This alone supports a stock price of approximately $380-400.
+1. **CF Franchise Provides Floor:** Vertex's CF business generates approximately $10B in annual revenue with 40%+ operating margins. This alone supports a stock price of approximately $380-400.
 
 2. **Asymmetric Risk/Reward:** With limited downside (~6%) and significant upside potential (30%+), the risk/reward skews favorably for longs.
 
@@ -20,7 +20,7 @@ Vertex represents an attractive risk/reward into the VX-548 Phase 3 readout. The
 
 ## Valuation
 
-At 11x forward earnings, VRTX trades at a discount to its 5-year average of 14x. The CF business alone justifies current levels, meaning investors get the pain option for free.
+At approximately 28x forward earnings, VRTX trades at a modest discount to its 5-year average of roughly 30x. The CF business alone justifies current levels, meaning investors get the pain option for free.
 
 ## Key Risks
 
