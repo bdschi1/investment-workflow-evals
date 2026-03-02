@@ -1,0 +1,171 @@
+# SaaS Rule of 40 Report Review
+# Tests: Metric mischaracterization, convention mismatch, revenue type ambiguity
+
+id: saas_rule_of_40
+title: "Review: SaaS Company Rule of 40 Analysis"
+version: "1.0.0"
+module: "07_report_review"
+category: "metric_validation"
+difficulty: "moderate"
+estimated_time_minutes: 15
+
+# === CONTEXT ===
+context:
+  report_type: "AI-generated equity research excerpt"
+  report_format: "Single-company analysis with Rule of 40 assessment"
+
+  ai_generated_report: >
+    CloudSync Inc. (CSYN) — Initiating Coverage: Buy
+
+    CloudSync reported Q3 2025 results demonstrating continued operational
+    momentum. Revenue grew 33% year-over-year to $1.8B, driven by strong
+    enterprise adoption and platform expansion. Free cash flow margin reached
+    12%, reflecting disciplined spending and improving unit economics.
+
+    Rule of 40 Assessment: CloudSync's Rule of 40 score of 45 (33% revenue
+    growth + 12% FCF margin) demonstrates strong operational efficiency and
+    positions the company among the top quartile of enterprise SaaS peers.
+    This metric confirms CloudSync's ability to balance growth investments
+    with profitability, a hallmark of durable software business models.
+
+    We note that CloudSync's 33% revenue growth includes a $120M contribution
+    from the July 2025 acquisition of DataMesh, which added approximately
+    7 percentage points to the reported growth rate. Excluding this
+    contribution, organic revenue growth was approximately 26%.
+
+    Our price target of $185 is based on 15x forward EV/Revenue, in line
+    with high-growth SaaS peers. We rate the stock Buy with high confidence
+    given the strong Rule of 40 score and management's track record of
+    execution.
+
+  company:
+    name: "CloudSync Inc."
+    ticker: "CSYN"
+    sector: "Technology - Enterprise SaaS"
+    market_cap: "$28B"
+
+  as_of_date: "2025-11-15"
+
+  key_financials:
+    revenue_q3: "$1.8B"
+    revenue_growth_yoy: "33%"
+    organic_growth_yoy: "26%"
+    acquisition_contribution: "$120M (~7pp)"
+    fcf_margin: "12%"
+    subscription_revenue_pct: "78%"
+    professional_services_pct: "22%"
+
+# === TASK ===
+task:
+  prompt: >
+    You are reviewing this AI-generated equity research excerpt for a
+    quality assurance team. Evaluate the report across the standard
+    review dimensions (factual accuracy, methodological soundness, logic
+    chain integrity, confidence calibration, completeness, source
+    reliability, and practical relevance).
+
+    Produce structured reviewer feedback identifying specific errors,
+    gaps, and unsupported claims. For each issue found, cite the specific
+    text from the report and explain why it is problematic.
+
+  expected_output_type: "structured_review"
+
+  constraints:
+    - "Must identify the primary analytical errors in the report"
+    - "Must assess confidence calibration of the recommendation"
+    - "Feedback must be specific and cite report text"
+    - "Must not introduce errors not present in the report"
+
+# === EMBEDDED ERRORS (for rubric reference, not shown to evaluee) ===
+# 1. Rule of 40 described as "operational efficiency" — it measures growth/profitability tradeoff
+# 2. Uses FCF margin without noting convention choice (EBITDA is standard for SaaS Rule of 40)
+# 3. Uses total revenue growth (33%) including acquisition, not organic (26%) — organic Rule of 40 = 38, below threshold
+# 4. 22% professional services revenue means this isn't a pure SaaS model — Rule of 40 applicability is questionable
+# 5. "High confidence" Buy on a single metric (Rule of 40) with no sensitivity, no scenario analysis, no peer comparison
+# 6. Report buries the acquisition contribution below the Rule of 40 assessment — framing issue
+
+# === EVALUATION CRITERIA ===
+evaluation_criteria:
+  dimensions:
+    - name: "Error Identification"
+      weight: 0.35
+      criteria:
+        - "Identifies Rule of 40 mischaracterization as operational efficiency"
+        - "Flags organic vs total growth distinction and its impact on the score"
+        - "Notes FCF vs EBITDA convention ambiguity"
+        - "Questions applicability given 22% services revenue"
+
+    - name: "Confidence Assessment"
+      weight: 0.25
+      criteria:
+        - "Flags 'high confidence' language as unsupported"
+        - "Notes absence of scenario analysis or sensitivity"
+        - "Identifies single-metric basis for Buy recommendation"
+
+    - name: "Feedback Quality"
+      weight: 0.25
+      criteria:
+        - "Cites specific report text for each flag"
+        - "Explains why each issue is problematic"
+        - "Distinguishes between major and minor issues"
+
+    - name: "Review Discipline"
+      weight: 0.15
+      criteria:
+        - "Does not introduce errors not present in the report"
+        - "Does not attempt to rewrite the report"
+        - "Feedback is concise and actionable"
+
+  critical_failures:
+    - "Misses the organic vs total growth distinction entirely"
+    - "Accepts 'high confidence' language without flagging"
+    - "States Rule of 40 is correctly characterized as operational efficiency"
+    - "Introduces factual errors not present in the original report"
+
+  pass_threshold: 70
+
+# === KEY FACTS ===
+key_facts:
+  - fact: "Rule of 40 measures growth/profitability tradeoff, not operational efficiency"
+    source: "Standard financial definition"
+    importance: "critical"
+
+  - fact: "Organic growth of 26% + 12% FCF margin = 38, below the 40 threshold"
+    source: "Derived from report data"
+    importance: "critical"
+
+  - fact: "EBITDA margin is the standard convention for SaaS Rule of 40"
+    source: "Industry standard"
+    importance: "important"
+
+  - fact: "22% professional services revenue weakens pure SaaS classification"
+    source: "Report key financials"
+    importance: "important"
+
+# === PITFALLS ===
+pitfalls:
+  - description: "Accepting the 45 score at face value without checking organic growth"
+    failure_type: "oversight"
+    severity: "critical"
+
+  - description: "Focusing only on the arithmetic and missing the characterization error"
+    failure_type: "shallow_analysis"
+    severity: "major"
+
+  - description: "Over-flagging minor issues while missing the major ones"
+    failure_type: "prioritization_failure"
+    severity: "major"
+
+  - description: "Rewriting the report instead of providing structured feedback"
+    failure_type: "scope_creep"
+    severity: "minor"
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-01"
+  tags:
+    - "report_review"
+    - "saas"
+    - "rule_of_40"
+    - "metric_validation"
+    - "confidence_calibration"

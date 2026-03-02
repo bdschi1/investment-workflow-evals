@@ -1,0 +1,175 @@
+# SaaS Scenario Analysis Report Review
+# Tests: Narrow scenario range, no drivers, unquantified confidence, guidance anchoring
+
+id: saas_scenario_analysis
+title: "Review: SaaS Company Bull/Bear/Base Scenario Analysis"
+version: "1.0.0"
+module: "07_report_review"
+category: "scenario_validation"
+difficulty: "moderate"
+estimated_time_minutes: 15
+
+# === CONTEXT ===
+context:
+  report_type: "AI-generated equity research excerpt"
+  report_format: "Scenario analysis with recommendation"
+
+  ai_generated_report: >
+    NovaPlatform Inc. (NVPF) — Scenario Analysis and Price Target
+
+    NovaPlatform is a leading vertical SaaS provider serving the healthcare
+    administration market. Management guided Q4 revenue growth of 30-34%
+    year-over-year, consistent with the company's trend of steady execution.
+    Net revenue retention remains above 130%, and the company recently
+    expanded its platform with AI-powered workflow automation features.
+
+    Scenario Analysis:
+
+    Bull Case ($92, +25% upside):
+    Revenue growth of 40% driven by strong enterprise adoption. Operating
+    margin expands to 8% as the company benefits from scale. Multiple
+    expands to 16x forward revenue.
+
+    Base Case ($82, +12% upside):
+    Revenue growth of 32% in line with midpoint of guidance. Operating
+    margin flat at 4%. Multiple sustains at 14x forward revenue.
+
+    Bear Case ($72, -2% downside):
+    Revenue growth of 25% reflecting macro headwinds in healthcare IT
+    spending. Operating margin compresses to 1%. Multiple contracts to
+    12x forward revenue.
+
+    Probability-Weighted Price Target:
+    Bull (25%): $92 × 0.25 = $23.00
+    Base (50%): $82 × 0.50 = $41.00
+    Bear (25%): $72 × 0.25 = $18.00
+    Weighted Target: $82.00
+
+    Downside is limited given our bear case still implies strong growth
+    of 25% and only 2% downside from current levels. We rate NovaPlatform
+    Buy.
+
+  company:
+    name: "NovaPlatform Inc."
+    ticker: "NVPF"
+    sector: "Technology - Vertical SaaS (Healthcare)"
+    market_cap: "$12B"
+
+  as_of_date: "2025-11-20"
+
+  key_financials:
+    current_price: "$73.50"
+    management_guidance: "30-34% revenue growth"
+    nrr: ">130%"
+    operating_margin: "4%"
+    forward_revenue_multiple: "14x"
+    revenue_ttm: "$850M"
+
+# === TASK ===
+task:
+  prompt: >
+    You are reviewing this AI-generated scenario analysis for a quality
+    assurance team. Evaluate the scenario construction, assumption quality,
+    and confidence calibration of the recommendation.
+
+    Produce structured reviewer feedback identifying specific analytical
+    flaws and unsupported claims. For each issue, cite the specific text
+    and explain why it is problematic.
+
+  expected_output_type: "structured_review"
+
+  constraints:
+    - "Must identify flaws in scenario construction"
+    - "Must assess confidence calibration"
+    - "Must evaluate whether the recommendation is supported"
+    - "Must not introduce errors not present in the report"
+
+# === EMBEDDED ERRORS ===
+# 1. Bear case at 25% growth vs 30-34% guidance is not meaningfully bearish — no structural downside
+# 2. Range is 25-40% — all three scenarios assume strong growth, no deceleration case
+# 3. No drivers for any scenario — what produces 40% growth? what causes 25%?
+# 4. "Downside is limited" is unquantified and self-fulfilling given narrow range
+# 5. Bear case has only 2% downside — this isn't a bear case, it's a rounding error
+# 6. No margin scenario beyond revenue — what about sales efficiency, R&D leverage, opex?
+# 7. Market consensus expectations not referenced — what's priced in?
+# 8. Bull case assumes 40% vs guidance of 30-34% — what does management know that the AI doesn't?
+# 9. Probability weights are arbitrary (25/50/25) with no justification
+
+evaluation_criteria:
+  dimensions:
+    - name: "Scenario Construction Critique"
+      weight: 0.35
+      criteria:
+        - "Identifies bear case at 25% as not meaningfully bearish"
+        - "Notes all three scenarios assume strong growth"
+        - "Flags missing drivers for each scenario"
+        - "Identifies the 40% bull case vs 30-34% guidance gap"
+
+    - name: "Confidence Assessment"
+      weight: 0.25
+      criteria:
+        - "Flags 'downside is limited' as unquantified and self-fulfilling"
+        - "Notes 2% bear case downside is not a real bear case"
+        - "Identifies missing market consensus context"
+
+    - name: "Completeness Assessment"
+      weight: 0.25
+      criteria:
+        - "Notes revenue-only scenarios with no margin/opex analysis"
+        - "Flags arbitrary probability weights"
+        - "Identifies missing competitive or macro context for scenarios"
+
+    - name: "Feedback Quality"
+      weight: 0.15
+      criteria:
+        - "Cites specific numbers from the report"
+        - "Explains what a proper bear case would include"
+        - "Feedback is actionable for the AI engineering team"
+
+  critical_failures:
+    - "Accepts 25% bear case growth as meaningfully bearish"
+    - "Accepts 'downside is limited' without flagging"
+    - "Misses the narrow scenario range entirely"
+    - "Introduces errors not present in the original report"
+
+  pass_threshold: 70
+
+key_facts:
+  - fact: "Bear case at 25% vs 30-34% guidance is only a modest miss, not a structural downside scenario"
+    source: "Derived from report"
+    importance: "critical"
+
+  - fact: "2% downside in bear case effectively means the analysis has no downside"
+    source: "Report scenario analysis"
+    importance: "critical"
+
+  - fact: "No scenario drivers are provided for any of the three cases"
+    source: "Report omission"
+    importance: "important"
+
+  - fact: "Market consensus/expectations not referenced anywhere"
+    source: "Report omission"
+    importance: "important"
+
+pitfalls:
+  - description: "Accepting the probability-weighted framework as methodologically sound because the math is correct"
+    failure_type: "form_over_substance"
+    severity: "critical"
+
+  - description: "Focusing on the probability weights while missing the scenario range problem"
+    failure_type: "misdirection"
+    severity: "major"
+
+  - description: "Suggesting specific probability adjustments instead of addressing the structural flaw"
+    failure_type: "wrong_fix"
+    severity: "minor"
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-01"
+  tags:
+    - "report_review"
+    - "saas"
+    - "scenario_analysis"
+    - "confidence_calibration"
+    - "bear_case"

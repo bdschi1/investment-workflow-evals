@@ -1,0 +1,192 @@
+# Regional Bank Risk Report Review
+# Tests: Evidence-conclusion disconnect, regulatory minimum misuse, HTM losses, no trend data
+
+id: regional_bank_risk
+title: "Review: Regional Bank Risk Assessment and Capital Adequacy"
+version: "1.0.0"
+module: "07_report_review"
+category: "risk_assessment_audit"
+difficulty: "hard"
+estimated_time_minutes: 20
+
+# === CONTEXT ===
+context:
+  report_type: "AI-generated equity research excerpt"
+  report_format: "Risk assessment with capital adequacy analysis"
+
+  ai_generated_report: >
+    Heritage Regional Bancorp (HRB) — Risk Assessment Update
+
+    Heritage Regional reported Q3 2025 results that reflected ongoing
+    challenges in the regional banking environment. We highlight three
+    key risk metrics below and assess the bank's overall financial health.
+
+    Funding Pressure: The loan-to-deposit ratio rose to 145% in Q3,
+    up from 138% in Q2, as deposit outflows continued while loan
+    commitments were drawn down. Management noted that wholesale funding
+    costs have increased 85 basis points since Q1.
+
+    Margin Compression: Net interest margin declined 45 basis points
+    over the past two quarters, from 3.10% in Q1 to 2.65% in Q3.
+    This reflects both higher funding costs and competitive pressure
+    on loan yields. Management expects NIM to stabilize in Q4 but
+    did not provide specific guidance.
+
+    Securities Portfolio: The held-to-maturity securities portfolio
+    carries $2.1B in unrealized losses, primarily in long-duration
+    US Treasury and agency MBS positions purchased during 2020-2021.
+    These losses do not impact reported capital ratios under current
+    accounting standards.
+
+    Capital Adequacy: While these metrics warrant monitoring, the bank's
+    Tier 1 capital ratio of 12.3% — well above the 6% regulatory
+    minimum — provides a substantial cushion against stress scenarios.
+    We believe Heritage Regional maintains adequate capital to weather
+    current headwinds and rate the stock Hold.
+
+    Valuation: HRB trades at 0.85x tangible book value and 8.2x
+    trailing earnings. Dividend yield of 4.8% provides income support.
+
+  company:
+    name: "Heritage Regional Bancorp"
+    ticker: "HRB"
+    sector: "Financials - Regional Banks"
+    market_cap: "$3.2B"
+
+  as_of_date: "2025-11-10"
+
+  key_financials:
+    loan_to_deposit: "145% (up from 138% in Q2)"
+    nim_q1: "3.10%"
+    nim_q3: "2.65%"
+    nim_compression: "45bps over 2 quarters"
+    htm_unrealized_losses: "$2.1B"
+    tier1_capital_ratio: "12.3%"
+    regulatory_minimum: "6%"
+    tangible_book_value: "0.85x"
+    trailing_pe: "8.2x"
+    dividend_yield: "4.8%"
+    wholesale_funding_cost_increase: "85bps since Q1"
+
+  additional_context: >
+    Industry average loan-to-deposit ratio is approximately 80-90%.
+    Regional bank Tier 1 capital ratios typically trigger market concern
+    at 8-9%, well above the 6% regulatory minimum. Rating agency
+    downgrades typically occur at 9-10%. The bank's Tier 1 ratio was
+    14.1% one year ago and 13.2% two quarters ago. Silicon Valley Bank's
+    failure in March 2023 demonstrated that HTM unrealized losses can
+    rapidly become realized when deposit flight forces asset sales.
+    Heritage's total assets are approximately $28B.
+
+# === TASK ===
+task:
+  prompt: >
+    You are reviewing this AI-generated risk assessment for a quality
+    assurance team. Evaluate whether the report's conclusions are
+    supported by the evidence presented, and assess the adequacy of
+    the risk analysis framework.
+
+    Produce structured reviewer feedback identifying specific analytical
+    flaws, evidence-conclusion disconnects, and missing context. For each
+    issue, cite the specific text and explain why it is problematic.
+
+  expected_output_type: "structured_review"
+
+  constraints:
+    - "Must identify the primary evidence-conclusion disconnect"
+    - "Must assess whether the capital adequacy analysis is sound"
+    - "Must evaluate the treatment of HTM losses"
+    - "Must not introduce errors not present in the report"
+
+# === EMBEDDED ERRORS ===
+# 1. Three red-flag metrics → "warrants monitoring" is a massive understatement
+# 2. Tier 1 at 12.3% vs 6% minimum — the 6% is seizure level, not the real floor; markets panic at 8-9%
+# 3. No Tier 1 trend: was 14.1% a year ago, 13.2% two quarters ago — declining at 90bps/quarter
+# 4. HTM losses "don't impact capital ratios" is technically true but misleading — they do if forced to sell
+# 5. 145% loan-to-deposit is extreme (industry avg 80-90%) — the report lists it but doesn't contextualize
+# 6. The three metrics form a causal chain the report treats as independent: deposits flee → forced HTM sales → losses realized → capital craters
+# 7. "Warrants monitoring" + Hold rating is disconnected from the severity of the data
+# 8. No stress test: what happens to Tier 1 if $2.1B HTM losses are realized?
+# 9. NIM decline of 45bps in 2 quarters with no stabilization evidence beyond management hope
+
+evaluation_criteria:
+  dimensions:
+    - name: "Evidence-Conclusion Assessment"
+      weight: 0.30
+      criteria:
+        - "Identifies disconnect between three red-flag metrics and 'warrants monitoring' conclusion"
+        - "Notes that Hold rating is not supported by the severity of the data"
+        - "Recognizes the three metrics as a causal chain, not independent observations"
+
+    - name: "Capital Adequacy Critique"
+      weight: 0.25
+      criteria:
+        - "Flags 6% regulatory minimum as wrong benchmark (market floor is 8-9%)"
+        - "Identifies missing Tier 1 trend data (declining from 14.1%)"
+        - "Notes that real cushion is much thinner than 630bps"
+
+    - name: "HTM Loss Treatment"
+      weight: 0.25
+      criteria:
+        - "Identifies that HTM losses can become realized in a deposit-flight scenario"
+        - "Notes the SVB parallel — forced selling converts accounting fiction to real losses"
+        - "Flags missing stress test (what if $2.1B becomes realized?)"
+
+    - name: "Feedback Quality"
+      weight: 0.20
+      criteria:
+        - "Cites specific metrics and report text"
+        - "Explains the causal chain clearly"
+        - "Feedback is actionable for the AI engineering team"
+
+  critical_failures:
+    - "Accepts 12.3% vs 6% as 'substantial cushion' without questioning"
+    - "Treats HTM losses as irrelevant because they don't impact reported ratios"
+    - "Misses the evidence-conclusion disconnect entirely"
+    - "Introduces factual errors not present in the original report"
+
+  pass_threshold: 70
+
+key_facts:
+  - fact: "145% loan-to-deposit ratio is extreme — industry average is 80-90%"
+    source: "additional_context"
+    importance: "critical"
+
+  - fact: "Tier 1 declining: 14.1% → 13.2% → 12.3% over three quarters"
+    source: "additional_context"
+    importance: "critical"
+
+  - fact: "Market concern triggers at 8-9% Tier 1, not 6% — real cushion is ~350bps, not 630bps"
+    source: "additional_context"
+    importance: "critical"
+
+  - fact: "SVB demonstrated that HTM losses become realized when deposits flee"
+    source: "additional_context"
+    importance: "important"
+
+  - fact: "The three metrics form a causal chain: deposit pressure → forced selling → HTM losses realized → capital impairment"
+    source: "Derived analysis"
+    importance: "important"
+
+pitfalls:
+  - description: "Flagging each metric individually without connecting them as a causal chain"
+    failure_type: "fragmented_analysis"
+    severity: "major"
+
+  - description: "Focusing on NIM compression while underweighting the capital and HTM issues"
+    failure_type: "prioritization_failure"
+    severity: "major"
+
+  - description: "Accepting management's NIM stabilization guidance at face value"
+    failure_type: "uncritical_acceptance"
+    severity: "minor"
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-01"
+  tags:
+    - "report_review"
+    - "regional_bank"
+    - "capital_adequacy"
+    - "htm_losses"
+    - "evidence_conclusion_disconnect"

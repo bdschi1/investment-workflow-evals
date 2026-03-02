@@ -1,0 +1,181 @@
+# Med-Tech TAM Analysis Report Review
+# Tests: Arithmetic-as-analysis, stale source, static share assumption, TAM vs SAM
+
+id: medtech_tam_analysis
+title: "Review: Surgical Robotics TAM and Revenue Projection"
+version: "1.0.0"
+module: "07_report_review"
+category: "market_sizing_audit"
+difficulty: "hard"
+estimated_time_minutes: 20
+
+# === CONTEXT ===
+context:
+  report_type: "AI-generated equity research excerpt"
+  report_format: "Single-company analysis with top-down market sizing"
+
+  ai_generated_report: >
+    Intuitive Surgical (ISRG) — Sector Leader Poised for Growth
+
+    Market Opportunity: The global surgical robotics TAM is projected to
+    reach $20B by 2030 (MarketsandMarkets, 2023). With 68% market share
+    in robotic-assisted surgery, Intuitive Surgical is well-positioned
+    to capture $13.6B in revenue by 2030, representing a 12.4% CAGR from
+    2025 revenue of $7.1B.
+
+    Competitive Position: Intuitive's da Vinci platform remains the
+    gold standard in surgical robotics. The installed base of over 9,000
+    systems worldwide creates a durable recurring revenue stream through
+    instruments and accessories, which represent approximately 55% of
+    total revenue. The company's recent launch of the da Vinci 5 system
+    strengthens its competitive position and should drive upgrade cycles
+    across the existing installed base.
+
+    Growth Drivers:
+    - Expansion into general surgery procedures (currently ~5% penetration)
+    - International growth, particularly in China and emerging markets
+    - da Vinci 5 upgrade cycle driving higher ASPs
+    - New procedure categories (thoracic, colorectal)
+
+    Valuation: At 55x forward P/E, ISRG appears expensive on a headline
+    basis, but we believe the TAM expansion justifies the premium. Our
+    DCF yields a price target of $620, representing 18% upside from
+    current levels.
+
+    We rate ISRG Buy with conviction. The combination of dominant market
+    share, large TAM, and procedure expansion creates a compelling
+    growth story.
+
+  company:
+    name: "Intuitive Surgical"
+    ticker: "ISRG"
+    sector: "Healthcare - Medical Devices"
+    market_cap: "$185B"
+
+  as_of_date: "2025-12-15"
+
+  key_financials:
+    revenue_2025e: "$7.1B"
+    market_share: "68%"
+    tam_2030_projection: "$20B"
+    source_vintage: "MarketsandMarkets 2023 (3 years old)"
+    forward_pe: "55x"
+    instruments_accessories_pct: "55%"
+    installed_base: "9,000+ systems"
+
+  additional_context: >
+    Key competitors in surgical robotics include Medtronic (Hugo system),
+    Johnson & Johnson (Ottava, in development), Stryker (Mako for orthopedics),
+    and several Chinese competitors gaining domestic share. Medtronic's Hugo
+    has received CE mark and is in limited US rollout. J&J's Ottava timeline
+    has slipped multiple times. Regulatory barriers to entry are lower in
+    robotics than in pharmaceuticals.
+
+# === TASK ===
+task:
+  prompt: >
+    You are reviewing this AI-generated equity research excerpt for a
+    quality assurance team. Evaluate the market sizing methodology,
+    revenue projection logic, and overall analytical rigor.
+
+    Produce structured reviewer feedback identifying specific errors,
+    unsupported assumptions, and analytical gaps. For each issue, cite
+    the specific text and explain why it is problematic.
+
+  expected_output_type: "structured_review"
+
+  constraints:
+    - "Must identify the primary analytical flaws in the TAM analysis"
+    - "Must assess the revenue projection methodology"
+    - "Must evaluate confidence calibration of the recommendation"
+    - "Must not introduce errors not present in the report"
+
+# === EMBEDDED ERRORS ===
+# 1. $13.6B = 68% × $20B is arithmetic, not analysis — no growth drivers, market dynamics, or share trajectory
+# 2. Static share assumption: 68% held constant through 2030 despite increasing competition
+# 3. Stale source: MarketsandMarkets 2023 is 3 years old — TAM projections get revised constantly
+# 4. No current TAM baseline stated — can't assess whether $20B implies growth or contraction
+# 5. No cost-of-maintaining-share analysis — what margins look like if ISRG has to defend share
+# 6. TAM vs SAM confusion: $20B is total addressable, not serviceable or obtainable
+# 7. "Buy with conviction" language is overconfident — no scenario analysis, no sensitivity
+# 8. 55x P/E justified solely by TAM without margin/earnings path analysis
+# 9. Competitive section mentions threats but TAM section ignores them entirely
+
+evaluation_criteria:
+  dimensions:
+    - name: "TAM Methodology Critique"
+      weight: 0.30
+      criteria:
+        - "Identifies share × TAM as arithmetic, not analysis"
+        - "Flags static 68% share assumption given competitive entry"
+        - "Notes stale 2023 source for a 2030 projection"
+        - "Recognizes missing current baseline (TAM today vs 2030)"
+
+    - name: "Logic Chain Assessment"
+      weight: 0.25
+      criteria:
+        - "Identifies disconnect between competitive threats section and TAM section"
+        - "Notes TAM justifying P/E without an earnings bridge"
+        - "Flags missing cost/margin analysis for share defense"
+
+    - name: "Confidence Assessment"
+      weight: 0.25
+      criteria:
+        - "Flags 'Buy with conviction' as overconfident"
+        - "Notes absence of scenario analysis"
+        - "Identifies missing sensitivity around TAM assumptions"
+
+    - name: "Feedback Quality"
+      weight: 0.20
+      criteria:
+        - "Cites specific report text for each flag"
+        - "Distinguishes between valid points (installed base, recurring revenue) and flawed ones"
+        - "Feedback is actionable"
+
+  critical_failures:
+    - "Accepts $13.6B revenue projection as analytically sound"
+    - "Misses the stale source issue"
+    - "Accepts static market share assumption without questioning"
+    - "Introduces factual errors not present in the original report"
+
+  pass_threshold: 70
+
+key_facts:
+  - fact: "68% × $20B = $13.6B is multiplication, not a revenue forecast methodology"
+    source: "Derived from report"
+    importance: "critical"
+
+  - fact: "MarketsandMarkets 2023 source is 3 years old at time of report"
+    source: "Report citation"
+    importance: "critical"
+
+  - fact: "Medtronic Hugo and J&J Ottava represent real competitive threats to share"
+    source: "Report additional_context"
+    importance: "important"
+
+  - fact: "No current-year TAM is stated, making growth assessment impossible"
+    source: "Report omission"
+    importance: "important"
+
+pitfalls:
+  - description: "Getting distracted by the 55x P/E discussion and missing the TAM methodology errors"
+    failure_type: "misdirection"
+    severity: "major"
+
+  - description: "Accepting growth drivers as sufficient support for the TAM projection"
+    failure_type: "conflation"
+    severity: "major"
+
+  - description: "Flagging only the stale source without addressing the share assumption"
+    failure_type: "shallow_analysis"
+    severity: "major"
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-01"
+  tags:
+    - "report_review"
+    - "medtech"
+    - "tam_analysis"
+    - "market_sizing"
+    - "surgical_robotics"

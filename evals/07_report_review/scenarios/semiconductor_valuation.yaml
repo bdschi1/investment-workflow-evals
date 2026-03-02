@@ -1,0 +1,185 @@
+# Semiconductor Valuation Report Review
+# Tests: Circular self-comparison, missing compression context, no peer reference, E denominator risk
+
+id: semiconductor_valuation
+title: "Review: Semiconductor Company Valuation and Buy Recommendation"
+version: "1.0.0"
+module: "07_report_review"
+category: "valuation_audit"
+difficulty: "hard"
+estimated_time_minutes: 20
+
+# === CONTEXT ===
+context:
+  report_type: "AI-generated equity research excerpt"
+  report_format: "Single-company valuation analysis with recommendation"
+
+  ai_generated_report: >
+    Nvidia Corp (NVDA) — Valuation Update: Buy the Dip
+
+    Nvidia shares have pulled back 18% from their 52-week high, creating
+    an attractive entry point for long-term investors. The stock currently
+    trades at 35x forward P/E, well below its 5-year average forward P/E
+    of 45x.
+
+    This multiple compression represents a compelling opportunity. Over
+    the past five years, NVDA has consistently re-rated higher as the
+    AI investment cycle accelerated. At current levels, the stock is
+    trading at a 22% discount to its historical average, suggesting
+    meaningful upside as sentiment normalizes.
+
+    Earnings Momentum: Consensus estimates project EPS of $4.20 for
+    FY2027, representing 38% year-over-year growth. The company's
+    dominant position in AI accelerators, with an estimated 80%+ market
+    share in data center GPUs, provides strong visibility into the
+    earnings trajectory.
+
+    Revenue Diversification: While data center revenue (85% of total)
+    remains the primary growth driver, gaming and automotive segments
+    provide additional optionality. Management has guided total revenue
+    growth of 30-35% for the next fiscal year.
+
+    We maintain our Buy rating with a price target of $175, based on
+    a re-rating to 42x forward P/E — still below the 5-year average.
+    At $175, the stock would offer 25% upside from current levels.
+    Downside risk is limited by the company's dominant competitive
+    position and strong earnings growth trajectory.
+
+  company:
+    name: "Nvidia Corp"
+    ticker: "NVDA"
+    sector: "Technology - Semiconductors"
+    market_cap: "$3.4T"
+
+  as_of_date: "2025-11-30"
+
+  key_financials:
+    current_price: "$140"
+    forward_pe: "35x"
+    five_year_avg_pe: "45x"
+    eps_fy2027e: "$4.20"
+    eps_growth_yoy: "38%"
+    data_center_pct: "85%"
+    revenue_growth_guidance: "30-35%"
+    market_cap: "$3.4T"
+
+  additional_context: >
+    Nvidia's 5-year average forward P/E of 45x spans a period of
+    fundamental business transformation — from a gaming/crypto GPU
+    company to the dominant AI infrastructure provider. AMD trades at
+    25x forward P/E. Broadcom at 28x. The SOX semiconductor index
+    trades at 22x forward P/E. Nvidia's forward EPS consensus has
+    been revised upward 15% over the past 90 days. The stock has
+    roughly tripled since 2023 on AI demand. Semiconductor stocks
+    are cyclical, and multiple compression often precedes earnings
+    deceleration in the sector.
+
+# === TASK ===
+task:
+  prompt: >
+    You are reviewing this AI-generated valuation analysis for a quality
+    assurance team. Evaluate the valuation methodology, analytical logic,
+    and recommendation quality.
+
+    Produce structured reviewer feedback identifying specific errors,
+    unsupported assumptions, and analytical gaps. For each issue, cite
+    the specific text and explain why it is problematic.
+
+  expected_output_type: "structured_review"
+
+  constraints:
+    - "Must identify the primary valuation methodology flaws"
+    - "Must assess the logic behind the Buy recommendation"
+    - "Must evaluate confidence calibration"
+    - "Must not introduce errors not present in the report"
+
+# === EMBEDDED ERRORS ===
+# 1. Comparing stock to its own 5-year average P/E is circular — the business fundamentally changed
+# 2. No peer comparison: AMD at 25x, Broadcom at 28x, SOX at 22x — NVDA at 35x is a PREMIUM, not a discount
+# 3. "Buy the dip" is not a thesis — no explanation of WHY the multiple compressed
+# 4. Multiple compression could signal the market is pricing in deceleration — the report treats it as opportunity without analysis
+# 5. Forward EPS of $4.20 is consensus — if consensus is already aggressive, the "low" P/E is built on an inflated E
+# 6. Price target based on re-rating to 42x — WHY would the multiple re-rate? What catalyst?
+# 7. "Downside risk is limited" is unquantified and unsupported
+# 8. At $3.4T market cap, law of large numbers applies — growth rates required to justify expansion are enormous
+# 9. No semiconductor cycle discussion — semis are cyclical, current could be peak
+
+evaluation_criteria:
+  dimensions:
+    - name: "Valuation Methodology Critique"
+      weight: 0.30
+      criteria:
+        - "Identifies circular self-comparison as primary methodology flaw"
+        - "Notes missing peer comparison (AMD, Broadcom, SOX index)"
+        - "Flags that at 35x vs peers at 22-28x, NVDA is at a premium, not a discount"
+        - "Questions the re-rating assumption for the price target"
+
+    - name: "Logic Chain Assessment"
+      weight: 0.25
+      criteria:
+        - "Identifies missing explanation for WHY the multiple compressed"
+        - "Notes that compression could signal deceleration, not opportunity"
+        - "Flags 'buy the dip' as a reflex, not an analytical framework"
+        - "Questions whether consensus EPS estimates are reliable or aggressive"
+
+    - name: "Confidence Assessment"
+      weight: 0.25
+      criteria:
+        - "Flags unquantified 'limited downside' claim"
+        - "Notes no sensitivity analysis or alternative scenarios"
+        - "Identifies missing discussion of semiconductor cyclicality"
+
+    - name: "Feedback Quality"
+      weight: 0.20
+      criteria:
+        - "Cites specific multiples and comparisons from report"
+        - "Provides context on why historical self-comparison is insufficient"
+        - "Feedback is actionable for the AI engineering team"
+
+  critical_failures:
+    - "Accepts the 5-year average comparison as valid without questioning business transformation"
+    - "Fails to note that NVDA trades at a premium to semiconductor peers"
+    - "Accepts 'buy the dip' as a valid investment thesis"
+    - "Introduces factual errors not present in the original report"
+
+  pass_threshold: 70
+
+key_facts:
+  - fact: "NVDA at 35x forward P/E vs AMD at 25x, Broadcom at 28x, SOX at 22x — NVDA is premium, not cheap"
+    source: "additional_context"
+    importance: "critical"
+
+  - fact: "5-year average P/E spans fundamental business transformation (gaming → AI infrastructure)"
+    source: "additional_context"
+    importance: "critical"
+
+  - fact: "Multiple compression in semiconductors often precedes earnings deceleration"
+    source: "additional_context"
+    importance: "important"
+
+  - fact: "Consensus EPS revised up 15% in 90 days — if baked in, the 'low' P/E may be on inflated E"
+    source: "additional_context"
+    importance: "important"
+
+pitfalls:
+  - description: "Agreeing that 35x vs 45x average represents a discount without checking peers"
+    failure_type: "anchoring"
+    severity: "critical"
+
+  - description: "Focusing only on the P/E level without questioning what's in the E"
+    failure_type: "shallow_analysis"
+    severity: "major"
+
+  - description: "Flagging only confidence language while missing the structural methodology issues"
+    failure_type: "prioritization_failure"
+    severity: "major"
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-01"
+  tags:
+    - "report_review"
+    - "semiconductor"
+    - "valuation"
+    - "pe_ratio"
+    - "peer_comparison"

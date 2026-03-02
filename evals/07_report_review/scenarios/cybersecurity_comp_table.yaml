@@ -1,0 +1,173 @@
+# Cybersecurity Comp Table Report Review
+# Tests: Metric switching, timeframe mismatch, implied metric equivalence
+
+id: cybersecurity_comp_table
+title: "Review: Cybersecurity Comparative Valuation Analysis"
+version: "1.0.0"
+module: "07_report_review"
+category: "methodology_audit"
+difficulty: "moderate"
+estimated_time_minutes: 15
+
+# === CONTEXT ===
+context:
+  report_type: "AI-generated equity research excerpt"
+  report_format: "Multi-company comparative valuation table with analysis"
+
+  ai_generated_report: >
+    Cybersecurity Sector Comparative Valuation
+
+    We screened the enterprise cybersecurity space to identify the most
+    attractively valued name. Our analysis covers five leading platforms
+    across endpoint, identity, cloud, and network security.
+
+    Valuation Summary:
+
+    | Company       | Ticker | Revenue Growth | Valuation Multiple |
+    |---------------|--------|----------------|--------------------|
+    | CrowdStrike   | CRWD   | 28% YoY        | 18.5x EV/Revenue   |
+    | Palo Alto     | PANW   | 15% YoY        | 12.2x EV/Revenue   |
+    | Zscaler       | ZS     | 32% YoY        | 14.8x EV/Revenue   |
+    | SentinelOne   | S      | 35% YoY        | 10.1x EV/Revenue   |
+    | Fortinet      | FTNT   | 11% YoY        | 8.4x P/E           |
+
+    Fortinet stands out as the most attractively valued name in our screen,
+    trading at just 8.4x — a significant discount to the group average of
+    12.8x. The company's lower growth rate is offset by its superior
+    profitability (32% operating margin vs. peer average of -2%), providing
+    a more favorable risk/reward profile.
+
+    We note that CrowdStrike's premium valuation reflects its leadership
+    position in endpoint security and strong net retention rates above 120%.
+    SentinelOne's lower multiple relative to its growth rate suggests the
+    market is pricing in execution risk following recent sales leadership
+    transitions.
+
+    Recommendation: Buy FTNT at current levels. The stock's valuation
+    discount to peers provides meaningful upside if the company can sustain
+    low-teens revenue growth and maintain margins.
+
+  company:
+    name: "Cybersecurity Sector"
+    ticker: "CRWD, PANW, ZS, S, FTNT"
+    sector: "Technology - Cybersecurity"
+    market_cap: "Various ($15B-$85B)"
+
+  as_of_date: "2025-10-30"
+
+  key_financials:
+    crwd_ev_revenue: "18.5x (NTM)"
+    panw_ev_revenue: "12.2x (NTM)"
+    zs_ev_revenue: "14.8x (NTM)"
+    s_ev_revenue: "10.1x (NTM)"
+    ftnt_pe_trailing: "8.4x (TTM P/E, not EV/Revenue)"
+    ftnt_ev_revenue_actual: "7.8x"
+    ftnt_operating_margin: "32%"
+    peer_avg_operating_margin: "-2%"
+
+# === TASK ===
+task:
+  prompt: >
+    You are reviewing this AI-generated comparative valuation analysis for
+    a quality assurance team. Evaluate the report's methodology, internal
+    consistency, and analytical conclusions.
+
+    Produce structured reviewer feedback identifying specific errors,
+    methodological problems, and unsupported claims. For each issue, cite
+    the specific text and explain why it is problematic.
+
+  expected_output_type: "structured_review"
+
+  constraints:
+    - "Must identify the primary methodological error"
+    - "Must assess whether the Buy recommendation is supported"
+    - "Feedback must cite specific report text"
+    - "Must not introduce errors not present in the report"
+
+# === EMBEDDED ERRORS ===
+# 1. Metric switching: EV/Revenue for 4 companies, P/E for Fortinet — breaks comparability
+# 2. "Group average of 12.8x" averages EV/Revenue and P/E together — meaningless
+# 3. "8.4x" for FTNT looks cheap vs 18.5x for CRWD, but they measure different things
+# 4. No timeframe consistency stated — are growth rates TTM? NTM? Mixed?
+# 5. Revenue growth rates not adjusted for same period
+# 6. The Buy recommendation on FTNT is built on a flawed comparison
+# 7. Profitability comparison (32% vs -2%) is valid but used to justify a metric switch rather than running all on EV/Revenue
+
+evaluation_criteria:
+  dimensions:
+    - name: "Methodology Error Detection"
+      weight: 0.35
+      criteria:
+        - "Identifies the EV/Revenue to P/E switch for Fortinet"
+        - "Flags the meaningless group average that mixes two different metrics"
+        - "Notes that EV/Revenue applies to both profitable and unprofitable companies"
+        - "Identifies timeframe ambiguity in growth rates"
+
+    - name: "Recommendation Assessment"
+      weight: 0.25
+      criteria:
+        - "Recognizes the Buy recommendation is built on a flawed comparison"
+        - "Notes that Fortinet's actual EV/Revenue would be needed for valid comparison"
+        - "Identifies that profitability advantage is real but metric switch is not the right way to show it"
+
+    - name: "Feedback Quality"
+      weight: 0.25
+      criteria:
+        - "Cites specific table entries and report text"
+        - "Explains why metric consistency matters in comp tables"
+        - "Proposes what the correct approach would be"
+
+    - name: "Review Discipline"
+      weight: 0.15
+      criteria:
+        - "Does not introduce errors not present in the report"
+        - "Distinguishes between the fixable methodology error and the valid profitability point"
+        - "Feedback is actionable for the AI engineering team"
+
+  critical_failures:
+    - "Fails to identify the metric switch between EV/Revenue and P/E"
+    - "Accepts the 12.8x group average as valid"
+    - "States Fortinet is correctly identified as cheapest without questioning methodology"
+    - "Introduces factual errors not present in the original report"
+
+  pass_threshold: 70
+
+key_facts:
+  - fact: "Fortinet uses P/E (8.4x) while all other companies use EV/Revenue"
+    source: "Comp table in report"
+    importance: "critical"
+
+  - fact: "Group average of 12.8x mixes two incompatible metrics"
+    source: "Derived from report"
+    importance: "critical"
+
+  - fact: "EV/Revenue works for both profitable and unprofitable companies"
+    source: "Standard valuation methodology"
+    importance: "important"
+
+  - fact: "Fortinet's actual EV/Revenue is 7.8x, still cheapest but for valid reasons (lower growth)"
+    source: "key_financials"
+    importance: "important"
+
+pitfalls:
+  - description: "Focusing on the profitability comparison while missing the metric switch"
+    failure_type: "misdirection"
+    severity: "critical"
+
+  - description: "Flagging only minor issues (timeframe, growth adjustment) while missing the core error"
+    failure_type: "prioritization_failure"
+    severity: "major"
+
+  - description: "Stating all companies should use P/E instead of EV/Revenue"
+    failure_type: "incorrect_fix"
+    severity: "major"
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-01"
+  tags:
+    - "report_review"
+    - "cybersecurity"
+    - "comp_table"
+    - "methodology"
+    - "valuation_multiples"

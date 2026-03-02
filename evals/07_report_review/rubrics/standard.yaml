@@ -1,0 +1,448 @@
+# Standard AI Report Review Rubric
+# For evaluating the quality of structured feedback on AI-generated equity research
+
+id: report_review_standard
+title: "AI Report Review Standard Rubric"
+version: "1.0.0"
+module: "07_report_review"
+
+description: >
+  This rubric evaluates a reviewer's ability to identify errors, gaps, and
+  overconfidence in AI-generated equity research reports. The seven dimensions
+  map to the quality dimensions required for institutional-grade AI research
+  review: factual accuracy, methodological soundness, logic chain integrity,
+  confidence calibration, completeness, source reliability, and practical
+  relevance. The task is to flag problems, not to rewrite the report.
+
+# === SCORING OVERVIEW ===
+total_points: 100
+pass_threshold: 70
+excellence_threshold: 85
+
+# === DIMENSIONS ===
+dimensions:
+  - name: "Factual Accuracy"
+    id: "factual_accuracy"
+    weight: 20
+    description: >
+      Evaluates whether the reviewer correctly identifies arithmetic errors,
+      stale data, wrong line items, and misquoted metrics in the AI report.
+
+    scoring_levels:
+      - score: "18-20"
+        label: "Excellent"
+        description: >
+          All factual errors in the report identified and correctly explained.
+          Reviewer distinguishes between material and immaterial errors.
+          Specific numbers cited from the report with correct alternatives.
+        anchor_examples:
+          - "Identifies organic growth of 26% vs reported 33% and recalculates Rule of 40"
+          - "Catches that P/E and EV/Revenue are mixed in the comp table average"
+          - "Notes source vintage (2023 for a 2025 report) as a data quality issue"
+
+      - score: "14-17"
+        label: "Good"
+        description: >
+          Most factual errors identified. Minor errors may be missed.
+          Explanations are clear but may lack recalculated alternatives.
+        anchor_examples:
+          - "Identifies the metric switch but doesn't recalculate the group average"
+          - "Flags stale data but doesn't quantify the impact"
+
+      - score: "10-13"
+        label: "Acceptable"
+        description: >
+          Primary factual error identified but secondary errors missed.
+          Explanations present but incomplete.
+        anchor_examples:
+          - "Catches the arithmetic error but misses the convention issue"
+          - "Identifies one of two material data problems"
+
+      - score: "5-9"
+        label: "Poor"
+        description: >
+          Major factual errors in the report missed. Reviewer may flag
+          minor issues while overlooking critical ones.
+        anchor_examples:
+          - "Focuses on formatting while missing the calculation error"
+          - "Flags a minor rounding issue while accepting a stale source"
+
+      - score: "0-4"
+        label: "Fail"
+        description: >
+          Fails to identify material factual errors. May accept incorrect
+          data or introduce factual errors of their own.
+        anchor_examples:
+          - "Accepts the flawed calculation as correct"
+          - "States the data is accurate when it is demonstrably wrong"
+
+  - name: "Methodological Soundness"
+    id: "methodological_soundness"
+    weight: 20
+    description: >
+      Evaluates whether the reviewer identifies inappropriate metrics,
+      inconsistent conventions, misapplied analytical frameworks, and
+      flawed comparison methodology.
+
+    scoring_levels:
+      - score: "18-20"
+        label: "Excellent"
+        description: >
+          All methodology errors identified with clear explanation of why
+          the approach is wrong and what the correct approach would be.
+          Reviewer understands when a metric is appropriate vs inappropriate.
+        anchor_examples:
+          - "Explains that Rule of 40 measures growth/profitability tradeoff, not efficiency"
+          - "Notes that EV/Revenue applies to both profitable and unprofitable companies"
+          - "Identifies that historical self-comparison is circular when the business has transformed"
+
+      - score: "14-17"
+        label: "Good"
+        description: >
+          Primary methodology error identified. Explanation is sound but
+          may not fully articulate the correct alternative approach.
+        anchor_examples:
+          - "Identifies the metric switch but doesn't explain why EV/Revenue works for all"
+          - "Flags self-comparison but doesn't suggest peer comparison as alternative"
+
+      - score: "10-13"
+        label: "Acceptable"
+        description: >
+          Methodology error partially identified. Reviewer recognizes
+          something is off but cannot fully articulate the problem.
+        anchor_examples:
+          - "Notes inconsistency in the comp table but attributes it to the wrong cause"
+          - "Questions the metric but suggests an equally inappropriate alternative"
+
+      - score: "5-9"
+        label: "Poor"
+        description: >
+          Methodology errors largely missed. Reviewer may accept flawed
+          frameworks without questioning.
+        anchor_examples:
+          - "Accepts the metric switch as reasonable given profitability differences"
+          - "Does not question whether Rule of 40 applies to the company type"
+
+      - score: "0-4"
+        label: "Fail"
+        description: >
+          No methodology errors identified. Reviewer endorses the flawed
+          approach or introduces methodology errors of their own.
+        anchor_examples:
+          - "States the comparison methodology is sound"
+          - "Suggests all companies should use P/E instead of EV/Revenue"
+
+  - name: "Logic Chain Integrity"
+    id: "logic_chain_integrity"
+    weight: 20
+    description: >
+      Evaluates whether the reviewer identifies broken reasoning chains,
+      unsupported leaps, and disconnects between evidence and conclusions
+      in the AI report.
+
+    scoring_levels:
+      - score: "18-20"
+        label: "Excellent"
+        description: >
+          All logic chain breaks identified. Reviewer traces the reasoning
+          from premise to conclusion and identifies where each leap fails.
+          Explains how the evidence could support a different conclusion.
+        anchor_examples:
+          - "Maps the chain: 'three red flags → warrants monitoring' and explains the disconnect"
+          - "Identifies that share × TAM is arithmetic, not a revenue forecasting methodology"
+          - "Notes the report lists competitive threats but ignores them in the TAM section"
+
+      - score: "14-17"
+        label: "Good"
+        description: >
+          Primary logic chain break identified. Explanation is clear but
+          may not trace all intermediate steps.
+        anchor_examples:
+          - "Identifies evidence-conclusion disconnect but doesn't fully articulate the causal chain"
+          - "Notes the logic gap but doesn't explain what conclusion the evidence supports"
+
+      - score: "10-13"
+        label: "Acceptable"
+        description: >
+          Logic issues partially identified. Reviewer senses the conclusion
+          is wrong but cannot fully articulate why the reasoning fails.
+        anchor_examples:
+          - "Notes the conclusion seems too optimistic without explaining the specific logic break"
+          - "Identifies one disconnect but misses the broader pattern"
+
+      - score: "5-9"
+        label: "Poor"
+        description: >
+          Logic chain breaks largely missed. Reviewer may accept unsupported
+          conclusions or focus on surface-level issues.
+        anchor_examples:
+          - "Accepts that listing three metrics and concluding 'warrants monitoring' is adequate"
+          - "Doesn't question whether the evidence supports the recommendation"
+
+      - score: "0-4"
+        label: "Fail"
+        description: >
+          No logic chain issues identified. Reviewer endorses flawed
+          reasoning or adds their own unsupported conclusions.
+        anchor_examples:
+          - "States the report's reasoning is sound"
+          - "Agrees with the conclusion without examining the logic"
+
+  - name: "Confidence Calibration"
+    id: "confidence_calibration"
+    weight: 15
+    description: >
+      Evaluates whether the reviewer identifies overconfident language,
+      unquantified claims, false precision, and missing uncertainty
+      acknowledgment in the AI report.
+
+    scoring_levels:
+      - score: "14-15"
+        label: "Excellent"
+        description: >
+          All confidence calibration failures identified. Reviewer flags
+          specific language, explains what level of evidence would be needed,
+          and notes missing ranges or sensitivity analysis.
+        anchor_examples:
+          - "Flags 'high confidence' and explains it requires sensitivity analysis and multiple scenarios"
+          - "Identifies 'downside is limited' as self-fulfilling given the narrow scenario range"
+          - "Notes 'Buy with conviction' without scenario analysis or peer context"
+
+      - score: "11-13"
+        label: "Good"
+        description: >
+          Most confidence issues identified. Reviewer flags problematic
+          language but may not fully articulate what evidence would justify it.
+        anchor_examples:
+          - "Flags overconfident language but doesn't specify what would make it appropriate"
+          - "Notes missing sensitivity without explaining its importance"
+
+      - score: "8-10"
+        label: "Acceptable"
+        description: >
+          Some confidence issues identified. Reviewer catches the most
+          obvious overconfidence but misses subtler calibration failures.
+        anchor_examples:
+          - "Flags 'guaranteed' or 'certain' but accepts 'downside is limited'"
+          - "Notes missing scenario analysis but doesn't connect it to the recommendation language"
+
+      - score: "4-7"
+        label: "Poor"
+        description: >
+          Confidence calibration issues largely missed. Reviewer may accept
+          overconfident framing at face value.
+        anchor_examples:
+          - "Accepts 'Buy with high confidence' without questioning evidence basis"
+          - "Does not flag unquantified claims like 'limited downside'"
+
+      - score: "0-3"
+        label: "Fail"
+        description: >
+          No confidence calibration issues identified. Reviewer may add
+          their own overconfident language.
+        anchor_examples:
+          - "Agrees the evidence supports 'high confidence'"
+          - "Adds 'strong buy' language to their own review"
+
+  - name: "Completeness of Coverage"
+    id: "completeness"
+    weight: 10
+    description: >
+      Evaluates whether the reviewer identifies missing context such as
+      peer comparisons, market consensus, scenario drivers, terminal
+      assumptions, competitive dynamics, or other material gaps.
+
+    scoring_levels:
+      - score: "9-10"
+        label: "Excellent"
+        description: >
+          All material gaps identified. Reviewer specifies what should
+          be included and why it matters for the analysis.
+        anchor_examples:
+          - "Notes missing peer valuation context and explains its importance"
+          - "Flags absent scenario drivers and missing margin analysis"
+          - "Identifies missing market consensus reference"
+
+      - score: "7-8"
+        label: "Good"
+        description: >
+          Most material gaps identified. May miss one secondary gap.
+        anchor_examples:
+          - "Notes missing peer comparison but not missing consensus"
+          - "Identifies most gaps with clear explanations"
+
+      - score: "5-6"
+        label: "Acceptable"
+        description: >
+          Some gaps identified but not all material ones. Reviewer
+          focuses on the most obvious omission.
+        anchor_examples:
+          - "Notes one major missing element but misses others"
+          - "Identifies the gap but doesn't explain why it matters"
+
+      - score: "2-4"
+        label: "Poor"
+        description: >
+          Few gaps identified. Reviewer treats an incomplete report
+          as reasonably complete.
+
+      - score: "0-1"
+        label: "Fail"
+        description: >
+          No gaps identified. Reviewer treats the report as complete.
+
+  - name: "Source Reliability"
+    id: "source_reliability"
+    weight: 5
+    description: >
+      Evaluates whether the reviewer flags stale sources, uncited claims,
+      and unverifiable data in the AI report.
+
+    scoring_levels:
+      - score: "5"
+        label: "Excellent"
+        description: >
+          All source reliability issues identified. Reviewer notes vintage,
+          authority, and verifiability of cited and uncited claims.
+        anchor_examples:
+          - "Flags 2023 market research report used in 2025 analysis"
+          - "Notes claims without any source citation"
+
+      - score: "4"
+        label: "Good"
+        description: >
+          Most source issues identified. Minor gaps in source assessment.
+
+      - score: "3"
+        label: "Acceptable"
+        description: >
+          Primary source issue identified but secondary ones missed.
+
+      - score: "1-2"
+        label: "Poor"
+        description: >
+          Source reliability issues largely missed.
+
+      - score: "0"
+        label: "Fail"
+        description: >
+          No source issues identified. Accepts all claims at face value.
+
+  - name: "Practical Relevance"
+    id: "practical_relevance"
+    weight: 10
+    description: >
+      Evaluates whether the reviewer's feedback is actionable — specific
+      enough for an AI engineering team to diagnose the failure mode and
+      improve the model's output.
+
+    scoring_levels:
+      - score: "9-10"
+        label: "Excellent"
+        description: >
+          Feedback identifies specific, diagnosable failure modes.
+          Each flag points to a correctable pattern in the AI system.
+          Reviewer distinguishes between one-off errors and systematic issues.
+        anchor_examples:
+          - "Identifies 'metric switching in comp tables' as a repeatable failure pattern"
+          - "Notes 'arithmetic disguised as analysis' as a systematic issue in TAM sections"
+          - "Flags 'evidence-conclusion disconnect' with the specific reasoning chain that broke"
+
+      - score: "7-8"
+        label: "Good"
+        description: >
+          Most feedback is actionable. Reviewer identifies patterns but
+          may not fully characterize the underlying failure mode.
+
+      - score: "5-6"
+        label: "Acceptable"
+        description: >
+          Some actionable feedback. Reviewer identifies what's wrong but
+          not necessarily why it happened or how to fix it.
+
+      - score: "2-4"
+        label: "Poor"
+        description: >
+          Feedback is vague or generic. Would not help an engineering
+          team diagnose or fix the issue.
+
+      - score: "0-1"
+        label: "Fail"
+        description: >
+          Feedback is not actionable. Generic statements like "needs
+          improvement" without specific direction.
+
+# === CRITICAL FAILURES ===
+critical_failures:
+  - id: "missed_primary_error"
+    description: "Fails to identify the primary embedded error in the AI report"
+    examples:
+      - "Reviews a comp table with metric switching and doesn't notice the switch"
+      - "Reviews a report with stale data and accepts the source as current"
+      - "Reviews a narrow scenario range and accepts the bear case as genuinely bearish"
+
+  - id: "accepted_overconfidence"
+    description: "Accepts overconfident language without flagging it"
+    examples:
+      - "Does not flag 'high confidence' Buy on a single metric"
+      - "Accepts 'downside is limited' without questioning"
+      - "Endorses 'Buy with conviction' that lacks scenario analysis"
+
+  - id: "contradicted_report_data"
+    description: "Reviewer's feedback contradicts data present in the report"
+    examples:
+      - "States a number is wrong when the report has it right"
+      - "Claims a section is missing when it is present"
+      - "Misquotes the report in the feedback"
+
+  - id: "hallucinated_errors"
+    description: "Reviewer identifies errors that are not actually present in the report"
+    examples:
+      - "Claims the arithmetic is wrong when it is correct"
+      - "Invents a methodology problem that doesn't exist"
+      - "Attributes claims to the report that it didn't make"
+
+# === SCORING INSTRUCTIONS ===
+scoring_instructions:
+  general:
+    - "Score each dimension independently before calculating total"
+    - "Use anchor examples for calibration"
+    - "Check for critical failures before final scoring"
+    - "The reviewer's job is to flag, not fix — do not penalize for not rewriting the report"
+
+  calibration:
+    - "'Excellent' means the reviewer caught everything material and explained it clearly"
+    - "'Good' means the reviewer caught the primary issues with solid explanations"
+    - "'Acceptable' means the reviewer found the biggest problem but missed secondary issues"
+    - "'Poor' means the reviewer missed material issues or focused on the wrong things"
+    - "'Fail' means the reviewer endorsed the flawed analysis or introduced new errors"
+
+  weighting:
+    - "Apply weights to calculate total score"
+    - "Round final score to nearest integer"
+    - "A critical failure caps the total score at 50 regardless of dimension scores"
+
+# === OUTPUT FORMAT ===
+output_format:
+  required_fields:
+    - "overall_score"
+    - "dimension_scores"
+    - "critical_failures_found"
+    - "pass_fail_status"
+    - "summary_feedback"
+
+  optional_fields:
+    - "detailed_dimension_feedback"
+    - "improvement_suggestions"
+    - "failure_mode_classification"
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-01"
+  version_notes: >
+    Initial version. Dimensions mapped to institutional AI research review
+    quality standards. Designed for evaluating human reviewers assessing
+    AI-generated equity research reports.
+  applicable_scenarios:
+    - "All Module 07 report review scenarios"
+    - "Any AI-generated equity research review task"
