@@ -46,6 +46,8 @@ class EvaluationResult:
     passed: bool
     critical_failures: list
     detailed_feedback: dict
+    likert_score: int = 0
+    likert_label: str = ""
 
 
 class EvaluationRunner:
@@ -221,6 +223,10 @@ class EvaluationRunner:
         pass_threshold = rubric.get("pass_threshold", 70)
         passed = overall_score >= pass_threshold and len(critical_failures) == 0
 
+        # Likert overlay (5-35 scale)
+        from .grading_engine import _score_to_likert
+        likert_score, likert_label = _score_to_likert(overall_score)
+
         return EvaluationResult(
             scenario_id=scenario.get("id", config.scenario_name),
             scenario_title=scenario.get("title", ""),
@@ -232,6 +238,8 @@ class EvaluationRunner:
             passed=passed,
             critical_failures=critical_failures,
             detailed_feedback=detailed_feedback,
+            likert_score=likert_score,
+            likert_label=likert_label,
         )
 
     def _default_rubric(self) -> dict:
@@ -270,6 +278,8 @@ class EvaluationRunner:
                     "module": result.module,
                     "timestamp": result.timestamp,
                     "overall_score": result.overall_score,
+                    "likert_score": result.likert_score,
+                    "likert_label": result.likert_label,
                     "passed": result.passed,
                     "scores": result.scores,
                     "critical_failures": result.critical_failures,
@@ -283,7 +293,7 @@ class EvaluationRunner:
                 f.write(f"**Module:** {result.module}\n")
                 f.write(f"**Scenario:** {result.scenario_id}\n")
                 f.write(f"**Timestamp:** {result.timestamp}\n")
-                f.write(f"**Overall Score:** {result.overall_score:.1f}/100\n")
+                f.write(f"**Overall Score:** {result.overall_score:.1f}/100 (Likert: {result.likert_score}/35 — {result.likert_label})\n")
                 f.write(f"**Status:** {'PASS' if result.passed else 'FAIL'}\n\n")
 
                 f.write("## Dimension Scores\n\n")
@@ -366,7 +376,7 @@ def main():
         print(f"Running evaluation: {args.module}/{args.scenario}")
         result = runner.run_evaluation(config)
 
-        print(f"\nOverall Score: {result.overall_score:.1f}/100")
+        print(f"\nOverall Score: {result.overall_score:.1f}/100 (Likert: {result.likert_score}/35 — {result.likert_label})")
         print(f"Status: {'PASS' if result.passed else 'FAIL'}")
 
         if result.critical_failures:

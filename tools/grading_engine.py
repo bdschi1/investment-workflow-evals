@@ -16,6 +16,31 @@ from typing import Optional
 from dataclasses import dataclass
 
 
+_LIKERT_LABELS = {
+    5: "Fail", 10: "Poor", 15: "Below Expectations", 20: "Adequate",
+    25: "Good", 30: "Very Good", 35: "Excellent",
+}
+
+
+def _score_to_likert(score_0_100: float) -> tuple[int, str]:
+    """Map a 0-100 overall score to a 5-35 Likert rating (7-point, step 5)."""
+    if score_0_100 >= 92:
+        val = 35
+    elif score_0_100 >= 80:
+        val = 30
+    elif score_0_100 >= 65:
+        val = 25
+    elif score_0_100 >= 50:
+        val = 20
+    elif score_0_100 >= 35:
+        val = 15
+    elif score_0_100 >= 20:
+        val = 10
+    else:
+        val = 5
+    return val, _LIKERT_LABELS[val]
+
+
 @dataclass
 class GradingResult:
     """Result of grading a submission."""
@@ -24,6 +49,8 @@ class GradingResult:
     detailed_feedback: dict[str, str]
     overall_score: float
     passed: bool
+    likert_score: int = 0
+    likert_label: str = ""
 
 
 class GradingEngine:
