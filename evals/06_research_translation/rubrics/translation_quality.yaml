@@ -10,19 +10,25 @@ dimensions:
       Key facts, direction, and magnitude survive translation
       without distortion.
     scoring_levels:
-      5: >
+      35: >
         All key facts preserved with correct magnitude and direction.
         No material distortions.
-      4: >
+      30: >
+        Nearly all facts preserved with correct direction. One minor
+        rounding that doesn't affect conclusions.
+      25: >
         Most facts preserved. Minor rounding or simplification
         that doesn't mislead.
-      3: >
+      20: >
         Core thesis intact but some quantitative details lost
         or oversimplified.
-      2: >
+      15: >
+        Direction correct but notable factual gaps that weaken
+        the translation quality.
+      10: >
         Direction correct but significant factual gaps or
         misleading simplifications.
-      1: >
+      5: >
         Material facts missing or distorted. Reader would draw
         incorrect conclusions.
     critical_failures:
@@ -36,16 +42,22 @@ dimensions:
     description: >
       Text is accessible to target audience without sacrificing meaning.
     scoring_levels:
-      5: >
+      35: >
         Grade 6-8 reading level. All jargon defined. Short, clear sentences.
-      4: >
+      30: >
+        Grade 7-9. Nearly all jargon defined. Sentences mostly short
+        and clear with rare exceptions.
+      25: >
         Grade 8-10. Most jargon defined. Occasional complex sentence.
-      3: >
+      20: >
         Grade 10-12. Some undefined jargon. Generally readable.
-      2: >
+      15: >
+        Grade 11-12+. Multiple undefined terms. Sentence structure
+        occasionally difficult for retail audience.
+      10: >
         Grade 12+. Significant jargon without definitions.
         Long, complex sentences.
-      1: >
+      5: >
         Essentially unchanged institutional language.
         Not accessible to retail.
     critical_failures:
@@ -57,15 +69,20 @@ dimensions:
     weight: 20
     description: "All required sections present with adequate content."
     scoring_levels:
-      5: >
+      35: >
         All required sections present with substantive content.
         Nothing important omitted.
-      4: >
+      30: >
+        All required sections present with good depth. One minor
+        area could be slightly expanded.
+      25: >
         All required sections present. One section could use more detail.
-      3: >
+      20: >
         Missing one required section or two sections are too thin.
-      2: "Missing two required sections or content is skeletal."
-      1: "Fewer than half the required sections present."
+      15: >
+        Missing one required section and one other section is thin.
+      10: "Missing two required sections or content is skeletal."
+      5: "Fewer than half the required sections present."
     required_sections:
       - "Summary"
       - "What it means / thesis"
@@ -78,15 +95,21 @@ dimensions:
     description: >
       Tone matches target audience without being condescending or alarmist.
     scoring_levels:
-      5: >
+      35: >
         Warm, informative, balanced. Empowers reader without talking down.
-      4: >
+      30: >
+        Consistently appropriate tone. Informative and accessible
+        with minor stylistic imperfections.
+      25: >
         Generally appropriate. Slight moments of over-simplification.
-      3: >
+      20: >
         Adequate but could be more engaging or slightly condescending.
-      2: >
+      15: >
+        Uneven tone — alternates between appropriate and slightly off
+        for the target audience.
+      10: >
         Noticeably condescending, alarmist, or inappropriately casual.
-      1: >
+      5: >
         Tone completely wrong for audience. Patronizing or fear-mongering.
     critical_failures:
       - "Uses 'you should always' or 'never' for investment decisions"
