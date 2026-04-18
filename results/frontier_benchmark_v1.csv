@@ -1,1 +1,4 @@
 module,scenario_id,model,score,critical_failure_triggered,judge_model,judge_cache_hit_rate,run_date
+06_research_translation,10k_risk_section_to_plain_english,claude-haiku-4-5-20251001,67.50,true,rubric-engine-dry-run,0.000,2026-04-18
+06_research_translation,earnings_call_to_shareholder_note,claude-haiku-4-5-20251001,60.75,true,rubric-engine-dry-run,0.000,2026-04-18
+06_research_translation,ic_memo_to_retail_summary,claude-haiku-4-5-20251001,63.50,false,rubric-engine-dry-run,0.000,2026-04-18
