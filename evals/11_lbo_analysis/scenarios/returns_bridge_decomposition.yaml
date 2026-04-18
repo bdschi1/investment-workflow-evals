@@ -1,0 +1,100 @@
+# LBO Returns Bridge — Value-Creation Decomposition
+# Tests: attribution of IRR across EBITDA growth, multiple change, debt paydown
+
+id: returns_bridge_decomposition
+title: "LBO Returns Bridge — Decomposing MOIC into Value-Creation Drivers"
+version: "1.0.0"
+module: "11_lbo_analysis"
+category: "returns_attribution"
+difficulty: "moderate"
+estimated_time_minutes: 45
+
+context:
+  entry:
+    close_date: "2021-12-31"
+    entry_ebitda: "$80M"
+    entry_multiple: "9.5x"
+    entry_ev: "$760M"
+    entry_net_debt: "$400M"
+    entry_sponsor_equity: "$330M"
+    management_rollover: "$30M (included in equity check)"
+  exit:
+    exit_date: "2026-06-30"
+    hold_years: 4.5
+    exit_ebitda: "$130M"
+    exit_multiple: "10.5x"
+    exit_ev: "$1,365M"
+    exit_net_debt: "$250M"
+    exit_equity: "$1,115M"
+  situation: >
+    Sponsor preparing to present to LPs at sale close. The investor
+    relations team needs a returns-bridge chart that decomposes total
+    value creation into EBITDA growth, multiple change, and debt
+    paydown. The IC is particularly interested in separating
+    operational value creation from multiple-expansion tailwind.
+  as_of_date: "2026-06-30"
+
+task:
+  prompt: >
+    Produce a value-creation bridge decomposing sponsor MOIC into:
+
+    1. **EBITDA growth** — contribution from EBITDA moving from
+       $80M to $130M at the entry multiple of 9.5x
+    2. **Multiple expansion** — contribution from multiple moving
+       from 9.5x to 10.5x at exit EBITDA of $130M
+    3. **Debt paydown** — contribution from net debt reduction
+       ($400M to $250M)
+    4. **Cross-term** — residual reconciliation (interaction effects)
+    5. **Total bridge** — must tie to actual exit equity of $1,115M
+
+    Report MOIC and IRR at each step. Close with a 2-3 sentence
+    narrative separating operational value creation from market-driven
+    multiple expansion.
+
+  expected_output_type: "returns_bridge"
+  constraints:
+    - "Total bridge must tie exactly to exit equity"
+    - "EBITDA growth contribution must use entry multiple"
+    - "Multiple expansion contribution must use exit EBITDA"
+    - "Narrative must distinguish operational from multiple-driven return"
+
+key_facts:
+  - fact: "Sponsor entry equity = $330M including $30M management rollover"
+    source: "Transaction records"
+    importance: "critical"
+  - fact: "Exit EBITDA is $130M, up from $80M at entry"
+    source: "Audited financials"
+    importance: "critical"
+  - fact: "Exit multiple of 10.5x is 1.0x above entry multiple"
+    source: "Sale process"
+    importance: "critical"
+  - fact: "Net debt declined from $400M to $250M over the hold"
+    source: "Debt schedule"
+    importance: "important"
+
+pitfalls:
+  - description: "Attributing multiple expansion as operational value creation"
+    failure_type: "misattribution"
+    severity: "major"
+  - description: "Using exit multiple for EBITDA-growth bucket (double-counts multiple change)"
+    failure_type: "methodology_error"
+    severity: "major"
+  - description: "Missing debt paydown bucket entirely (equity return includes it by definition)"
+    failure_type: "omission_error"
+    severity: "major"
+  - description: "Presenting IRR as a sure-thing outcome for LPs rather than a realized result contingent on market conditions"
+    failure_type: "overconfidence_language"
+    severity: "major"
+
+evaluation_criteria:
+  rubric: standard
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-04-18"
+  tags:
+    - "lbo"
+    - "returns_bridge"
+    - "value_creation"
+    - "attribution"

@@ -1,0 +1,111 @@
+# Dividend Recapitalization — Feasibility Assessment
+# Tests: leverage headroom, covenant compliance, return uplift math
+
+id: dividend_recap_feasibility
+title: "Dividend Recap — Portfolio Company Mid-Hold Feasibility"
+version: "1.0.0"
+module: "11_lbo_analysis"
+category: "dividend_recap"
+difficulty: "moderate"
+estimated_time_minutes: 50
+
+context:
+  company:
+    name: "PlatformCo"
+    sector: "Business Services"
+    description: >
+      Sponsor-owned platform, 2.5 years into hold. Revenue has grown from
+      $380M (entry LTM) to $520M (current LTM); EBITDA from $70M to
+      $110M (21% margin). Original transaction closed at 5.0x total
+      leverage ($350M debt on $420M EV); net debt today is $260M after
+      deleveraging.
+  current_capital_structure:
+    senior_term_loan_outstanding: "$180M"
+    senior_term_loan_rate: "SOFR + 375"
+    sub_notes_outstanding: "$80M"
+    sub_notes_rate: "8.25% fixed"
+    revolver_undrawn: "$50M capacity"
+    minimum_cash_covenant: "$15M"
+  market_conditions: >
+    Credit markets supportive. A senior dividend-recap term loan is
+    available at SOFR+400, up to 4.0x total leverage. Sub-debt market
+    at 8.0-8.5%.
+  sponsor_constraint:
+    hold_horizon_remaining: "2.5-3.0 years"
+    exit_case_ebitda: "$150-175M"
+    exit_multiple_range: "9.0-11.0x"
+  situation: >
+    Sponsor is weighing a dividend recap to distribute capital to LPs
+    without selling the business. Deal team must assess (a) how much
+    can be raised without breaching market leverage norms, (b) impact
+    on sponsor IRR and MOIC vs base case (no recap), and (c) downside
+    scenario if EBITDA softens.
+  as_of_date: "2026-03-01"
+
+task:
+  prompt: >
+    Build a dividend-recap feasibility view:
+
+    1. **Leverage headroom** — compute maximum incremental debt at
+       4.0x total leverage on current LTM EBITDA of $110M. Show senior
+       vs total leverage post-recap.
+    2. **Recap sources & uses** — new term loan at SOFR+400; uses are
+       (a) refinance existing senior ($180M), (b) fees (2.5% of new
+       debt), (c) residual to sponsor dividend. Leave sub notes
+       untouched.
+    3. **Impact on returns** — compare sponsor IRR and MOIC with and
+       without the recap, assuming the same exit EBITDA and multiple
+       range. Show the cash-on-cash dividend timing effect.
+    4. **Downside stress** — if EBITDA falls back to $90M in Year 4,
+       does the recapped structure breach a 6.5x total leverage
+       covenant?
+    5. **Recommendation (3 sentences)** — framed probabilistically.
+
+  expected_output_type: "recap_memo"
+  constraints:
+    - "Must show senior and total leverage post-recap"
+    - "Fees are 2.5% of new debt raised"
+    - "Sub notes stay in place at existing rate"
+    - "Minimum $15M cash covenant respected"
+    - "No guaranteed-return language"
+
+key_facts:
+  - fact: "Current LTM EBITDA = $110M; current net debt = $260M (2.4x)"
+    source: "Portfolio company reporting"
+    importance: "critical"
+  - fact: "Senior + total leverage caps: 3.0x senior / 4.0x total"
+    source: "Market comps"
+    importance: "critical"
+  - fact: "New debt pricing at SOFR+400; sub notes stay at 8.25%"
+    source: "Market sounding"
+    importance: "important"
+  - fact: "Recap fees are 2.5% of new debt raised"
+    source: "Market convention"
+    importance: "supporting"
+
+pitfalls:
+  - description: "Treating the dividend distribution as a cost rather than a return of capital"
+    failure_type: "conceptual_error"
+    severity: "major"
+  - description: "Omitting transaction fees from the recap sources & uses"
+    failure_type: "omission_error"
+    severity: "major"
+  - description: "Not recomputing interest expense and interest coverage at the new debt level"
+    failure_type: "mechanical_error"
+    severity: "major"
+  - description: "Presenting IRR uplift as certain rather than scenario-contingent"
+    failure_type: "overconfidence_language"
+    severity: "major"
+
+evaluation_criteria:
+  rubric: standard
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-04-18"
+  tags:
+    - "lbo"
+    - "dividend_recap"
+    - "leverage"
+    - "returns_uplift"
