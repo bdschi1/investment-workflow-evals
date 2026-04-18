@@ -181,3 +181,130 @@ class TestJudgeRegression:
             assert not unknown, (
                 f"{baseline['id']}: unknown dimension ids in fixture: {unknown}"
             )
+
+
+# ---------------------------------------------------------------------------
+# Cross-model judge agreement test
+# ---------------------------------------------------------------------------
+
+CROSS_MODEL_TOLERANCE = 8.0  # overall-score delta (0-100) permitted between judges
+
+
+def _run_pipeline_with_judge(
+    baseline: dict[str, Any],
+    rubric: dict,
+    dimension_scores: dict[str, float],
+) -> float:
+    """Run GradingEngine with a judge that returns the given dimension_scores."""
+    judge_result = JudgeResult(
+        dimension_scores=dict(dimension_scores),
+        critical_failures=list(baseline.get("critical_failures", [])),
+        detected_patterns={},
+        confidence="high",
+        feedback={dim: "cross-model fixture" for dim in dimension_scores},
+        fallback_used=False,
+        overall_score=0.0,
+    )
+
+    engine = GradingEngine(rubric)
+    engine._judge = MagicMock()
+    engine._judge.grade.return_value = judge_result
+
+    scenario = {
+        "id": baseline["scenario_id"],
+        "context": {"situation": baseline["scenario_context"]},
+        "task": {"prompt": baseline["task"]},
+    }
+    scores, _, _ = engine.grade(
+        ai_output=baseline["model_response"],
+        scenario=scenario,
+        use_llm=True,
+    )
+    return engine.calculate_overall_score(scores)
+
+
+class TestCrossModelJudge:
+    """Cross-model judge regression: Opus and Sonnet as judges on the same
+    golden response should land on the same overall score within a fixed
+    tolerance. Flags hidden bias in the judge model itself rather than in
+    the scorer code.
+
+    Both judges are mocked — no live API calls. The "Opus view" and
+    "Sonnet view" are synthetic but deliberately asymmetric per dimension
+    to simulate realistic inter-judge noise.
+    """
+
+    @pytest.fixture(scope="class")
+    def rubric(self) -> dict:
+        return _load_rubric()
+
+    @pytest.fixture(scope="class")
+    def baseline(self) -> dict[str, Any]:
+        # Use the strong response so both judges are in the "excellent" band
+        return next(b for b in _load_baselines() if b["id"] == "iwe_baseline_001")
+
+    def _opus_view(self, baseline: dict[str, Any]) -> dict[str, float]:
+        """Opus tends to be slightly harsher on evidence_quality, slightly
+        more generous on completeness. Deltas stay within realistic bounds."""
+        base = dict(baseline["dimension_scores"])
+        return {
+            k: max(0.0, min(100.0, v + delta))
+            for k, v, delta in (
+                ("factual_accuracy", base["factual_accuracy"], +1.0),
+                ("analytical_rigor", base["analytical_rigor"], -2.0),
+                ("risk_assessment", base["risk_assessment"], +1.0),
+                ("evidence_quality", base["evidence_quality"], -3.0),
+                ("completeness", base["completeness"], +2.0),
+            )
+        }
+
+    def _sonnet_view(self, baseline: dict[str, Any]) -> dict[str, float]:
+        """Sonnet tends in the opposite direction: more lenient on
+        evidence_quality, slightly harsher on completeness."""
+        base = dict(baseline["dimension_scores"])
+        return {
+            k: max(0.0, min(100.0, v + delta))
+            for k, v, delta in (
+                ("factual_accuracy", base["factual_accuracy"], -1.0),
+                ("analytical_rigor", base["analytical_rigor"], +2.0),
+                ("risk_assessment", base["risk_assessment"], -1.0),
+                ("evidence_quality", base["evidence_quality"], +3.0),
+                ("completeness", base["completeness"], -2.0),
+            )
+        }
+
+    def test_opus_judges_sonnet_outputs_and_vice_versa(
+        self, rubric: dict, baseline: dict[str, Any]
+    ) -> None:
+        """Overall-score delta between Opus-as-judge and Sonnet-as-judge on
+        the same response stays inside CROSS_MODEL_TOLERANCE points."""
+        opus_overall = _run_pipeline_with_judge(
+            baseline, rubric, self._opus_view(baseline)
+        )
+        sonnet_overall = _run_pipeline_with_judge(
+            baseline, rubric, self._sonnet_view(baseline)
+        )
+        delta = abs(opus_overall - sonnet_overall)
+        assert delta <= CROSS_MODEL_TOLERANCE, (
+            f"Cross-model judge delta {delta:.2f} exceeds tolerance "
+            f"{CROSS_MODEL_TOLERANCE:.2f}. Opus={opus_overall:.2f}, "
+            f"Sonnet={sonnet_overall:.2f}. Investigate judge bias."
+        )
+
+    def test_both_judges_agree_on_pass_fail(
+        self, rubric: dict, baseline: dict[str, Any]
+    ) -> None:
+        """Both judges should land on the same pass/fail side of the
+        rubric's pass_threshold for the same response."""
+        threshold = rubric.get("pass_threshold", 70)
+        opus_overall = _run_pipeline_with_judge(
+            baseline, rubric, self._opus_view(baseline)
+        )
+        sonnet_overall = _run_pipeline_with_judge(
+            baseline, rubric, self._sonnet_view(baseline)
+        )
+        assert (opus_overall >= threshold) == (sonnet_overall >= threshold), (
+            f"Judges disagree on pass/fail: Opus={opus_overall:.2f} "
+            f"(pass={opus_overall >= threshold}), Sonnet={sonnet_overall:.2f} "
+            f"(pass={sonnet_overall >= threshold}), threshold={threshold}"
+        )
