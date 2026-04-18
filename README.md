@@ -1,3 +1,5 @@
+<!-- investment-workflow-evals/README.md | Last updated: 2026-04-16 -->
+
 # Investment Workflow Evaluations
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
@@ -10,6 +12,18 @@ This is a continually developed project. Evaluation modules, scenarios, and rubr
 **Key questions this project answers:**
 - *Can this AI model produce analyst-quality investment research?*
 - *Where does the model fail in ways that sound intelligent but are substantively wrong?*
+
+## Policy
+
+Every deliverable must be objectively gradable, financially sound, and free of AI fingerprints.
+
+1. **Rubric-scored, not vibes-scored.** Every evaluation uses weighted dimensions with 5-level anchors and critical failure gates -- no subjective "good/bad" assessments.
+2. **Adversarial examples are mandatory.** Each scenario ships with a response that sounds intelligent but is substantively wrong, because that is the failure mode that matters.
+3. **Golden answers set the ceiling.** Expert-written reference responses define what "good" looks like; the rubric measures distance from that standard.
+4. **Dual-use by design.** Scenarios serve both evaluation (benchmark AI model quality) and training (SFT examples, RLHF preference pairs) -- same data, two purposes.
+5. **Critical failures are automatic fails.** Treating environmental demand as structural alpha or embedding unhedged risks in terminal value triggers an automatic zero regardless of other dimension scores.
+
+The tool exists to catch AI-generated investment analysis that sounds right but would lose money.
 
 ---
 
@@ -242,7 +256,9 @@ investment-workflow-evals/
 │   │   └── golden_answers/
 ├── tools/
 │   ├── eval_runner.py             # Run evaluations
-│   └── grading_engine.py          # Score submissions
+│   ├── grading_engine.py          # Score submissions
+│   ├── ai_judge.py                # LLM-as-judge scorer (optional thinking_budget for extended thinking; block-safe response parsing; prompt caching for repeated system prompts)
+│   └── generate_gaf.py            # Generate golden answer files via Opus + IRR retrieval
 ├── studio/                        # RLHF Studio (interactive DPO data)
 │   ├── app.py                     # Streamlit UI
 │   ├── configs.py                 # Models, presets, personas

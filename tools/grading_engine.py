@@ -1229,13 +1229,47 @@ class GradingEngine:
         dimension: dict,
     ) -> tuple[float, str]:
         """
-        Score a dimension using an LLM.
+        Score a dimension using an LLM (InvestmentWorkflowJudge).
 
-        This provides more nuanced evaluation but requires API access.
+        Grades all dimensions in a single API call and caches the result on
+        self._llm_result so subsequent calls per grading pass do not re-invoke
+        the API.  Returns (score, feedback) for the requested dimension only.
         """
-        # Placeholder for LLM-based scoring
-        # Would integrate with Anthropic or OpenAI API
-        return 75.0, "LLM scoring not yet implemented"
+        from tools.ai_judge import InvestmentWorkflowJudge
+
+        # Lazy-instantiate the judge once per GradingEngine lifetime.
+        if not hasattr(self, "_judge") or self._judge is None:
+            self._judge = InvestmentWorkflowJudge()
+
+        # Cache the full JudgeResult per (ai_output, scenario id) so all
+        # dimensions in one grade() call share a single API round-trip.
+        cache_key = (
+            id(ai_output),
+            scenario.get("id", ""),
+        )
+        if not hasattr(self, "_llm_cache"):
+            self._llm_cache: dict = {}
+
+        if cache_key not in self._llm_cache:
+            judge_result = self._judge.grade(
+                scenario=scenario,
+                ai_output=ai_output,
+                rubric=self.rubric,
+            )
+            self._llm_cache[cache_key] = judge_result
+
+        result = self._llm_cache[cache_key]
+
+        dim_id = dimension["id"]
+        score = result.dimension_scores.get(dim_id, 50.0)
+        feedback = result.feedback.get(
+            dim_id,
+            result.detected_patterns.get(dim_id, "LLM-graded"),
+        )
+        if result.fallback_used:
+            feedback = "Fallback score — AI judge unavailable"
+
+        return score, feedback
 
     def calculate_overall_score(self, dimension_scores: dict) -> float:
         """Calculate weighted overall score."""
