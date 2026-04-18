@@ -27,6 +27,44 @@ The tool exists to catch AI-generated investment analysis that sounds right but 
 
 ---
 
+## Frontier Benchmark (v1.1 — coming)
+
+The repo is scheduled to publish its first frontier-model leaderboard
+once the Phase-1 benchmark run completes. Scaffolding is in place:
+[`results/frontier_benchmark_v1.csv`](results/frontier_benchmark_v1.csv)
+holds the column schema, and
+[`results/judge_agreement_v1.md`](results/judge_agreement_v1.md)
+documents the methodology for cross-model judge agreement.
+
+**Placeholder — numbers to be filled by v1.1:**
+
+| Module | `claude-opus-4-7` | `claude-sonnet-4-5` | `gpt-5` | `gemini-2.5-pro` |
+|---|---|---|---|---|
+| 00 qualification | TBD | TBD | TBD | TBD |
+| 01 equity thesis | TBD | TBD | TBD | TBD |
+| 02 dcf valuation | TBD | TBD | TBD | TBD |
+| 03 portfolio construction | TBD | TBD | TBD | TBD |
+| 04 assumption validation | TBD | TBD | TBD | TBD |
+| 05 risk attribution | TBD | TBD | TBD | TBD |
+| 06 research translation | TBD | TBD | TBD | TBD |
+| 07 report review | TBD | TBD | TBD | TBD |
+| 08 comparable analysis | TBD | TBD | TBD | TBD |
+| 09 m&a analysis | TBD | TBD | TBD | TBD |
+| 10 valuation synthesis | TBD | TBD | TBD | TBD |
+| 11 lbo analysis | TBD | TBD | TBD | TBD |
+| 12 deal execution | TBD | TBD | TBD | TBD |
+
+Methodology: one row per (module, scenario, model) is appended to the
+CSV at run time; this table reports per-module mean overall scores
+across scenarios. Judge-agreement addendum (Spearman, Cohen's κ, and
+per-dimension Pearson) will land alongside the first populated run —
+see `BENCHMARK_RUN.md` at the repo root for the exact invocation and
+rough cost estimate. Scores reported here are probabilistic point
+estimates; expect overlapping confidence intervals between close-in
+SKUs rather than sharp rankings.
+
+---
+
 ## Quick Start
 
 ```bash
