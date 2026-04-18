@@ -1,0 +1,243 @@
+# prompt_version: 1.0.0
+# prompt_date: 2026-04-04
+# description: M&A Analysis Standard Rubric
+
+# M&A Analysis Evaluation Rubric
+# Covers accretion/dilution and sources & uses scenarios
+
+id: standard_ma_analysis
+title: "Standard M&A Analysis Evaluation Rubric"
+version: "1.0.0"
+module: "09_ma_analysis"
+
+description: >
+  Evaluates AI-generated M&A analyses against institutional standards.
+  Applicable to accretion/dilution analyses and sources & uses tables.
+  Emphasis on mechanical accuracy (pro forma EPS math, S&U balance)
+  and completeness of deal components.
+
+total_points: 100
+pass_threshold: 70
+excellence_threshold: 85
+
+dimensions:
+  - name: "Transaction Mechanics"
+    id: "transaction_mechanics"
+    weight: 35
+    description: >
+      Core deal math: S&U balance, pro forma EPS, purchase price
+      calculation, financing structure.
+
+    scoring_levels:
+      - score: "31-35"
+        label: "Excellent"
+        description: >
+          All transaction math correct. S&U balanced. Pro forma
+          adjustments complete (foregone interest, new debt interest,
+          intangible amort, synergies — all tax-affected). Share
+          count correct for stock deals.
+        anchor_examples:
+          - "S&U check = $0.0M"
+          - "Pro forma EPS accounts for all 5 adjustment categories"
+          - "Exchange ratio = offer price ÷ acquirer share price"
+
+      - score: "24-30"
+        label: "Good"
+        description: >
+          Core mechanics correct. Minor adjustment missing or
+          simplified. S&U balanced within rounding.
+
+      - score: "17-23"
+        label: "Acceptable"
+        description: >
+          Basic mechanics present. One material adjustment missing.
+          S&U approximately balanced.
+
+      - score: "9-16"
+        label: "Poor"
+        description: >
+          Multiple mechanical errors. S&U imbalanced. Key
+          adjustments missing.
+
+      - score: "0-8"
+        label: "Fail"
+        description: >
+          Fundamental errors in deal math. Cannot determine
+          pro forma impact.
+
+  - name: "Scenario Analysis"
+    id: "scenario_analysis"
+    weight: 25
+    description: >
+      Coverage of multiple financing scenarios, price sensitivities,
+      and synergy breakeven analysis.
+
+    scoring_levels:
+      - score: "22-25"
+        label: "Excellent"
+        description: >
+          All specified scenarios modeled. Sensitivity matrix across
+          prices and financing mixes. Synergy breakeven per scenario.
+          Multi-year pro forma with phasing.
+        anchor_examples:
+          - "4 financing scenarios × 5 offer prices = 20 data points"
+          - "Breakeven synergies: $18M for all-cash, $32M for all-stock"
+
+      - score: "17-21"
+        label: "Good"
+        description: >
+          Most scenarios covered. Some sensitivity analysis.
+          Breakeven shown for at least one scenario.
+
+      - score: "12-16"
+        label: "Acceptable"
+        description: >
+          2-3 scenarios modeled. Limited sensitivity.
+
+      - score: "6-11"
+        label: "Poor"
+        description: >
+          Single scenario only. No sensitivity or breakeven.
+
+      - score: "0-5"
+        label: "Fail"
+        description: >
+          No scenario analysis. Single point estimate.
+
+  - name: "Accuracy & Consistency"
+    id: "accuracy"
+    weight: 20
+    description: >
+      Verifiability of all calculations, consistent tax treatment,
+      no double-counting.
+
+    scoring_levels:
+      - score: "18-20"
+        label: "Excellent"
+        description: >
+          Every number verifiable. Tax rate applied consistently.
+          No double-counting. Acquirer data matches SMB source.
+
+      - score: "14-17"
+        label: "Good"
+        description: >
+          Calculations correct with minor rounding. Tax treatment
+          consistent.
+
+      - score: "10-13"
+        label: "Acceptable"
+        description: >
+          Most calculations correct. Tax treatment may be
+          inconsistent in one area.
+
+      - score: "5-9"
+        label: "Poor"
+        description: >
+          Material calculation errors. Inconsistent methodology.
+
+      - score: "0-4"
+        label: "Fail"
+        description: >
+          Fundamental errors throughout.
+
+  - name: "Completeness"
+    id: "completeness"
+    weight: 10
+    description: >
+      All required deal components present: purchase accounting,
+      pro forma adjustments, cap table.
+
+    scoring_levels:
+      - score: "9-10"
+        label: "Excellent"
+        description: >
+          All components present. Purchase accounting adjustments.
+          Pro forma cap table. Ownership split.
+
+      - score: "7-8"
+        label: "Good"
+        description: >
+          Most components present. Minor items missing.
+
+      - score: "5-6"
+        label: "Acceptable"
+        description: >
+          Core components present. Some supporting items missing.
+
+      - score: "2-4"
+        label: "Poor"
+        description: >
+          Multiple components missing.
+
+      - score: "0-1"
+        label: "Fail"
+        description: >
+          Fundamentally incomplete.
+
+  - name: "Presentation"
+    id: "presentation"
+    weight: 10
+    description: >
+      Formatting, layout, color coding for accretive/dilutive.
+
+    scoring_levels:
+      - score: "9-10"
+        label: "Excellent"
+        description: >
+          Green for accretive, red for dilutive. Professional
+          formatting. Summary comparison table.
+
+      - score: "7-8"
+        label: "Good"
+        description: >
+          Professional formatting. Color coding present.
+
+      - score: "5-6"
+        label: "Acceptable"
+        description: >
+          Readable. Basic formatting.
+
+      - score: "2-4"
+        label: "Poor"
+        description: >
+          Minimal formatting.
+
+      - score: "0-1"
+        label: "Fail"
+        description: >
+          No formatting.
+
+critical_failures:
+  - id: "su_imbalance"
+    description: "Sources ≠ Uses by more than $0.5M"
+
+  - id: "eps_math_error"
+    description: "Pro forma EPS calculation is verifiably wrong"
+
+  - id: "share_count_error"
+    description: "Diluted share count for stock deal is materially wrong"
+
+  - id: "hallucinated_data"
+    description: "Financial data not from SMB or scenario context"
+
+  - id: "missing_tax_effect"
+    description: "No tax-effecting on any pro forma adjustment"
+
+scoring_instructions:
+  general:
+    - "Verify S&U balance first — it is a binary pass/fail"
+    - "Spot-check pro forma EPS for at least one financing scenario"
+    - "Confirm tax rate consistency across all adjustments"
+
+  calibration:
+    - "'Excellent' = ready for board presentation"
+    - "'Good' = needs minor MD review"
+    - "'Acceptable' = structure right, details need work"
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-24"
+  applicable_scenarios:
+    - "Accretion/dilution analyses"
+    - "Sources & uses tables"
+    - "Merger consequence analyses"

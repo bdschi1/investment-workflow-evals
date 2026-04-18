@@ -1,0 +1,228 @@
+# Due Diligence Request List — M&A Transaction
+# Tests: Completeness of diligence categories, specificity, prioritization
+# No SMB integration (generates from company profile, not financial data)
+
+id: diligence_request_list
+title: "Due Diligence Request List — Healthcare Services Acquisition"
+version: "1.0.0"
+module: "12_deal_execution"
+category: "diligence"
+difficulty: "moderate"
+estimated_time_minutes: 45
+output_format: "excel"
+
+smb_integration:
+  enabled: false
+  notes: "Diligence lists are generated from company profile, not SEC financials"
+
+context:
+  target:
+    name: "CarePoint Health Services"
+    sector: "Healthcare — Home Health & Hospice"
+    financials:
+      revenue: "$280M"
+      ebitda: "$45M"
+      ebitda_margin: "16.1%"
+      employees: "3,200"
+      locations: "42 offices across 8 states"
+    description: >
+      Regional home health, hospice, and personal care services
+      provider operating in the Midwest and Southeast. Mix of
+      Medicare (~55%), Medicaid (~25%), and commercial insurance
+      (~20%) payors. Has grown via 6 tuck-in acquisitions over
+      4 years.
+
+  deal_type: "PE take-private (control acquisition)"
+
+  situation: >
+    A PE sponsor has signed an LOI to acquire CarePoint at
+    approximately $400M enterprise value (8.9x EBITDA). The
+    sponsor's deal team needs to prepare a comprehensive due
+    diligence request list to send to the target's management
+    team. The list must cover all material areas for a healthcare
+    services acquisition, with particular attention to regulatory
+    compliance, reimbursement risk, and labor/staffing issues.
+
+  key_risk_areas:
+    - "Medicare/Medicaid reimbursement and regulatory compliance"
+    - "State licensing and certificate of need requirements"
+    - "Staffing and labor (nurse/aide shortage, wage inflation)"
+    - "Patient census and referral source concentration"
+    - "Prior acquisition integration and earnout obligations"
+    - "Compliance history (OIG investigations, False Claims Act)"
+    - "IT systems and data security (HIPAA)"
+
+  as_of_date: "2024-12-15"
+
+task:
+  prompt: >
+    Generate a comprehensive due diligence request list for the
+    acquisition of CarePoint Health Services. Your Excel deliverable
+    must be organized into the following categories, with specific
+    numbered requests under each:
+
+    1. **Corporate & Organizational** — Charter documents, org charts,
+       subsidiaries, joint ventures, governance
+    2. **Financial** — Audited financials, monthly P&Ls, revenue by
+       payor/service line, AR aging, backlog/census data, budget vs
+       actual, capital expenditure detail
+    3. **Tax** — Federal/state returns, tax attributes, transfer pricing,
+       pending audits, NOLs
+    4. **Legal & Litigation** — Pending/threatened litigation, settlements,
+       consent orders, regulatory actions, False Claims Act exposure
+    5. **Regulatory & Compliance** — State licenses, Medicare/Medicaid
+       certifications, survey results, deficiency reports, HIPAA
+       compliance, compliance program documentation, OIG/DOJ history
+    6. **Reimbursement** — Payor contracts, rate schedules, PDGM impact
+       analysis, Medicare star ratings, claims denial rates, RAC/ZPIC
+       audit history
+    7. **Human Resources & Labor** — Employee census, compensation/benefits,
+       turnover rates by role, union agreements, staffing ratios,
+       contractor/agency usage, employment litigation
+    8. **Operations** — Patient census trends, referral sources, service
+       mix, quality metrics, accreditation status, geographic coverage
+    9. **IT & Data** — Systems inventory, EHR platform, cybersecurity
+       assessment, HIPAA breach history, data migration readiness
+    10. **Real Estate & Leases** — Facility leases, owned properties,
+        lease terms, renewal options
+    11. **Insurance** — Coverage summary, claims history, tail coverage,
+        malpractice claims
+    12. **Acquisitions & Integration** — Prior deal documentation, earnout
+        obligations, integration status, purchase price allocation
+
+    Each request should be specific enough that the target's team
+    knows exactly what document or dataset to provide. Include
+    priority levels (Critical / Important / Supporting) for each.
+
+  expected_output_type: "diligence_request_list"
+
+  constraints:
+    - "Each request must be specific (not 'provide all financial information')"
+    - "Priority levels must be assigned (Critical / Important / Supporting)"
+    - "Healthcare-specific items must be prominent (regulatory, reimbursement, compliance)"
+    - "Total requests should be 80-120 items (realistic scope)"
+    - "Organized by category with numbered items"
+    - "Include estimated delivery timeline for each category (Week 1-2, Week 2-4, etc.)"
+
+  time_horizon: "4-6 week confirmatory diligence period"
+
+data_sources:
+  - type: "company_profile"
+    description: "CarePoint Health Services overview"
+    date: "2024-12-15"
+    key_data_points:
+      - "Revenue: $280M"
+      - "42 offices, 8 states"
+      - "3,200 employees"
+      - "55% Medicare, 25% Medicaid, 20% commercial"
+      - "6 prior acquisitions"
+
+key_facts:
+  - fact: "Home health and hospice are heavily regulated — Medicare conditions of participation, state licensure, and periodic surveys are all critical"
+    source: "Healthcare regulatory framework"
+    importance: "critical"
+
+  - fact: "PDGM (Patient-Driven Groupings Model) changed Medicare home health reimbursement in 2020 — compliance with PDGM coding is a key diligence item"
+    source: "CMS regulation"
+    importance: "critical"
+
+  - fact: "False Claims Act liability is the #1 legal risk in healthcare services M&A — compliance program quality is a deal-breaker"
+    source: "Healthcare M&A practice"
+    importance: "critical"
+
+  - fact: "Nurse and aide staffing is the operational bottleneck — turnover rates, agency reliance, and wage trends are critical"
+    source: "Industry dynamics"
+    importance: "important"
+
+  - fact: "6 prior tuck-in acquisitions may have outstanding earnout obligations or incomplete integration"
+    source: "Deal history"
+    importance: "important"
+
+pitfalls:
+  - description: "Generic requests ('provide all financial information') instead of specific items — target won't know what to produce"
+    failure_type: "specificity_error"
+    severity: "major"
+
+  - description: "Missing healthcare-specific regulatory items (Medicare certifications, survey results, compliance programs)"
+    failure_type: "domain_knowledge_gap"
+    severity: "critical"
+
+  - description: "No priority levels — everything cannot be 'Critical'; must triage"
+    failure_type: "prioritization_error"
+    severity: "major"
+
+  - description: "Fewer than 60 requests — likely missing major categories for a healthcare deal"
+    failure_type: "completeness_error"
+    severity: "major"
+
+  - description: "More than 150 requests — overly granular, will overwhelm target and slow process"
+    failure_type: "scoping_error"
+    severity: "minor"
+
+  - description: "Missing prior acquisition diligence — earnouts, integration, and PPA are standard for serial acquirers"
+    failure_type: "omission"
+    severity: "major"
+
+evaluation_criteria:
+  dimensions:
+    - name: "Completeness"
+      weight: 0.30
+      criteria:
+        - "All 12 specified categories covered"
+        - "80-120 total requests (appropriate scope)"
+        - "Healthcare-specific items prominently featured"
+        - "No major category missing"
+        - "Prior acquisition diligence included"
+
+    - name: "Specificity"
+      weight: 0.25
+      criteria:
+        - "Each request names a specific document or dataset"
+        - "Time periods specified where relevant (3-5 years of financials)"
+        - "Format requested where relevant (Excel, PDF, summary)"
+        - "Actionable — target team can produce what's asked for"
+
+    - name: "Prioritization"
+      weight: 0.20
+      criteria:
+        - "Critical / Important / Supporting assigned to each item"
+        - "Priority distribution is realistic (~30% critical, ~40% important, ~30% supporting)"
+        - "Regulatory and financial items appropriately weighted as critical"
+        - "Delivery timeline assigned by category"
+
+    - name: "Domain Knowledge"
+      weight: 0.15
+      criteria:
+        - "Healthcare regulatory items correct (COPs, state licenses, surveys)"
+        - "Reimbursement items specific (PDGM, star ratings, RAC/ZPIC)"
+        - "Compliance items targeted (OIG, FCA, corporate integrity agreements)"
+        - "Staffing items reflect industry reality (turnover, agency usage)"
+
+    - name: "Presentation"
+      weight: 0.10
+      criteria:
+        - "Professional formatting"
+        - "Numbered items within each category"
+        - "Priority column with color coding"
+        - "Timeline column"
+        - "Status tracking columns (requested, received, reviewed)"
+
+  critical_failures:
+    - "Missing regulatory/compliance category entirely"
+    - "No priority levels assigned"
+    - "Fewer than 40 requests (critically incomplete)"
+    - "Generic/vague requests throughout (not specific documents)"
+    - "Missing healthcare-specific reimbursement items"
+
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-24"
+  tags:
+    - "due_diligence"
+    - "diligence_request_list"
+    - "healthcare"
+    - "deal_execution"
+    - "m_and_a"
+    - "pe"

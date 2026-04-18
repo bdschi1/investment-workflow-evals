@@ -1,0 +1,413 @@
+# prompt_version: 1.0.0
+# prompt_date: 2026-04-04
+# description: LBO Analysis Standard Rubric
+
+# LBO Analysis Evaluation Rubric
+# Scoring framework for leveraged buyout model quality
+
+id: standard_lbo_analysis
+title: "Standard LBO Analysis Evaluation Rubric"
+version: "1.0.0"
+module: "11_lbo_analysis"
+
+description: >
+  Evaluates AI-generated LBO models against institutional PE standards.
+  Emphasis on mechanical linkage (debt schedule ↔ cash flow ↔ balance sheet),
+  returns math accuracy, and professional formatting. A passing LBO model
+  must have zero circular references, balanced sources & uses, and
+  demonstrably correct IRR/MOIC calculations.
+
+total_points: 100
+pass_threshold: 70
+excellence_threshold: 85
+
+dimensions:
+  - name: "Transaction Structure"
+    id: "transaction_structure"
+    weight: 20
+    description: >
+      Evaluates whether the deal is structured correctly: sources = uses,
+      debt tranches are market-appropriate, cap table is accurate, and
+      fees are realistic.
+
+    scoring_levels:
+      - score: "18-20"
+        label: "Excellent"
+        description: >
+          Sources = Uses exactly. All debt tranches within market norms.
+          Fees itemized and realistic. Pro forma cap table with
+          sponsor/mgmt split. Existing debt refinancing handled. Entry
+          leverage within credible range for the sector.
+        anchor_examples:
+          - "S&U check cell shows $0.0 difference"
+          - "Senior leverage 3.0x, total leverage 4.5x — within industrial norms"
+          - "Advisory 1.5%, financing 3.0%, legal $5M — all itemized"
+          - "Mgmt rollover at 8% of PF equity, sponsor at 92%"
+
+      - score: "14-17"
+        label: "Good"
+        description: >
+          Sources ≈ Uses (minor rounding). Tranches reasonable. Fees
+          present but may not be fully itemized. Cap table present.
+        anchor_examples:
+          - "S&U off by <$1M due to rounding"
+          - "Fees shown as lump sum rather than itemized"
+
+      - score: "10-13"
+        label: "Acceptable"
+        description: >
+          S&U structure present but with gaps. May be missing one
+          component (e.g., cash to B/S, refinancing). Leverage
+          within broad range.
+        anchor_examples:
+          - "Missing refinancing of existing debt in uses"
+          - "No pro forma cap table but ownership noted"
+
+      - score: "5-9"
+        label: "Poor"
+        description: >
+          S&U materially imbalanced. Unrealistic leverage or fees.
+          Missing major components.
+        anchor_examples:
+          - "S&U off by >$10M"
+          - "Total leverage 7.0x with no mezzanine — not market-clearing"
+
+      - score: "0-4"
+        label: "Fail"
+        description: >
+          No S&U table, or fundamentally wrong. Cannot determine
+          how the deal is financed.
+        anchor_examples:
+          - "No sources & uses tab"
+          - "Equity check is negative (impossible structure)"
+
+  - name: "Financial Projections"
+    id: "financial_projections"
+    weight: 25
+    description: >
+      Evaluates the operating model: IS/BS/CF linkage, assumption
+      transparency, balance sheet balancing, and projection
+      reasonableness.
+
+    scoring_levels:
+      - score: "22-25"
+        label: "Excellent"
+        description: >
+          Three-statement model fully linked. Balance sheet balances
+          every year. Working capital, D&A, and capex flow correctly.
+          All assumptions explicit and changeable. Growth and margin
+          assumptions reasonable for sector. Key operating metrics
+          calculated per period.
+        anchor_examples:
+          - "BS balances to the penny in all 5 projection years"
+          - "WC changes in CF statement = delta in BS current items"
+          - "Assumptions section with blue-font inputs for every driver"
+          - "Revenue growth declining from 7% to 4% — realistic deceleration"
+
+      - score: "17-21"
+        label: "Good"
+        description: >
+          Statements linked with minor gaps. BS balances. Most
+          assumptions explicit. Projections reasonable.
+        anchor_examples:
+          - "D&A assumption present but not tied to gross PP&E schedule"
+          - "WC modeled as % of revenue rather than individual line items"
+
+      - score: "12-16"
+        label: "Acceptable"
+        description: >
+          Basic projections present. Some linkage gaps. BS may have
+          small imbalance. Assumptions partially explicit.
+        anchor_examples:
+          - "BS off by <$5M in outer years"
+          - "Capex hardcoded instead of % of revenue"
+
+      - score: "6-11"
+        label: "Poor"
+        description: >
+          Projections present but poorly linked. BS does not balance.
+          Key assumptions missing or unreasonable.
+        anchor_examples:
+          - "No working capital in cash flow"
+          - "EBITDA margins expanding 500bps/year — unrealistic"
+
+      - score: "0-5"
+        label: "Fail"
+        description: >
+          No operating model, or model is fundamentally broken.
+          Cannot derive cash flows for debt service.
+        anchor_examples:
+          - "Only income statement, no BS or CF"
+          - "Revenue declining 20% with no explanation"
+
+  - name: "Debt Mechanics"
+    id: "debt_mechanics"
+    weight: 20
+    description: >
+      Evaluates debt schedule accuracy: amortization, interest
+      calculation, cash sweep logic, revolver mechanics, and
+      reconciliation to the operating model.
+
+    scoring_levels:
+      - score: "18-20"
+        label: "Excellent"
+        description: >
+          Full debt schedule per tranche. Mandatory amort correct
+          (1% of original TL). Interest formula-driven from
+          balance × rate. Cash sweep logic correct (excess CF ×
+          sweep %, after min cash). Revolver draws/repays logical.
+          Schedule ties to BS debt and IS interest expense.
+          Credit stats calculated each period.
+        anchor_examples:
+          - "TL amort = $3.0M/yr (1% of $300M original)"
+          - "Interest = avg balance × (SOFR + 400bps), SOFR assumption stated"
+          - "Cash sweep = max(0, (excess CF - min cash) × 50%)"
+          - "Leverage ratio declining from 4.5x to 2.1x over 5 years"
+
+      - score: "14-17"
+        label: "Good"
+        description: >
+          Debt schedule present per tranche. Mechanics mostly correct.
+          Minor issues (e.g., interest on beginning vs average balance).
+          Ties to operating model.
+        anchor_examples:
+          - "Interest on beginning balance instead of average — conservative"
+          - "Cash sweep present but no minimum cash check"
+
+      - score: "10-13"
+        label: "Acceptable"
+        description: >
+          Debt schedule present but simplified. May aggregate tranches.
+          Basic amort and interest. Sweep may be hardcoded.
+        anchor_examples:
+          - "Single line for 'total debt' instead of per-tranche"
+          - "Cash sweep as fixed dollar amount per year"
+
+      - score: "5-9"
+        label: "Poor"
+        description: >
+          Minimal debt schedule. Interest or amort materially wrong.
+          Does not reconcile to operating model.
+        anchor_examples:
+          - "Interest expense in IS ≠ sum of interest in debt schedule"
+          - "No cash sweep modeled"
+
+      - score: "0-4"
+        label: "Fail"
+        description: >
+          No debt schedule, or schedule is fundamentally wrong.
+          Cannot determine debt paydown path.
+        anchor_examples:
+          - "No debt schedule tab"
+          - "Debt balance increases over time with no additional borrowing"
+
+  - name: "Returns Calculation"
+    id: "returns_calculation"
+    weight: 25
+    description: >
+      Evaluates IRR/MOIC accuracy, matrix construction, sensitivity
+      tables, and whether returns are reasonable for the deal.
+
+    scoring_levels:
+      - score: "22-25"
+        label: "Excellent"
+        description: >
+          IRR uses XIRR with correct cash flow timing (negative at
+          entry, positive at exit). MOIC = exit equity ÷ sponsor
+          equity (mgmt rollover treated correctly). Full matrix at
+          specified dimensions. Sensitivity tables with 3+ dimensions.
+          Conditional formatting. Returns directionally reasonable
+          (~20-25% base case IRR for midmarket).
+        anchor_examples:
+          - "XIRR formula with Year 0 negative, Year N positive equity"
+          - "Sponsor MOIC excludes mgmt rollover equity from denominator"
+          - "9×9 IRR matrix: 7.0-11.0x multiples × years 3-6"
+          - "Three sensitivity tables with green/yellow/red formatting"
+
+      - score: "17-21"
+        label: "Good"
+        description: >
+          IRR methodology correct. MOIC calculated. Matrix present
+          but may not cover full specified range. 1-2 sensitivity
+          tables.
+        anchor_examples:
+          - "IRR via IRR() instead of XIRR() — close but less precise"
+          - "Matrix covers 8.0-10.0x instead of full 7.0-11.0x range"
+
+      - score: "12-16"
+        label: "Acceptable"
+        description: >
+          Returns calculated for base case. Limited matrix (fewer
+          dimensions). Basic sensitivity. Returns in plausible range.
+        anchor_examples:
+          - "IRR and MOIC for base case only, one sensitivity table"
+          - "Matrix is 3×3 instead of 9×4"
+
+      - score: "6-11"
+        label: "Poor"
+        description: >
+          Returns present but methodology questionable. May use
+          simple annualized return instead of IRR. Limited or no
+          sensitivity.
+        anchor_examples:
+          - "Return = (exit equity / entry equity)^(1/n) − 1 instead of XIRR"
+          - "No sensitivity tables"
+
+      - score: "0-5"
+        label: "Fail"
+        description: >
+          Returns incorrect or missing. IRR/MOIC math demonstrably
+          wrong. No returns matrix.
+        anchor_examples:
+          - "MOIC calculated as exit EV / entry equity (wrong numerator)"
+          - "No returns analysis tab"
+
+  - name: "Presentation & Formatting"
+    id: "presentation_formatting"
+    weight: 10
+    description: >
+      Evaluates adherence to Wall Street Excel formatting conventions
+      and professional presentation standards.
+
+    scoring_levels:
+      - score: "9-10"
+        label: "Excellent"
+        description: >
+          Full Wall Street formatting: blue inputs, black formulas,
+          parentheses for negatives, $mm units labeled, alternating
+          row shading, bold subtotals with borders, conditional
+          formatting on returns. Print-ready with headers.
+        anchor_examples:
+          - "All input cells in blue Calibri 10pt"
+          - "Revenue row: $450.0, ($22.5), 4.5%"
+          - "Returns matrix with green ≥25%, yellow 15-25%, red <15%"
+
+      - score: "7-8"
+        label: "Good"
+        description: >
+          Professional formatting. Most conventions followed.
+          Minor inconsistencies (e.g., some negatives with minus
+          signs instead of parens).
+        anchor_examples:
+          - "Mostly consistent but headers not repeating on print"
+          - "Conditional formatting on returns but not on credit stats"
+
+      - score: "5-6"
+        label: "Acceptable"
+        description: >
+          Readable and organized. Basic formatting present.
+          Some Wall Street conventions missing.
+        anchor_examples:
+          - "Units labeled but negatives use minus signs"
+          - "No color coding for inputs vs formulas"
+
+      - score: "2-4"
+        label: "Poor"
+        description: >
+          Minimal formatting. Hard to read. Inconsistent units
+          or number formats.
+        anchor_examples:
+          - "Mix of $M and $mm and $000s"
+          - "No section headers or visual separation"
+
+      - score: "0-1"
+        label: "Fail"
+        description: >
+          No formatting. Raw numbers without context. Unusable
+          for presentation.
+        anchor_examples:
+          - "Plain text numbers with no formatting"
+          - "Cannot distinguish inputs from outputs"
+
+critical_failures:
+  - id: "sources_uses_imbalance"
+    description: "Sources ≠ Uses by more than $0.5M"
+    examples:
+      - "Sources total $620M, Uses total $645M — $25M gap"
+      - "Missing refinancing of existing debt in uses"
+
+  - id: "balance_sheet_imbalance"
+    description: "Balance sheet does not balance (A ≠ L + E) in any projection year"
+    examples:
+      - "Year 3 assets $800M but L+E = $785M"
+      - "Goodwill not created on acquisition"
+
+  - id: "debt_cf_disconnect"
+    description: "Debt schedule interest/repayment does not match operating model"
+    examples:
+      - "IS shows $35M interest but debt schedule calculates $42M"
+      - "CF shows $10M debt repayment but debt balance unchanged"
+
+  - id: "returns_math_error"
+    description: "IRR or MOIC calculation is verifiably incorrect"
+    examples:
+      - "MOIC = 2.5x but exit equity / entry equity = 2.1x"
+      - "IRR shows 30% but manual calc yields 22%"
+
+  - id: "hallucinated_financials"
+    description: "Financial data not traceable to SMB output or scenario context"
+    examples:
+      - "Uses revenue of $800M when SMB shows $450M"
+      - "Invents acquisition targets with specific financials"
+
+  - id: "negative_equity_check"
+    description: "Deal structure implies negative equity contribution (impossible)"
+    examples:
+      - "Debt exceeds total uses, making equity check negative"
+
+scoring_instructions:
+  general:
+    - "Score each dimension independently before calculating total"
+    - "Use anchor examples for calibration"
+    - "Verify S&U balance, BS balance, and debt schedule reconciliation before scoring — these are binary pass/fail checks"
+    - "Spot-check at least one IRR/MOIC cell by hand calculation"
+    - "Check for critical failures before final scoring"
+
+  calibration:
+    - "An 'Excellent' LBO model is one you could present to an IC without rework"
+    - "'Good' means a senior associate would need minor cleanup before IC"
+    - "'Acceptable' means the structure is right but needs meaningful rework"
+    - "'Poor' means fundamental rework required"
+    - "'Fail' means start over"
+
+  weighting:
+    - "Apply weights to calculate total score: structure(20) + projections(25) + debt(20) + returns(25) + formatting(10)"
+    - "Round final score to nearest integer"
+    - "Any critical failure = automatic fail regardless of total score"
+
+  lbo_specific:
+    - "The debt schedule is the signature test — it is where most models break"
+    - "Cash sweep mechanics must be formula-driven, not hardcoded"
+    - "Returns at base case should be ~20-25% IRR for a credible midmarket deal"
+    - "If returns are >40% IRR at base case, the model likely has an error or unrealistic assumptions"
+    - "If returns are <10% IRR at base case, the deal does not pencil and the model should flag this"
+
+output_format:
+  required_fields:
+    - "overall_score"
+    - "dimension_scores"
+    - "critical_failures_found"
+    - "pass_fail_status"
+    - "summary_feedback"
+    - "spot_check_results"
+
+  optional_fields:
+    - "detailed_dimension_feedback"
+    - "mechanical_linkage_audit"
+    - "returns_verification"
+    - "improvement_suggestions"
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-24"
+  version_notes: >
+    Inaugural LBO rubric. Weighted heavily toward returns calculation (25%)
+    and financial projections (25%) as these are the core analytical outputs.
+    Debt mechanics (20%) is the differentiator — most AI models struggle
+    with cash sweep logic and revolver mechanics. Transaction structure (20%)
+    and formatting (10%) round out the evaluation.
+  applicable_scenarios:
+    - "All LBO scenarios"
+    - "Take-private analyses"
+    - "Recapitalization models"
+    - "Dividend recap analyses"

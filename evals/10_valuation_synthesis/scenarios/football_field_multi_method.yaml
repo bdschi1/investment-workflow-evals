@@ -1,0 +1,213 @@
+# Football Field Valuation Summary — Multi-Methodology
+# Tests: Synthesis of DCF, comps, precedents, SOTP into range chart
+# SMB integration: Target financials from smb_bridge
+
+id: football_field_multi_method
+title: "Football Field Valuation Summary — Multi-Methodology Synthesis"
+version: "1.0.0"
+module: "10_valuation_synthesis"
+category: "valuation_summary"
+difficulty: "moderate"
+estimated_time_minutes: 45
+output_format: "excel"
+
+smb_integration:
+  enabled: true
+  placeholder_prefix: "[X]"
+  sheets_required:
+    - "IS Annual"
+    - "BS Annual"
+    - "Valuation"
+  fill_fields:
+    - "revenue"
+    - "ebitda"
+    - "net_income"
+    - "eps"
+    - "shares_outstanding"
+    - "share_price"
+    - "total_debt"
+    - "cash"
+    - "enterprise_value"
+
+context:
+  company:
+    name: "[COMPANY]"
+    ticker: "[TICKER]"
+    sector: "Technology — Software & Services"
+    market_cap: "[X]"
+    description: >
+      Mid-cap enterprise software company. SMB provides actual
+      financials for valuation inputs.
+
+  situation: >
+    An investment banking team has completed four independent
+    valuation analyses for [COMPANY] in the context of a potential
+    sale process. The VP has asked the analyst to synthesize
+    all four into a single football field summary with implied
+    equity value per share ranges.
+
+  valuation_inputs:
+    dcf:
+      method: "Discounted Cash Flow (WACC-based)"
+      implied_ev_low: "$1,800M"
+      implied_ev_high: "$2,400M"
+      key_assumptions: "WACC 9.5-11.0%, terminal growth 2.5-3.5%, 5-year projection"
+
+    trading_comps:
+      method: "Comparable Company Analysis"
+      implied_ev_low: "$1,650M"
+      implied_ev_high: "$2,200M"
+      key_assumptions: "Peer median EV/NTM EBITDA 12.5-16.5x, peer set of 10 companies"
+
+    precedent_transactions:
+      method: "Precedent Transactions"
+      implied_ev_low: "$2,000M"
+      implied_ev_high: "$2,800M"
+      key_assumptions: "10 transactions at 14.0-19.5x LTM EBITDA, includes control premium"
+
+    52_week_range:
+      method: "52-Week Trading Range"
+      implied_ev_low: "$1,500M"
+      implied_ev_high: "$2,100M"
+      key_assumptions: "Share price range × diluted shares + net debt"
+
+  as_of_date: "2024-12-15"
+
+task:
+  prompt: >
+    Create a football field valuation summary for [COMPANY]
+    synthesizing the four pre-computed valuation methodologies.
+    Your Excel deliverable must include:
+
+    1. **Valuation Summary Table** — Each methodology with
+       implied EV range, implied equity value range, and implied
+       price per share range. Show low, midpoint, and high.
+    2. **EV-to-Equity Bridge** — For each method: implied EV →
+       subtract net debt → implied equity value → divide by
+       diluted shares → implied price per share
+    3. **Football Field Chart Data** — Horizontal bar chart layout
+       showing each methodology as a range bar. Include current
+       share price reference line.
+    4. **Weighted Valuation** — Suggested weighting across methods
+       (DCF 35%, comps 25%, precedents 30%, 52-week 10%) with
+       weighted average implied value
+    5. **Key Observations** — 3-5 bullet points on valuation
+       findings (convergence/divergence, premium to current, etc.)
+
+  expected_output_type: "football_field"
+
+  constraints:
+    - "EV-to-equity bridge must use consistent net debt and share count"
+    - "Precedent transactions typically imply higher values (control premium)"
+    - "52-week range is descriptive, not prescriptive — weight accordingly"
+    - "Net debt = total debt − cash (both from SMB balance sheet)"
+    - "Diluted shares from treasury stock method"
+    - "All values in $mm except per-share amounts"
+
+  time_horizon: "Point-in-time valuation"
+
+data_sources:
+  - type: "pre_computed"
+    description: "DCF, comps, precedents, and trading range results"
+    date: "2024-12-15"
+    key_data_points:
+      - "DCF implied EV: $1,800M-$2,400M"
+      - "Comps implied EV: $1,650M-$2,200M"
+      - "Precedents implied EV: $2,000M-$2,800M"
+      - "52-week implied EV: $1,500M-$2,100M"
+
+  - type: "balance_sheet"
+    description: "From SMB for EV-to-equity bridge"
+    date: "[X]"
+    key_data_points:
+      - "Total debt: [X]"
+      - "Cash: [X]"
+      - "Shares outstanding: [X]"
+      - "Current share price: [X]"
+
+key_facts:
+  - fact: "Precedent transactions typically imply higher values due to control premium (20-40% over trading value)"
+    source: "M&A methodology"
+    importance: "critical"
+
+  - fact: "DCF is sensitive to terminal value assumptions — terminal value often represents 60-80% of total DCF value"
+    source: "Valuation methodology"
+    importance: "important"
+
+  - fact: "52-week trading range reflects market sentiment but not intrinsic or control value"
+    source: "Valuation methodology"
+    importance: "important"
+
+pitfalls:
+  - description: "Using different net debt or share count across methodologies — must be consistent"
+    failure_type: "consistency_error"
+    severity: "critical"
+
+  - description: "Adding net debt instead of subtracting it when bridging from EV to equity value"
+    failure_type: "sign_error"
+    severity: "critical"
+
+  - description: "Equal-weighting all methodologies when precedent transactions include control premium"
+    failure_type: "judgment_error"
+    severity: "major"
+
+  - description: "Not showing the current share price as a reference point on the football field"
+    failure_type: "omission"
+    severity: "minor"
+
+evaluation_criteria:
+  dimensions:
+    - name: "EV-to-Equity Bridge"
+      weight: 0.30
+      criteria:
+        - "Consistent net debt across all methods"
+        - "Consistent diluted share count"
+        - "Correct arithmetic: equity value = EV − net debt"
+        - "Per share = equity value ÷ diluted shares"
+
+    - name: "Synthesis & Judgment"
+      weight: 0.25
+      criteria:
+        - "Appropriate methodology weighting with rationale"
+        - "Recognizes precedent premium vs trading values"
+        - "Identifies convergence zones across methods"
+        - "Key observations are insightful and grounded"
+
+    - name: "Completeness"
+      weight: 0.20
+      criteria:
+        - "All 4 methods represented"
+        - "Low, mid, high for each"
+        - "Weighted average calculated"
+        - "Current price reference included"
+
+    - name: "Chart Data"
+      weight: 0.15
+      criteria:
+        - "Data structured for horizontal bar chart"
+        - "Ranges clearly defined"
+        - "Reference line for current price"
+
+    - name: "Presentation"
+      weight: 0.10
+      criteria:
+        - "Wall Street formatting"
+        - "Clean layout"
+        - "$mm for EV, $/share for equity"
+
+  critical_failures:
+    - "EV-to-equity bridge has wrong sign on net debt"
+    - "Methodologies use different net debt or share count"
+    - "Implied per-share values are demonstrably wrong"
+    - "Hallucinated financial data"
+
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-24"
+  tags:
+    - "football_field"
+    - "valuation_summary"
+    - "synthesis"
+    - "smb_integration"

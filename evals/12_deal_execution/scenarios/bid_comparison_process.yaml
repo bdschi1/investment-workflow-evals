@@ -1,0 +1,279 @@
+# Bid Comparison Matrix — Sell-Side Process
+# Tests: Extraction from unstructured LOIs, normalization, comparison judgment
+# No SMB integration (LOIs are provided as structured context)
+
+id: bid_comparison_process
+title: "Bid Comparison Matrix — Competitive Sell-Side Auction"
+version: "1.0.0"
+module: "12_deal_execution"
+category: "bid_comparison"
+difficulty: "moderate"
+estimated_time_minutes: 60
+output_format: "excel"
+
+smb_integration:
+  enabled: false
+  notes: "Target financials provided in context; LOIs are the primary input"
+
+context:
+  target:
+    name: "PrecisionFlow Systems"
+    sector: "Industrials — Fluid Control"
+    financials:
+      ltm_revenue: "$420M"
+      ltm_ebitda: "$84M"
+      ebitda_margin: "20.0%"
+      net_debt: "$60M"
+      diluted_shares: "25M"
+    description: >
+      Specialty fluid control and instrumentation company being
+      sold via a competitive auction process. The company serves
+      process industries (chemicals, pharma, food & beverage)
+      with a mix of OEM equipment and recurring aftermarket.
+
+  situation: >
+    The sell-side advisory team has received 5 indications of
+    interest (IOIs) from the second round of a competitive auction.
+    The team must normalize these bids into a comparison matrix
+    for the board to evaluate. Bids vary in structure: some are
+    all-cash, some include rollover equity, one has an earn-out,
+    and one is a stock-for-stock merger with a strategic buyer.
+
+  bids:
+    - bidder: "Alpine Industrial Partners (PE)"
+      offer_ev: "$780M"
+      implied_multiple: "9.3x LTM EBITDA"
+      structure: "All cash at close"
+      financing: "Committed debt financing from JPMorgan; $400M senior secured + $130M sub notes"
+      conditions: >
+        Standard PE conditions: confirmatory diligence (4 weeks),
+        management retention agreements, R&W insurance, HSR filing.
+        No financing contingency.
+      management: "Require CEO and CFO to roll 10% of proceeds and sign 3-year employment agreements"
+      timing: "45-day exclusivity, 90-day close target"
+      notes: "Strong track record in industrial M&A. Have acquired 3 similar businesses."
+
+    - bidder: "Meridian Capital Group (PE)"
+      offer_ev: "$820M"
+      implied_multiple: "9.8x LTM EBITDA"
+      structure: "Cash at close, subject to $40M working capital adjustment (target NWC: $55M)"
+      financing: "Highly confident letter from Goldman Sachs; $450M term loan + $120M mezzanine"
+      conditions: >
+        Confirmatory diligence (6 weeks), management rollover
+        required, environmental assessment of 3 facilities,
+        customer consent for top 5 contracts.
+      management: "Require management team to roll 15% of proceeds. Will replace CFO within 12 months."
+      timing: "60-day exclusivity, 120-day close target"
+      notes: "Highest headline price but most conditions. First deal in this subsector."
+
+    - bidder: "Flowserve Corporation (Strategic)"
+      offer_ev: "$750M"
+      implied_multiple: "8.9x LTM EBITDA"
+      structure: "50% cash / 50% Flowserve stock (fixed exchange ratio based on 20-day VWAP)"
+      financing: "Cash on hand + existing credit facility. No external financing needed."
+      conditions: >
+        Board approval (obtained), HSR filing, minimal diligence
+        remaining (2 weeks), no customer consents required.
+        Fixed exchange ratio — no collar.
+      management: "Standard retention packages. No rollover required. Plan to integrate within 18 months."
+      timing: "30-day exclusivity, 60-day close target"
+      synergies: "$35M annual run-rate cost synergies (25% realized Year 1, 75% Year 2, 100% Year 3)"
+      notes: "Lowest headline price but fastest close, fewest conditions. Stock component adds market risk."
+
+    - bidder: "Blackstone Infrastructure (PE)"
+      offer_ev: "$800M base + $50M earn-out"
+      implied_multiple: "9.5x base, 10.1x with full earn-out"
+      structure: "Cash at close for $800M base. Earn-out: $50M if EBITDA exceeds $92M in either of next 2 fiscal years."
+      financing: "Committed financing from Credit Suisse; $420M senior + $150M sub notes"
+      conditions: >
+        Confirmatory diligence (4 weeks), management retention,
+        standard reps and warranties, HSR filing.
+        Earn-out disputes subject to independent accounting firm.
+      management: "CEO to roll 8% and stay 2 years minimum. Open to retaining full management team."
+      timing: "45-day exclusivity, 90-day close target"
+      notes: "Earn-out bridges valuation gap. Strong reputation, experienced in industrial services."
+
+    - bidder: "Consolidated Controls Inc. (Strategic)"
+      offer_ev: "$830M"
+      implied_multiple: "9.9x LTM EBITDA"
+      structure: "All cash"
+      financing: "Cash on hand ($200M) + new $650M term loan (commitment letter from BofA)"
+      conditions: >
+        Confirmatory diligence (3 weeks), HSR filing (potential
+        second request given 35% combined market share in valve
+        actuators), European antitrust clearance (3-6 months),
+        divest overlapping product line (~$30M revenue).
+      management: "Retention bonuses for key employees. No rollover. Integration plan in 24 months."
+      timing: "45-day exclusivity, 6-9 month regulatory timeline"
+      synergies: "$50M annual cost synergies (procurement + overlapping facilities)"
+      notes: "Highest cash offer but significant regulatory risk. May require divestiture."
+
+  as_of_date: "2024-12-15"
+
+task:
+  prompt: >
+    Build a bid comparison matrix for the PrecisionFlow Systems
+    auction. Your Excel deliverable must include:
+
+    1. **Summary Comparison Table** — Side-by-side comparison of
+       all 5 bids across standardized dimensions:
+       - Headline EV, implied EV/EBITDA multiple
+       - Net consideration to shareholders (after adjustments)
+       - Consideration type (cash/stock/earn-out mix)
+       - Financing certainty (committed, highly confident, cash on hand)
+       - Key conditions and deal risk
+       - Regulatory risk assessment
+       - Management requirements
+       - Timeline to close
+       - Synergy potential (where applicable)
+
+    2. **Adjusted Value Analysis** — Normalize the bids to
+       comparable terms:
+       - Discount earn-out at 50% probability
+       - Risk-adjust stock consideration for market risk
+       - Note working capital adjustment impact
+       - Flag regulatory-contingent bids
+
+    3. **Risk Ranking** — Score each bid on execution risk (1-5 scale)
+       across: financing risk, regulatory risk, integration risk,
+       management/retention risk, timeline risk
+
+    4. **Board Recommendation Framework** — Organize bids into
+       tiers (most attractive, competitive, least attractive) with
+       rationale. Note trade-offs between price and certainty.
+
+  expected_output_type: "bid_comparison"
+
+  constraints:
+    - "Normalize all values to comparable basis"
+    - "Earn-outs should be probability-discounted"
+    - "Stock consideration carries market risk (note but don't ignore)"
+    - "Regulatory risk is the key differentiator between similar-price bids"
+    - "Certainty of close is as important as price for board consideration"
+    - "Do not recommend a single bid — present framework for board decision"
+
+  time_horizon: "Transaction close timeline (60-270 days depending on bid)"
+
+data_sources:
+  - type: "ioi_letters"
+    description: "5 indications of interest from second-round bidders"
+    date: "2024-12-15"
+    key_data_points:
+      - "Alpine: $780M all cash"
+      - "Meridian: $820M cash w/ WC adjustment"
+      - "Flowserve: $750M (50% cash / 50% stock)"
+      - "Blackstone: $800M + $50M earn-out"
+      - "Consolidated: $830M all cash (regulatory risk)"
+
+  - type: "target_financials"
+    description: "PrecisionFlow audited financials"
+    date: "2024-12-15"
+    key_data_points:
+      - "LTM Revenue: $420M"
+      - "LTM EBITDA: $84M"
+      - "Net debt: $60M"
+
+key_facts:
+  - fact: "Highest headline price ($830M, Consolidated) carries most regulatory risk (potential second request + EU clearance)"
+    source: "IOI analysis"
+    importance: "critical"
+
+  - fact: "Earn-out value ($50M, Blackstone) should be probability-weighted — earn-outs in M&A are realized ~40-60% of the time"
+    source: "Industry data"
+    importance: "critical"
+
+  - fact: "Stock consideration (Flowserve) exposes sellers to market risk between signing and closing"
+    source: "Deal structure"
+    importance: "important"
+
+  - fact: "Working capital adjustments can swing net proceeds ±$10M at close"
+    source: "Transaction mechanics"
+    importance: "important"
+
+  - fact: "Financing certainty hierarchy: cash on hand > committed > highly confident"
+    source: "M&A conventions"
+    importance: "important"
+
+pitfalls:
+  - description: "Ranking bids solely on headline price without adjusting for structure, risk, and conditions"
+    failure_type: "judgment_error"
+    severity: "critical"
+
+  - description: "Treating earn-out at full face value — must probability-discount"
+    failure_type: "valuation_error"
+    severity: "major"
+
+  - description: "Ignoring regulatory risk for Consolidated Controls despite 35% combined market share"
+    failure_type: "risk_omission"
+    severity: "major"
+
+  - description: "Not distinguishing between financing certainty levels (committed vs highly confident)"
+    failure_type: "risk_omission"
+    severity: "minor"
+
+  - description: "Making a single bid recommendation instead of presenting a framework — board decides, not the banker"
+    failure_type: "role_error"
+    severity: "major"
+
+evaluation_criteria:
+  dimensions:
+    - name: "Normalization & Adjustments"
+      weight: 0.30
+      criteria:
+        - "Earn-out probability-discounted"
+        - "Stock consideration risk noted"
+        - "Working capital adjustment impact quantified"
+        - "All bids expressed on comparable basis"
+        - "Net proceeds to shareholders calculated"
+
+    - name: "Risk Assessment"
+      weight: 0.30
+      criteria:
+        - "Execution risk scored across dimensions"
+        - "Regulatory risk differentiated (HSR, EU)"
+        - "Financing certainty hierarchy applied"
+        - "Timeline risk assessed"
+        - "Management retention requirements compared"
+
+    - name: "Comparison Completeness"
+      weight: 0.20
+      criteria:
+        - "All 5 bids compared across all dimensions"
+        - "Side-by-side format"
+        - "Key trade-offs identified"
+        - "Tier ranking with rationale"
+
+    - name: "Judgment & Framing"
+      weight: 0.10
+      criteria:
+        - "Price vs certainty trade-off articulated"
+        - "Framework presented, not single recommendation"
+        - "Board-appropriate language and framing"
+        - "Material risks highlighted"
+
+    - name: "Presentation"
+      weight: 0.10
+      criteria:
+        - "Professional formatting"
+        - "Color-coded risk scoring"
+        - "Summary table readable at a glance"
+        - "Clear section organization"
+
+  critical_failures:
+    - "Earn-out treated at full face value without discounting"
+    - "Ranking on headline price only without risk adjustment"
+    - "Missing a bidder from the comparison"
+    - "Making a single recommendation instead of framework"
+    - "Fabricating bid terms not in the IOIs"
+
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-24"
+  tags:
+    - "bid_comparison"
+    - "sell_side"
+    - "auction"
+    - "deal_execution"
+    - "m_and_a"

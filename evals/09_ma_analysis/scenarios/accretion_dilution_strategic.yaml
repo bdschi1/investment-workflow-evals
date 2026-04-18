@@ -1,0 +1,264 @@
+# Accretion/Dilution Analysis — Strategic Acquisition
+# Tests: Pro forma EPS impact, financing mix optimization, synergy sensitivity
+# SMB integration: Acquirer financials from smb_bridge
+
+id: accretion_dilution_strategic
+title: "Accretion/Dilution Analysis — Strategic Healthcare Acquisition"
+version: "1.0.0"
+module: "09_ma_analysis"
+category: "accretion_dilution"
+difficulty: "moderate"
+estimated_time_minutes: 60
+output_format: "excel"
+
+smb_integration:
+  enabled: true
+  placeholder_prefix: "[X]"
+  sheets_required:
+    - "IS Annual"
+    - "BS Annual"
+    - "Valuation"
+  fill_fields:
+    - "revenue"
+    - "ebitda"
+    - "net_income"
+    - "eps"
+    - "shares_outstanding"
+    - "share_price"
+    - "total_debt"
+    - "cash"
+    - "tax_rate"
+    - "interest_expense"
+
+context:
+  acquirer:
+    name: "[COMPANY]"
+    ticker: "[TICKER]"
+    sector: "Healthcare — Diversified Services"
+    description: >
+      Large-cap diversified healthcare services company. SMB provides
+      actual financials via extract_fill_values().
+    financials:
+      revenue: "[X]"
+      ebitda: "[X]"
+      net_income: "[X]"
+      eps: "[X]"
+      shares_outstanding: "[X]"
+      share_price: "[X]"
+      tax_rate: "[X]"
+      net_debt: "[X]"
+
+  target:
+    name: "HealthServ Analytics"
+    ticker: "Private"
+    description: >
+      Private healthcare analytics company with $350M revenue, $70M
+      EBITDA (20% margin), $42M net income. Growing 15% annually.
+      Owner seeking $700M (~10.0x EBITDA, ~2.0x revenue).
+    financials:
+      revenue: "$350M"
+      ebitda: "$70M"
+      ebitda_margin: "20.0%"
+      net_income: "$42M"
+      growth_rate: "15%"
+
+  deal_parameters:
+    offer_price: "$700M enterprise value"
+    implied_multiples:
+      ev_ebitda: "10.0x"
+      ev_revenue: "2.0x"
+    financing_scenarios:
+      - name: "100% Cash"
+        cash_pct: 100
+        stock_pct: 0
+        new_debt_pct: 0
+      - name: "50% Cash / 50% Stock"
+        cash_pct: 50
+        stock_pct: 50
+        new_debt_pct: 0
+      - name: "50% Cash / 50% New Debt"
+        cash_pct: 50
+        stock_pct: 0
+        new_debt_pct: 50
+      - name: "1/3 Each"
+        cash_pct: 33
+        stock_pct: 34
+        new_debt_pct: 33
+    synergies:
+      cost_synergies: "$25M pre-tax (phased: 25% Year 1, 75% Year 2, 100% Year 3+)"
+      revenue_synergies: "$15M pre-tax (phased: 0% Year 1, 33% Year 2, 67% Year 3, 100% Year 4+)"
+    new_debt_terms:
+      rate: "5.5%"
+      maturity: "7 years"
+    foregone_interest_on_cash: "4.5% pre-tax"
+    goodwill_and_intangibles:
+      total_premium: "~$350M above book (intangible-heavy, minimal tangible assets)"
+      intangible_amort_period: "10 years"
+      annual_intangible_amort: "$35M"
+
+  situation: >
+    [COMPANY]'s board is evaluating the acquisition of HealthServ
+    Analytics. The M&A advisory team must present an accretion/dilution
+    analysis showing the pro forma EPS impact under multiple financing
+    scenarios, with and without synergies, over a 3-year horizon.
+
+  as_of_date: "2024-12-15"
+
+task:
+  prompt: >
+    Build an accretion/dilution analysis for [COMPANY]'s proposed
+    acquisition of HealthServ Analytics. Your Excel deliverable must include:
+
+    1. **Transaction Summary** — Deal metrics, implied multiples, premium
+    2. **Pro Forma EPS** — For each of the 4 financing scenarios:
+       - Standalone acquirer EPS
+       - Pro forma combined EPS (before synergies)
+       - Pro forma combined EPS (after synergies, phased)
+       - Accretion/(dilution) in dollars and percentage
+    3. **Sensitivity Matrix** — Accretion/dilution at various offer
+       prices ($600M-$800M, $50M steps) × financing mixes
+    4. **Synergy Breakeven** — Minimum synergies required for deal
+       to be accretive under each financing scenario
+    5. **3-Year Pro Forma** — Year 1, 2, 3 EPS impact showing synergy
+       phase-in and intangible amortization
+
+  expected_output_type: "accretion_dilution"
+
+  constraints:
+    - "Must account for foregone interest on cash used"
+    - "Must include intangible amortization from purchase accounting"
+    - "Stock consideration uses acquirer's current share price for exchange ratio"
+    - "Tax-affect all items at acquirer's effective tax rate"
+    - "New shares issued = stock consideration ÷ acquirer share price"
+    - "Formatting: accretive in green, dilutive in red (parentheses)"
+
+  time_horizon: "3-year pro forma"
+
+data_sources:
+  - type: "10-K"
+    description: "[COMPANY] most recent Annual Report"
+    date: "[X]"
+    key_data_points:
+      - "Revenue: [X]"
+      - "Net income: [X]"
+      - "EPS: [X]"
+      - "Shares outstanding: [X]"
+      - "Tax rate: [X]"
+
+  - type: "market_data"
+    description: "Acquirer trading data from SMB"
+    date: "[X]"
+    key_data_points:
+      - "Share price: [X]"
+      - "Market cap: [X]"
+
+  - type: "target_financials"
+    description: "HealthServ Analytics management-provided financials"
+    date: "2024-12-15"
+    key_data_points:
+      - "Revenue: $350M"
+      - "EBITDA: $70M"
+      - "Net income: $42M"
+      - "Growth rate: 15%"
+
+key_facts:
+  - fact: "Offer price of $700M implies 10.0x EV/EBITDA for the target"
+    source: "Deal terms"
+    importance: "critical"
+
+  - fact: "Intangible amortization of $35M/year is a non-cash charge that reduces GAAP EPS but not cash EPS"
+    source: "Purchase accounting"
+    importance: "critical"
+
+  - fact: "Cost synergies phase in over 3 years; revenue synergies over 4 years"
+    source: "Management estimate"
+    importance: "important"
+
+  - fact: "Cash-funded deals sacrifice interest income; debt-funded deals add interest expense; stock-funded deals dilute share count"
+    source: "Methodology"
+    importance: "important"
+
+pitfalls:
+  - description: "Forgetting to subtract foregone interest income (after-tax) when using cash to fund the deal"
+    failure_type: "omission_error"
+    severity: "major"
+
+  - description: "Not tax-affecting synergies, interest expense, or foregone interest"
+    failure_type: "tax_error"
+    severity: "major"
+
+  - description: "Omitting intangible amortization from purchase accounting adjustments"
+    failure_type: "purchase_accounting_error"
+    severity: "major"
+
+  - description: "Using wrong share price for exchange ratio calculation in stock deals"
+    failure_type: "arithmetic_error"
+    severity: "critical"
+
+  - description: "Showing synergies at full run-rate in Year 1 instead of phasing in"
+    failure_type: "assumption_error"
+    severity: "major"
+
+evaluation_criteria:
+  dimensions:
+    - name: "Pro Forma Mechanics"
+      weight: 0.35
+      criteria:
+        - "Acquirer standalone EPS correct"
+        - "Target net income added to combined"
+        - "Foregone interest on cash (after-tax) subtracted"
+        - "New debt interest (after-tax) subtracted"
+        - "Intangible amortization (after-tax) subtracted"
+        - "New shares from stock consideration correctly calculated"
+        - "Synergies (after-tax) added with correct phasing"
+        - "Pro forma EPS = combined net income ÷ pro forma shares"
+
+    - name: "Scenario Completeness"
+      weight: 0.25
+      criteria:
+        - "All 4 financing scenarios modeled"
+        - "Each scenario shows before and after synergies"
+        - "Sensitivity matrix at various offer prices"
+        - "Synergy breakeven calculated per scenario"
+
+    - name: "Multi-Year Analysis"
+      weight: 0.20
+      criteria:
+        - "3-year pro forma with synergy phase-in"
+        - "Target growth reflected in outer years"
+        - "Intangible amortization consistent across years"
+        - "Crossover point identified (when dilutive deal becomes accretive)"
+
+    - name: "Accuracy"
+      weight: 0.10
+      criteria:
+        - "All arithmetic verifiable"
+        - "Tax rate applied consistently"
+        - "No double-counting of adjustments"
+
+    - name: "Presentation"
+      weight: 0.10
+      criteria:
+        - "Green for accretive, red (parentheses) for dilutive"
+        - "Clear labeling of assumptions vs calculated values"
+        - "Summary table showing all scenarios side by side"
+
+  critical_failures:
+    - "Pro forma EPS math is demonstrably wrong"
+    - "Share count calculation for stock deal is incorrect"
+    - "Foregone interest and new debt interest both omitted"
+    - "Hallucinated acquirer financial data"
+    - "Synergies not tax-affected"
+
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-24"
+  tags:
+    - "accretion_dilution"
+    - "ma"
+    - "merger"
+    - "pro_forma"
+    - "healthcare"
+    - "smb_integration"

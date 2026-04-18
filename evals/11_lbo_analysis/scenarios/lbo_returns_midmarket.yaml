@@ -1,0 +1,431 @@
+# LBO Returns Analysis — Midmarket Industrial
+# Tests: Transaction structuring, debt schedule mechanics, IRR/MOIC calculation, sensitivity analysis
+# SMB integration: Target financials populated via smb_bridge extract_fill_values()
+
+id: lbo_returns_midmarket
+title: "Midmarket LBO Returns Analysis — Industrial Services Platform"
+version: "1.0.0"
+module: "11_lbo_analysis"
+category: "leveraged_buyout"
+difficulty: "hard"
+estimated_time_minutes: 90
+output_format: "excel"
+
+smb_integration:
+  enabled: true
+  placeholder_prefix: "[X]"
+  sheets_required:
+    - "IS Annual"
+    - "BS Annual"
+    - "CF Annual"
+    - "Valuation"
+    - "Ratio Dashboard"
+  fill_fields:
+    - "revenue"
+    - "ebitda"
+    - "capex"
+    - "net_income"
+    - "total_debt"
+    - "cash"
+    - "shares_outstanding"
+    - "share_price"
+    - "enterprise_value"
+    - "ev_ebitda"
+    - "gross_margin"
+    - "ebitda_margin"
+    - "interest_expense"
+    - "depreciation_amortization"
+    - "working_capital"
+    - "current_assets"
+    - "current_liabilities"
+
+context:
+  company:
+    name: "[COMPANY]"
+    ticker: "[TICKER]"
+    sector: "Industrials — Specialty Services"
+    market_cap: "[X]"
+    description: >
+      Mid-cap industrial services platform providing mission-critical
+      maintenance, repair, and overhaul (MRO) services to infrastructure
+      end markets (power generation, water/wastewater, transportation).
+      Recurring revenue base (~65% of sales under multi-year contracts),
+      asset-light model, and fragmented competitor landscape amenable
+      to bolt-on M&A.
+
+  situation: >
+    A middle-market PE sponsor is evaluating a take-private of [COMPANY]
+    at a preliminary offer of [X] EV/EBITDA (representing a ~25% premium
+    to the unaffected share price). The sponsor believes there is
+    meaningful margin expansion opportunity through procurement
+    consolidation, SG&A rationalization, and bolt-on acquisitions.
+
+    Key transaction parameters under consideration:
+    - Entry EV/EBITDA: [X] (current trading) to 10.0x (with premium)
+    - Target capital structure: 4.0-5.0x total leverage at close
+    - Sponsor equity check: 40-45% of total sources
+    - Management rollover: 5-10% of pro forma equity
+    - Expected hold period: 4-6 years
+    - Exit multiple range: 8.0-11.0x EBITDA
+
+  financial_summary:
+    revenue_ltm: "[X]"
+    ebitda_ltm: "[X]"
+    ebitda_margin: "[X]"
+    capex_ltm: "[X]"
+    net_debt: "[X]"
+    fcf_conversion: "~60-65% of EBITDA (pre-growth capex)"
+    revenue_cagr_3yr: "~6-8%"
+    working_capital_pct_revenue: "~12-14%"
+
+  operating_assumptions:
+    base_case:
+      revenue_growth: ["7%", "6%", "5%", "5%", "4%"]
+      ebitda_margin_expansion: ["50bps", "75bps", "50bps", "25bps", "25bps"]
+      capex_pct_revenue: "3.0-3.5%"
+      working_capital_pct_incremental_revenue: "12%"
+      bolt_on_acquisitions: "1-2 per year at 6-7x EBITDA, $15-25M each"
+    upside_case:
+      revenue_growth: ["9%", "8%", "7%", "6%", "5%"]
+      ebitda_margin_expansion: ["75bps", "100bps", "75bps", "50bps", "50bps"]
+      notes: "Faster cross-sell, larger bolt-ons, pricing power"
+    downside_case:
+      revenue_growth: ["4%", "3%", "2%", "2%", "2%"]
+      ebitda_margin_expansion: ["25bps", "25bps", "0bps", "0bps", "0bps"]
+      notes: "Infrastructure spending slowdown, integration challenges"
+
+  capital_structure:
+    senior_secured_term_loan:
+      amount: "2.5-3.0x EBITDA"
+      rate: "SOFR + 400bps"
+      maturity: "7 years"
+      amortization: "1% per annum mandatory"
+      cash_sweep: "50% of excess cash flow above $10M minimum cash"
+    senior_secured_revolver:
+      amount: "$75M"
+      rate: "SOFR + 350bps"
+      maturity: "5 years"
+      drawn_at_close: "$0"
+    subordinated_notes:
+      amount: "1.0-1.5x EBITDA"
+      rate: "8.5% fixed (cash pay)"
+      maturity: "8 years"
+      amortization: "bullet"
+      call_protection: "NC-3, then at par"
+    sponsor_equity:
+      amount: "Residual (40-45% of total sources)"
+      management_rollover: "5-10% of pro forma equity"
+
+  transaction_fees:
+    advisory_fee: "1.5% of TEV"
+    financing_fees: "3.0% of total debt raised"
+    legal_and_other: "$5M"
+    total_estimated: "~$25-30M"
+
+  market_conditions: >
+    Credit markets constructive for midmarket issuers. Comparable
+    recent LBO financings pricing at SOFR + 375-425bps for senior
+    secured. Sub debt available at 8-9% coupon. PE dry powder at
+    record levels creating competitive auction dynamics. Industrial
+    services multiples have expanded 1-2 turns over 3 years as
+    sponsors recognize recurring revenue and infrastructure tailwinds.
+
+  as_of_date: "2024-12-15"
+
+  additional_context: >
+    Management team is supportive of a go-private and willing to roll
+    10% of their equity. CEO and CFO have PE-backed experience from
+    prior roles. The company has completed 8 bolt-on acquisitions in
+    5 years with strong integration track record. No material litigation
+    or regulatory overhang. Customer concentration is low (top 10
+    customers = ~30% of revenue). Backlog provides 6-9 months of
+    revenue visibility.
+
+task:
+  prompt: >
+    Build a complete LBO model for the proposed take-private of [COMPANY].
+    Your deliverable should be a multi-tab Excel workbook containing:
+
+    1. **Transaction Summary** — Entry valuation, premium, key deal metrics
+    2. **Sources & Uses** — Detailed financing structure with all tranches
+       balanced to total uses (purchase price + fees + cash to balance sheet)
+    3. **Operating Model** — 5-year projected income statement, balance
+       sheet, and cash flow statement driven by the base case assumptions
+    4. **Debt Schedule** — Annual debt balances, interest expense, mandatory
+       amortization, optional prepayments, and cash sweep mechanics for
+       each tranche
+    5. **Returns Analysis** — IRR and MOIC matrix showing sponsor returns
+       at exit multiples of 7.0x to 11.0x (0.5x increments) across
+       exit years 3 through 6
+    6. **Sensitivity Tables** — At minimum: (a) entry multiple vs exit
+       multiple, (b) revenue growth vs EBITDA margin, (c) leverage vs
+       exit multiple
+
+    Use [COMPANY]'s actual financials as the starting point. All
+    projections must flow from stated assumptions. The debt schedule
+    must mechanically link to the cash flow statement (interest expense,
+    mandatory amortization, optional paydowns from excess cash flow).
+    The returns analysis must derive from the equity value at exit
+    (exit EBITDA × exit multiple − net debt at exit) relative to
+    the initial equity investment.
+
+  expected_output_type: "lbo_model"
+
+  constraints:
+    - "Sources must equal uses — no residual imbalance"
+    - "Debt schedule must tie to CF statement interest and repayment lines"
+    - "IRR calculated using XIRR or equivalent (not simple annualized return)"
+    - "MOIC = exit equity / entry equity (inclusive of management rollover treatment)"
+    - "All assumptions must be explicitly stated and changeable"
+    - "Formatting must follow Wall Street conventions (parentheses for negatives, $mm units, blue inputs)"
+    - "Cash sweep logic must be formula-driven, not hardcoded"
+    - "Minimum cash balance of $10M must be maintained before sweep"
+
+  required_tabs:
+    - name: "Transaction Summary"
+      contents:
+        - "Entry valuation bridge (equity value → enterprise value)"
+        - "Premium to unaffected price"
+        - "Key credit statistics at close (total leverage, senior leverage, interest coverage)"
+        - "Implied equity check and ownership split (sponsor vs management)"
+
+    - name: "Sources & Uses"
+      contents:
+        - "Sources: each debt tranche, sponsor equity, management rollover"
+        - "Uses: equity purchase price, refinance existing debt, transaction fees (itemized), cash to balance sheet"
+        - "Sources = Uses check cell"
+        - "Pro forma capitalization table"
+
+    - name: "Operating Model"
+      contents:
+        - "Income statement: Revenue → EBITDA → EBIT → EBT → Net Income"
+        - "Balance sheet: Current assets, PP&E, goodwill, current liabilities, debt, equity"
+        - "Cash flow: CFO (net income + D&A + WC changes), capex, acquisitions, debt service, FCF to equity"
+        - "Key metrics per period: revenue growth, EBITDA margin, FCF conversion, leverage ratio"
+
+    - name: "Debt Schedule"
+      contents:
+        - "Beginning balance, mandatory amortization, optional prepayment, cash sweep, ending balance — per tranche"
+        - "Interest expense calculation per tranche (floating rate = SOFR assumption + spread)"
+        - "Total debt service (interest + mandatory amort)"
+        - "Excess cash flow calculation for sweep (CFO − capex − mandatory amort − minimum cash)"
+        - "Revolver draw/repay logic"
+        - "Credit statistics per period (total leverage, senior leverage, interest coverage, FCCR)"
+
+    - name: "Returns Analysis"
+      contents:
+        - "Exit EBITDA by year (from operating model)"
+        - "Exit enterprise value = exit EBITDA × exit multiple"
+        - "Exit equity value = exit EV − net debt at exit"
+        - "IRR matrix: rows = exit multiples (7.0x to 11.0x, 0.5x steps), columns = exit years (3, 4, 5, 6)"
+        - "MOIC matrix: same dimensions as IRR"
+        - "Highlight cells meeting sponsor hurdle (≥20% IRR, ≥2.0x MOIC)"
+
+    - name: "Sensitivities"
+      contents:
+        - "Table 1: Entry multiple (8.0-10.0x) vs exit multiple (8.0-11.0x) → IRR"
+        - "Table 2: Revenue CAGR (2-8%) vs EBITDA margin at exit (18-24%) → IRR at base exit year/multiple"
+        - "Table 3: Total leverage at entry (3.5-5.5x) vs exit multiple (8.0-11.0x) → MOIC"
+        - "Conditional formatting: green ≥25% IRR, yellow 15-25%, red <15%"
+
+  time_horizon: "5-year hold (analyze 3-6 year exits)"
+
+data_sources:
+  - type: "10-K"
+    description: "[COMPANY] most recent Annual Report"
+    date: "[X]"
+    key_data_points:
+      - "Revenue: [X]"
+      - "EBITDA: [X]"
+      - "D&A: [X]"
+      - "Capex: [X]"
+      - "Total debt: [X]"
+      - "Cash: [X]"
+      - "Working capital: [X]"
+
+  - type: "10-Q"
+    description: "[COMPANY] most recent Quarterly Report"
+    date: "[X]"
+    key_data_points:
+      - "LTM revenue: [X]"
+      - "LTM EBITDA: [X]"
+      - "Current debt balance: [X]"
+
+  - type: "market_data"
+    description: "Current trading data from SMB Valuation sheet"
+    date: "[X]"
+    key_data_points:
+      - "Share price: [X]"
+      - "Shares outstanding: [X]"
+      - "Market cap: [X]"
+      - "EV/EBITDA: [X]"
+      - "Beta: [X]"
+
+  - type: "credit_market"
+    description: "Comparable LBO financing terms"
+    date: "2024-12-15"
+    key_data_points:
+      - "Senior secured term loan: SOFR + 375-425bps"
+      - "Subordinated notes: 8.0-9.0% coupon"
+      - "Maximum senior leverage: 3.0-3.5x for industrial issuers"
+      - "Maximum total leverage: 4.5-5.5x for industrial issuers"
+
+key_facts:
+  - fact: "Target has ~65% recurring revenue under multi-year contracts"
+    source: "10-K, revenue discussion"
+    importance: "critical"
+
+  - fact: "LTM EBITDA of [X] with margin of [X], expanding ~50-75bps annually"
+    source: "Financial statements, SMB extract"
+    importance: "critical"
+
+  - fact: "FCF conversion of ~60-65% of EBITDA reflects low capex intensity"
+    source: "Cash flow statement"
+    importance: "critical"
+
+  - fact: "Management willing to roll 10% equity; CEO/CFO have prior PE experience"
+    source: "Management discussions"
+    importance: "important"
+
+  - fact: "8 bolt-on acquisitions in 5 years at 6-7x EBITDA with strong integration"
+    source: "Company presentations"
+    importance: "important"
+
+  - fact: "Low customer concentration (top 10 = ~30% of revenue)"
+    source: "10-K risk factors"
+    importance: "important"
+
+  - fact: "Credit markets currently pricing midmarket senior secured at SOFR + 375-425bps"
+    source: "Market data"
+    importance: "supporting"
+
+  - fact: "Industrial services multiples have expanded 1-2 turns over 3 years"
+    source: "Industry data"
+    importance: "supporting"
+
+pitfalls:
+  - description: "Sources and uses do not balance — missing transaction fees, cash to B/S, or refinancing existing debt"
+    failure_type: "arithmetic_error"
+    severity: "critical"
+
+  - description: "Debt schedule not linked to cash flow statement — interest expense or repayments hardcoded rather than formula-driven"
+    failure_type: "structural_error"
+    severity: "critical"
+
+  - description: "Cash sweep calculated on gross cash flow instead of excess cash flow after mandatory amort and minimum cash"
+    failure_type: "mechanical_error"
+    severity: "major"
+
+  - description: "IRR calculated as simple annualized return instead of using XIRR/proper time-value-of-money methodology"
+    failure_type: "calculation_error"
+    severity: "critical"
+
+  - description: "MOIC ignores management rollover treatment — must distinguish sponsor MOIC from total equity MOIC"
+    failure_type: "definitional_error"
+    severity: "major"
+
+  - description: "Projecting margin expansion without showing the operating leverage math (fixed vs variable cost structure)"
+    failure_type: "unsupported_assumption"
+    severity: "major"
+
+  - description: "Exit equity value calculated as exit EV minus total debt instead of net debt (forgetting to add back cash)"
+    failure_type: "arithmetic_error"
+    severity: "critical"
+
+  - description: "Floating rate interest not adjusting for SOFR assumption changes or debt paydowns during the year"
+    failure_type: "mechanical_error"
+    severity: "minor"
+
+  - description: "No minimum cash balance check before cash sweep — sweeping company to zero cash"
+    failure_type: "structural_error"
+    severity: "major"
+
+  - description: "Bolt-on acquisitions modeled without incremental debt or dilution to equity returns"
+    failure_type: "incomplete_model"
+    severity: "major"
+
+evaluation_criteria:
+  dimensions:
+    - name: "Transaction Structure"
+      weight: 0.20
+      criteria:
+        - "Sources and uses balance exactly (check cell = $0)"
+        - "Debt tranches are appropriately sized relative to EBITDA and market norms"
+        - "Entry leverage within market-clearing range (4.0-5.5x)"
+        - "Transaction fees are realistic and itemized"
+        - "Pro forma cap table shows sponsor/mgmt split correctly"
+        - "Existing debt is refinanced in uses"
+
+    - name: "Financial Projections"
+      weight: 0.25
+      criteria:
+        - "Revenue, EBITDA, and margin projections are internally consistent"
+        - "Working capital changes flow correctly to cash flow"
+        - "D&A and capex are reasonable relative to PP&E and revenue"
+        - "Balance sheet balances in every projection year"
+        - "Growth and margin assumptions are explicitly stated and reasonable"
+        - "FCF conversion ratio is realistic for asset-light industrial"
+
+    - name: "Debt Mechanics"
+      weight: 0.20
+      criteria:
+        - "Interest expense is formula-driven from average or beginning balance × rate"
+        - "Mandatory amortization correctly calculated (1% of original term loan)"
+        - "Cash sweep logic: excess CF × sweep percentage, after minimum cash"
+        - "Revolver draws/repays are logical (drawn for shortfalls, repaid first from excess CF)"
+        - "Ending balance = beginning − mandatory amort − optional prepay − sweep"
+        - "Credit statistics calculated correctly each period (leverage = net debt / EBITDA)"
+
+    - name: "Returns Calculation"
+      weight: 0.25
+      criteria:
+        - "Exit EV = exit year EBITDA × exit multiple"
+        - "Exit equity = exit EV − net debt at exit (total debt − cash)"
+        - "IRR uses proper XIRR methodology with correct cash flow timing"
+        - "MOIC = exit equity ÷ initial sponsor equity (not total equity if mgmt rolls)"
+        - "Matrix covers full range specified (7.0-11.0x multiples, years 3-6)"
+        - "Returns are reasonable for a midmarket LBO (base case ~20-25% IRR, ~2.0-2.5x MOIC)"
+        - "Sensitivity tables produce directionally correct results"
+
+    - name: "Presentation & Formatting"
+      weight: 0.10
+      criteria:
+        - "Units clearly labeled ($mm throughout)"
+        - "Negatives in parentheses, not minus signs"
+        - "Input cells in blue font, formulas in black"
+        - "Subtotals and totals have bold formatting and border treatment"
+        - "Each tab has clear section headers and logical flow"
+        - "Conditional formatting on returns matrices (green/yellow/red)"
+        - "Print area set, headers repeat on each page"
+
+  critical_failures:
+    - "Sources ≠ Uses (imbalance in funding table)"
+    - "Debt schedule does not reconcile to balance sheet debt balances"
+    - "Interest expense in operating model ≠ interest expense in debt schedule"
+    - "IRR or MOIC math is demonstrably wrong (verifiable by hand calculation)"
+    - "Balance sheet does not balance in any projection year"
+    - "Exit equity value calculated incorrectly (wrong sign on cash, missing debt)"
+    - "Hallucinated financial data not from SMB or scenario context"
+
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-24"
+  tags:
+    - "lbo"
+    - "leveraged_buyout"
+    - "private_equity"
+    - "returns_analysis"
+    - "debt_schedule"
+    - "midmarket"
+    - "industrials"
+    - "smb_integration"
+  notes: >
+    This is the flagship IB deliverable scenario for the LBO module.
+    Tests the full chain: transaction structuring → financial projections →
+    debt mechanics → returns calculation → sensitivity analysis. SMB
+    provides real target financials via extract_fill_values(). The debt
+    schedule mechanics (cash sweep, amortization, revolver logic) are
+    the most common failure points. Focus grading on whether the model
+    is mechanically linked end-to-end vs having hardcoded values.
