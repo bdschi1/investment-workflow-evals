@@ -110,6 +110,24 @@ python -m src.summarize_dataset
 ./run_all.sh
 ```
 
+### Run the Frontier Benchmark
+
+```bash
+# Schema / wiring dry-run (no API calls, no cost):
+python -m tools.benchmark_runner --modules all --dry-run \
+    --models claude-opus-4-7,claude-sonnet-4-5,gpt-5,gemini-2.5-pro
+
+# Cheap validation against 2-3 scenarios:
+python -m tools.benchmark_runner --modules 06_research_translation \
+    --models claude-haiku-4-5-20251001 --generator haiku --scenarios 3
+
+# Full live-frontier run (expensive, ~$150-250):
+python -m tools.benchmark_runner --modules all --generator live --yes-live \
+    --models claude-opus-4-7,claude-sonnet-4-5,gpt-5,gemini-2.5-pro
+```
+
+Results append to [`results/frontier_benchmark_v1.csv`](results/frontier_benchmark_v1.csv). Full invocation details, per-SKU cost estimates, and judge-agreement methodology live in [`BENCHMARK_RUN.md`](BENCHMARK_RUN.md). The live-generation path is intentionally gated behind `--yes-live` as a budget safety rail.
+
 ### Example Output
 
 ```
@@ -137,7 +155,7 @@ Status: PASS
 
 ### About This Project
 
-This repository contains evaluation scenarios, scoring rubrics, golden reference answers, and adversarial test cases for investment research tasks. Seven evaluation modules cover qualification, equity thesis construction, DCF valuation, portfolio construction, assumption validation, risk attribution, and research translation. Each module includes:
+This repository contains evaluation scenarios, scoring rubrics, golden reference answers, and adversarial test cases for investment research tasks. **Thirteen evaluation modules** (`00_qualification` through `12_deal_execution`) cover the full analyst workflow: qualification, equity thesis, DCF valuation, portfolio construction, assumption validation, risk attribution, research translation, report review, comparable analysis, M&A analysis, valuation synthesis, LBO analysis, and deal execution. Earlier READMEs described seven modules; the current count is reflected in [`docs/coverage_audit_2026-04.md`](docs/coverage_audit_2026-04.md), which also tracks per-module scenario and golden-answer counts. Each module includes:
 
 - **Scenarios** with task prompts and domain context drawn from realistic investment situations
 - **Rubrics** with weighted dimensions and multi-level scoring anchors
@@ -150,15 +168,23 @@ The materials serve two related uses: benchmarking AI model performance on inves
 
 ### Evaluation Modules
 
-| Module | Scenarios | Rubric | Focus |
-|--------|-----------|--------|-------|
-| **Qualification** | 1 | [qualification_standard.yaml](evals/00_qualification/rubrics/qualification_standard.yaml) | Onboarding assessment, basic equity analysis |
-| **Equity Thesis** | 3 | [standard.yaml](evals/01_equity_thesis/rubrics/standard.yaml) | Thesis construction, catalyst analysis, capex cycle, risk/reward |
-| **DCF Valuation** | 2 | [standard.yaml](evals/02_dcf_valuation/rubrics/standard.yaml) | Alpha vs environment, terminal value, margin normalization |
-| **Portfolio Construction** | 27 | [standard.yaml](evals/03_portfolio_construction/rubrics/standard.yaml) | Risk-based sizing, crowding risk, hedging, policy risk |
-| **Assumption Validation** | 3 | [assumption_validation.yaml](evals/04_assumption_validation/rubrics/assumption_validation.yaml) | Discount rate stress-testing, commodity assumptions, statistical significance |
-| **Risk Attribution** | 2 | [risk_attribution.yaml](evals/05_risk_attribution/rubrics/risk_attribution.yaml) | Factor decomposition, hypothesis testing, alpha vs environment |
-| **Research Translation** | 1 | [translation_quality.yaml](evals/06_research_translation/rubrics/translation_quality.yaml) | IC memo to retail-readable summary |
+Live counts (2026-04-18); see [`docs/coverage_audit_2026-04.md`](docs/coverage_audit_2026-04.md) for methodology and Phase-1 target vs actual.
+
+| Module | Scenarios | Goldens | Rubric | Focus |
+|--------|-----------|---------|--------|-------|
+| **00 Qualification** | 1 | 1 | [qualification_standard.yaml](evals/00_qualification/rubrics/qualification_standard.yaml) | Onboarding assessment, basic equity analysis |
+| **01 Equity Thesis** | 3 | 3 | [standard.yaml](evals/01_equity_thesis/rubrics/standard.yaml) | Thesis construction, catalyst analysis, capex cycle, risk/reward |
+| **02 DCF Valuation** | 2 | 2 | [standard.yaml](evals/02_dcf_valuation/rubrics/standard.yaml) | Alpha vs environment, terminal value, margin normalization |
+| **03 Portfolio Construction** | 27 | 5 | [standard.yaml](evals/03_portfolio_construction/rubrics/standard.yaml) | Risk-based sizing, crowding risk, hedging, policy risk — see [scenarios/INDEX.md](evals/03_portfolio_construction/scenarios/INDEX.md) |
+| **04 Assumption Validation** | 3 | 3 | [assumption_validation.yaml](evals/04_assumption_validation/rubrics/assumption_validation.yaml) | Discount rate stress-testing, commodity assumptions, statistical significance |
+| **05 Risk Attribution** | 2 | 2 | [risk_attribution.yaml](evals/05_risk_attribution/rubrics/risk_attribution.yaml) | Factor decomposition, hypothesis testing, alpha vs environment |
+| **06 Research Translation** | 3 | 3 | [translation_quality.yaml](evals/06_research_translation/rubrics/translation_quality.yaml) | 10-K risk, earnings call, IC memo → plain-English |
+| **07 Report Review** | 6 | 6 | [standard.yaml](evals/07_report_review/rubrics/standard.yaml) | Sell-side note critique, bias detection |
+| **08 Comparable Analysis** | 1 | 0 | [standard.yaml](evals/08_comparable_analysis/rubrics/standard.yaml) | Peer-set construction (goldens deferred) |
+| **09 M&A Analysis** | 3 | 3 | [standard.yaml](evals/09_ma_analysis/rubrics/standard.yaml) | Accretion/dilution, synergy sensitivity, sources & uses |
+| **10 Valuation Synthesis** | 3 | 3 | [standard.yaml](evals/10_valuation_synthesis/rubrics/standard.yaml) | DCF sensitivity, football field, SOTP |
+| **11 LBO Analysis** | 3 | 3 | [standard.yaml](evals/11_lbo_analysis/rubrics/standard.yaml) | Midmarket LBO returns, dividend recap, returns bridge |
+| **12 Deal Execution** | 3 | 3 | [standard.yaml](evals/12_deal_execution/rubrics/standard.yaml) | Bid comparison, diligence list, signing-to-close |
 
 ### Sample Scenarios
 
@@ -179,11 +205,19 @@ Each scenario includes context, task prompt, evaluation criteria, and an adversa
 | **Assumption Validation** | [Statistical Significance Trap](evals/04_assumption_validation/scenarios/statistical_significance_trap.yaml) | p-hacking, backtest overfitting, multiple comparisons |
 | **Risk Attribution** | [Healthcare L/S Factor Decomposition](evals/05_risk_attribution/scenarios/healthcare_ls_factor_decomposition.yaml) | Multi-factor return decomposition, residual alpha |
 | **Risk Attribution** | [Factor Tilt Attribution](evals/05_risk_attribution/scenarios/factor_tilt_attribution.yaml) | Value factor tilt vs stock selection, statistical significance |
-| **Research Translation** | *(scenarios in development)* | Institutional-to-retail content adaptation |
+| **Research Translation** | [10-K Risk → Plain English](evals/06_research_translation/scenarios/10k_risk_section_to_plain_english.yaml) | Issuer-specific risk prioritization, boilerplate filtering |
+| **Research Translation** | [Earnings Call → Shareholder Note](evals/06_research_translation/scenarios/earnings_call_to_shareholder_note.yaml) | Signal vs noise across 4 management items |
+| **M&A Analysis** | [Accretion/Dilution Strategic](evals/09_ma_analysis/scenarios/accretion_dilution_strategic.yaml) | Pro-forma EPS mechanics, financing-mix trade-offs |
+| **M&A Analysis** | [Merger Model Synergy Sensitivity](evals/09_ma_analysis/scenarios/merger_model_synergy_sensitivity.yaml) | Synergy phasing, 4x2 sensitivity grid |
+| **Valuation Synthesis** | [DCF Sensitivity WACC/g](evals/10_valuation_synthesis/scenarios/dcf_sensitivity_growth_wacc.yaml) | Gordon Growth grid, TV share of EV |
+| **Valuation Synthesis** | [SOTP Conglomerate](evals/10_valuation_synthesis/scenarios/sotp_conglomerate.yaml) | Segment-level multiple selection, holdco discount |
+| **LBO Analysis** | [Dividend Recap Feasibility](evals/11_lbo_analysis/scenarios/dividend_recap_feasibility.yaml) | Leverage headroom, IRR uplift vs exit-timing |
+| **Deal Execution** | [Bid Comparison Process](evals/12_deal_execution/scenarios/bid_comparison_process.yaml) | Risk-adjusted normalization of LOIs |
+| **Deal Execution** | [Signing-to-Close Workstream](evals/12_deal_execution/scenarios/signing_to_close_workstream.yaml) | Critical-path identification, State-DOH gating |
 
 ### Golden Answers
 
-Expert-level reference responses demonstrating proper analytical workflow. Each module now has golden answers for all its scenarios (17 total across 7 modules):
+Expert-level reference responses demonstrating proper analytical workflow. Current coverage is **35 goldens across 13 modules**; full per-module counts in [`docs/coverage_audit_2026-04.md`](docs/coverage_audit_2026-04.md). Sample goldens:
 
 | Module | Golden Answer | Key Concepts |
 |--------|---------------|--------------|
@@ -203,7 +237,12 @@ Expert-level reference responses demonstrating proper analytical workflow. Each 
 | **Assumption Validation** | [Statistical Significance Trap](evals/04_assumption_validation/golden_answers/statistical_significance_trap.md) | p-hacking awareness, multiple comparison correction |
 | **Risk Attribution** | [Healthcare L/S Factor Decomposition](evals/05_risk_attribution/golden_answers/healthcare_ls_factor_decomposition.md) | Multi-factor decomposition, residual alpha estimation |
 | **Risk Attribution** | [Factor Tilt Attribution](evals/05_risk_attribution/golden_answers/factor_tilt_attribution.md) | Factor tilt vs selection, statistical significance |
-| **Research Translation** | *(golden answers in development)* | Jargon simplification, actionable takeaways |
+| **Research Translation** | [IC Memo → Retail Brief](evals/06_research_translation/golden_answers/ic_memo_to_retail_summary.md) | Jargon simplification, magnitude preservation |
+| **Research Translation** | [10-K Risk → Plain English](evals/06_research_translation/golden_answers/10k_risk_section_to_plain_english.md) | Issuer-specific vs boilerplate ranking |
+| **M&A Analysis** | [Synergy Sensitivity](evals/09_ma_analysis/golden_answers/merger_model_synergy_sensitivity.md) | Tax-affected pro-forma walk, breakeven |
+| **Valuation Synthesis** | [SOTP Conglomerate](evals/10_valuation_synthesis/golden_answers/sotp_conglomerate.md) | Per-segment multiples, corporate cost capitalization |
+| **LBO Analysis** | [Returns Bridge Decomposition](evals/11_lbo_analysis/golden_answers/returns_bridge_decomposition.md) | Separate operational from multiple-driven return |
+| **Deal Execution** | [Bid Comparison Matrix](evals/12_deal_execution/golden_answers/bid_comparison_process.md) | Certainty-of-close weighting, earn-out probability |
 
 ### Rubric Structure
 
@@ -250,11 +289,16 @@ The `studio/` package provides a Streamlit-based interactive workflow for genera
 # Install studio dependencies
 pip install -e ".[studio]"
 
-# Launch the studio
+# Launch the studio (defaults to http://localhost:8501)
 streamlit run studio/app.py
+
+# Smoke-test the studio package without launching the UI
+pytest tests/test_studio_smoke.py tests/test_studio_ranker.py -v
 ```
 
-Both pipelines emit a unified JSONL schema (see `schemas/preference_pair.json`):
+**Studio workflow end-to-end:** upload a 10-K or 10-Q PDF → section-aware parse (`studio/document.py`) → choose up to 3 sections → multi-provider generation across Anthropic/OpenAI/Gemini with configurable temperatures and personas (`studio/generator.py` + `configs.py`) → drag-and-drop K-way ranking in the UI (`studio/ranker.py`) → export pairwise DPO records to JSONL (`studio/storage.py`). See [`studio/README.md`](studio/README.md) for the preference-pair extraction pipeline details.
+
+Both pipelines emit a unified JSONL schema (see [`schemas/preference_pair.json`](schemas/preference_pair.json)):
 - `src/extract_pairs.py` → `source: "scenario_anchor"` (batch, from YAML scenarios)
 - `studio/ranker.py` → `source: "studio_ranking"` (interactive, from live LLM outputs)
 
@@ -272,30 +316,18 @@ Both pipelines emit a unified JSONL schema (see `schemas/preference_pair.json`):
 
 ```
 investment-workflow-evals/
-├── evals/                         # Evaluation modules
-│   ├── 00_qualification/          # Onboarding assessment
-│   │   ├── scenarios/
-│   │   └── rubrics/
-│   ├── 01_equity_thesis/          # Investment thesis evaluation
-│   │   ├── scenarios/
-│   │   ├── rubrics/
-│   │   └── golden_answers/
-│   ├── 02_dcf_valuation/          # Valuation framework evaluation
-│   │   ├── scenarios/
-│   │   ├── rubrics/
-│   │   └── golden_answers/
-│   ├── 03_portfolio_construction/ # Position sizing & hedging
-│   │   ├── scenarios/
-│   │   ├── rubrics/
-│   │   └── golden_answers/
-│   ├── 05_risk_attribution/       # Performance attribution
-│   │   ├── scenarios/
-│   │   ├── rubrics/
-│   │   └── golden_answers/
+├── evals/                         # 13 evaluation modules (00_qualification - 12_deal_execution)
+│   └── <NN_module>/
+│       ├── scenarios/             # YAML scenarios with task prompts + adversarial examples
+│       ├── rubrics/               # Weighted YAML rubrics with 5-level anchors + critical failure gates
+│       └── golden_answers/        # Markdown expert-level reference responses
 ├── tools/
-│   ├── eval_runner.py             # Run evaluations
-│   ├── grading_engine.py          # Score submissions
-│   ├── ai_judge.py                # LLM-as-judge scorer (optional thinking_budget for extended thinking; block-safe response parsing; prompt caching for repeated system prompts)
+│   ├── eval_runner.py             # Run evaluations (supports --models frontier fan-out)
+│   ├── grading_engine.py          # Heuristic rubric scorer
+│   ├── ai_judge.py                # LLM-as-judge (tool_use, thinking-block-safe, prompt-caching)
+│   ├── judge_agreement.py         # Cross-model judge-agreement (Spearman, Cohen's kappa)
+│   ├── adversarial_generator.py   # Adversarial-variant stub + perturbation taxonomy
+│   ├── benchmark_runner.py        # Frontier benchmark runner, append-only CSV
 │   └── generate_gaf.py            # Generate golden answer files via Opus + IRR retrieval
 ├── studio/                        # RLHF Studio (interactive DPO data)
 │   ├── app.py                     # Streamlit UI
