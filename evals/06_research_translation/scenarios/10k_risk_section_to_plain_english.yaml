@@ -1,0 +1,107 @@
+# 10-K Risk Factors → Plain-English Risk Digest
+# Tests: material-risk prioritization, magnitude preservation, boilerplate filtering
+
+id: 10k_risk_section_to_plain_english
+title: "Translate a 10-K Risk Factors Section into a Plain-English Digest"
+version: "1.0.0"
+module: "06_research_translation"
+category: "filing_to_plain_english"
+difficulty: "moderate"
+estimated_time_minutes: 45
+
+context:
+  source_artifact:
+    type: "10-K_risk_factors"
+    length_words: 4800
+    issuer: "Mid-cap specialty insurer"
+    description: >
+      The issuer's 10-K Risk Factors section contains 28 discrete risk
+      paragraphs. Three are material and issuer-specific: (a) a
+      disclosed reserve development of $85M on a 2019-2020 commercial
+      auto book, (b) a reinsurance counterparty with a recently
+      downgraded A.M. Best rating that covers ~18% of ceded premium,
+      and (c) regulatory scrutiny in two state markets that
+      collectively produce ~34% of premium. The remaining 25
+      paragraphs are standard boilerplate (cyber risk, general
+      economic conditions, pandemic disclosures, ESG litigation, etc.)
+      shared almost verbatim across peer filings.
+  target_audience:
+    label: "individual retail investor research-report reader"
+    reading_level: "grade 7-9"
+  situation: >
+    A retail-oriented research tool must surface the three material,
+    issuer-specific risks without burying them in the boilerplate and
+    without overstating standard-language items. Ranking and concision
+    matter as much as jargon translation.
+  as_of_date: "2026-03-01"
+
+task:
+  prompt: >
+    Produce a 300-400 word plain-English digest of the 10-K Risk
+    Factors section, organized as:
+
+    1. "What Matters Most For This Company" — three bulleted items,
+       each with the issuer-specific risk in plain language, why it
+       is issuer-specific rather than industry-standard, and a
+       one-sentence quantitative anchor ($, %, rating).
+    2. "Standard Industry Risks" — a single paragraph (3-5 sentences)
+       summarizing that the rest of the section is boilerplate shared
+       with peers, naming two examples.
+    3. "Bottom Line For Investors" — a one-paragraph wrap-up that does
+       not recommend an action and does not promise anything.
+
+    Do not fabricate quantitative anchors; use only the values in the
+    context description.
+
+  expected_output_type: "retail_risk_digest"
+  constraints:
+    - "Must prioritize issuer-specific over boilerplate"
+    - "Must not recommend buying or selling the stock"
+    - "Magnitudes ($85M, 18%, 34%) must be preserved"
+    - "Reading level grade 7-9"
+
+key_facts:
+  - fact: "Reserve development is $85M on the 2019-2020 commercial auto book"
+    source: "Context description"
+    importance: "critical"
+  - fact: "Reinsurance counterparty covers ~18% of ceded premium with a recent rating downgrade"
+    source: "Context description"
+    importance: "critical"
+  - fact: "Regulatory scrutiny is concentrated in two states that produce ~34% of premium"
+    source: "Context description"
+    importance: "critical"
+
+pitfalls:
+  - description: "Leading with boilerplate (cyber, pandemic) instead of issuer-specific risks"
+    failure_type: "prioritization_error"
+    severity: "major"
+  - description: "Rounding $85M to 'about $100M' or 18% to '20%'"
+    failure_type: "magnitude_distortion"
+    severity: "major"
+  - description: "Characterizing standard industry risks as issuer-specific"
+    failure_type: "misframing"
+    severity: "major"
+  - description: "Giving buy / sell advice in the plain-English digest"
+    failure_type: "scope_creep"
+    severity: "critical"
+  - description: "Fabricating a dollar amount not present in the context"
+    failure_type: "hallucination"
+    severity: "critical"
+
+evaluation_criteria:
+  rubric: translation_quality
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-04-18"
+  tags:
+    - "research_translation"
+    - "10k"
+    - "risk_factors"
+    - "boilerplate_filtering"
+  notes: >
+    The 'three issuer-specific risks vs 25 boilerplate' split is the
+    main discrimination axis. Models that summarize every risk
+    uniformly will score poorly on Accuracy Preservation even if
+    Readability is high.

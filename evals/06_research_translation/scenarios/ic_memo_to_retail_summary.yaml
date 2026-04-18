@@ -1,0 +1,113 @@
+# IC Memo → Retail-Readable Summary
+# Tests: jargon simplification, magnitude preservation, action orientation
+
+id: ic_memo_to_retail_summary
+title: "Translate an Investment Committee Memo into a Retail-Readable Brief"
+version: "1.0.0"
+module: "06_research_translation"
+category: "ic_to_retail"
+difficulty: "moderate"
+estimated_time_minutes: 40
+
+context:
+  source_artifact:
+    type: "ic_memo"
+    length_words: 1100
+    audience: "institutional portfolio committee"
+    subject: "Initiation of a long position in a mid-cap industrial distributor"
+    description: >
+      The memo sizes a 2.5% position in a mid-cap industrial distributor,
+      cites a base-case IRR of ~18% over 24 months, a through-cycle
+      EV/EBITDA of 11.5x vs peers at 13.5x, and flags three risks:
+      customer concentration (~22% top-5), working-capital stress in a
+      soft macro, and a pending DOJ inquiry into a small ($12M)
+      distribution business acquired in 2022.
+  target_audience:
+    label: "retail investors on a brokerage platform"
+    reading_level: "grade 7-9"
+    default_holding_horizon: "6-18 months"
+  situation: >
+    The original IC memo uses standard institutional shorthand — "through-
+    cycle multiple," "WC headwinds," "customer concentration," "DOJ CID"
+    — and assumes the reader knows that a CID is a civil investigative
+    demand, not an indictment. The retail brief must preserve direction
+    and magnitude while translating jargon, and must not over- or
+    under-state the DOJ risk.
+  as_of_date: "2026-02-15"
+
+task:
+  prompt: >
+    Translate the institutional IC memo into a retail-readable brief
+    of approximately 350-500 words suitable for a brokerage-platform
+    audience. The brief must include, at minimum:
+
+    1. A plain-language summary of the thesis (2-3 sentences)
+    2. The three key numbers (IRR, valuation, position size) with
+       their plain-language meaning
+    3. What could go right (two bullets)
+    4. What could go wrong (three bullets — including the DOJ inquiry,
+       correctly characterized)
+    5. A "bottom line" that does not promise a specific return
+
+    Preserve direction and magnitude. Do not soften language to the
+    point that a retail reader loses the through-cycle-multiple point
+    or the binary DOJ-outcome risk.
+
+  expected_output_type: "retail_research_brief"
+  constraints:
+    - "Reading level grade 7-9 (short sentences, define jargon on first use)"
+    - "No 'guaranteed' or 'cannot lose' language"
+    - "Magnitudes must be preserved (do not round 18% IRR to '20%+')"
+    - "DOJ risk must be characterized as investigation, not indictment"
+
+key_facts:
+  - fact: "Position size in source memo is 2.5% of portfolio"
+    source: "IC memo section 1"
+    importance: "critical"
+  - fact: "Base-case IRR is ~18% over a 24-month horizon"
+    source: "IC memo section 3"
+    importance: "critical"
+  - fact: "Through-cycle EV/EBITDA of 11.5x vs peers at 13.5x is the valuation argument"
+    source: "IC memo section 4"
+    importance: "critical"
+  - fact: "DOJ inquiry is a CID, not an indictment, and relates to a small 2022 acquisition"
+    source: "IC memo risk section"
+    importance: "critical"
+  - fact: "Customer concentration is ~22% in the top 5 customers"
+    source: "IC memo risk section"
+    importance: "important"
+
+pitfalls:
+  - description: "Reversing direction — describing the thesis as bearish"
+    failure_type: "direction_reversal"
+    severity: "critical"
+  - description: "Describing the DOJ inquiry as an indictment or formal charge"
+    failure_type: "legal_misframing"
+    severity: "critical"
+  - description: "Omitting one of the three risks entirely"
+    failure_type: "missing_risk"
+    severity: "major"
+  - description: "Promising a specific return ('you will earn 18%')"
+    failure_type: "overconfidence_language"
+    severity: "critical"
+  - description: "Leaving in undefined jargon (CID, through-cycle, WC headwinds)"
+    failure_type: "readability"
+    severity: "major"
+
+evaluation_criteria:
+  rubric: translation_quality
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-04-18"
+  tags:
+    - "research_translation"
+    - "retail_audience"
+    - "ic_memo"
+    - "jargon_reduction"
+  notes: >
+    Phase-1 authored scenario. The IC memo contents are stated in
+    the 'context.source_artifact.description' field rather than
+    reproduced verbatim so the task tests translation judgment, not
+    verbatim rewriting.
