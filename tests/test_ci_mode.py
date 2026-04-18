@@ -136,5 +136,67 @@ class TestCIExits1OnThresholdFailure(unittest.TestCase):
         self.assertEqual(exit_calls[-1], 1, "Expected sys.exit(1) for failing threshold")
 
 
+class TestModelsFlag(unittest.TestCase):
+    """parse_models_flag + EvaluationConfig correctly handle --models."""
+
+    def test_parse_models_flag_handles_none(self):
+        from tools.eval_runner import parse_models_flag
+
+        self.assertEqual(parse_models_flag(None), [])
+        self.assertEqual(parse_models_flag(""), [])
+
+    def test_parse_models_flag_splits_and_strips(self):
+        from tools.eval_runner import parse_models_flag
+
+        parsed = parse_models_flag(
+            "claude-opus-4-7, claude-sonnet-4-5 , gpt-5 ,gemini-2.5-pro"
+        )
+        self.assertEqual(
+            parsed,
+            [
+                "claude-opus-4-7",
+                "claude-sonnet-4-5",
+                "gpt-5",
+                "gemini-2.5-pro",
+            ],
+        )
+
+    def test_parse_models_flag_deduplicates_preserving_order(self):
+        from tools.eval_runner import parse_models_flag
+
+        parsed = parse_models_flag(
+            "claude-opus-4-7,claude-sonnet-4-5,claude-opus-4-7"
+        )
+        self.assertEqual(parsed, ["claude-opus-4-7", "claude-sonnet-4-5"])
+
+    def test_evaluation_config_defaults_models_to_empty_list(self):
+        from tools.eval_runner import EvaluationConfig
+
+        cfg = EvaluationConfig(module="01_equity_thesis", scenario_name="s1")
+        self.assertEqual(cfg.models, [])
+
+    def test_evaluation_config_accepts_models(self):
+        from tools.eval_runner import EvaluationConfig
+
+        cfg = EvaluationConfig(
+            module="01_equity_thesis",
+            scenario_name="s1",
+            models=["claude-opus-4-7", "gpt-5"],
+        )
+        self.assertEqual(cfg.models, ["claude-opus-4-7", "gpt-5"])
+
+    def test_default_frontier_models_constant(self):
+        """DEFAULT_FRONTIER_MODELS matches the upgrade plan's Phase-1 SKU list."""
+        from tools.eval_runner import DEFAULT_FRONTIER_MODELS
+
+        expected = {
+            "claude-opus-4-7",
+            "claude-sonnet-4-5",
+            "gpt-5",
+            "gemini-2.5-pro",
+        }
+        self.assertEqual(set(DEFAULT_FRONTIER_MODELS), expected)
+
+
 if __name__ == "__main__":
     unittest.main()

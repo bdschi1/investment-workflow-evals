@@ -20,6 +20,35 @@ from typing import Optional, Dict, Any
 from dataclasses import dataclass
 
 
+DEFAULT_FRONTIER_MODELS: tuple[str, ...] = (
+    "claude-opus-4-7",
+    "claude-sonnet-4-5",
+    "gpt-5",
+    "gemini-2.5-pro",
+)
+
+
+def parse_models_flag(raw: Optional[str]) -> list[str]:
+    """Parse a --models value into a cleaned list of SKU strings.
+
+    Accepts `None`/empty (returns `[]`), a single SKU, or a
+    comma-separated list. Whitespace is stripped; empty tokens are
+    dropped; order is preserved with duplicates removed.
+
+    The parsed list is attached to EvaluationConfig.models. Callers
+    that are not benchmark-aware can ignore the attribute; the
+    benchmark runner uses it to fan out generation calls.
+    """
+    if not raw:
+        return []
+    seen: list[str] = []
+    for token in raw.split(","):
+        sku = token.strip()
+        if sku and sku not in seen:
+            seen.append(sku)
+    return seen
+
+
 @dataclass
 class EvaluationConfig:
     """Configuration for running an evaluation."""
@@ -28,10 +57,13 @@ class EvaluationConfig:
     rubric_name: str = "standard"
     ai_output_path: Optional[str] = None
     output_dir: Path = None
+    models: list[str] = None  # Optional frontier SKUs for benchmark fan-out
 
     def __post_init__(self):
         if self.output_dir is None:
             self.output_dir = Path("results")
+        if self.models is None:
+            self.models = []
 
 
 @dataclass
@@ -438,6 +470,18 @@ def main():
     run_parser.add_argument("--output-dir", default="results", help="Output directory")
     run_parser.add_argument("--format", default="json", choices=["json", "markdown"],
                            help="Report format")
+    run_parser.add_argument(
+        "--models",
+        default=None,
+        help=(
+            "Comma-separated frontier SKUs to benchmark (e.g. "
+            "'claude-opus-4-7,claude-sonnet-4-5,gpt-5,gemini-2.5-pro'). "
+            "When omitted, behavior matches the pre-existing single-input path. "
+            "When supplied with --input, the SKU list is recorded in the "
+            "result metadata; when supplied without --input, the benchmark "
+            "runner fans out one generation call per SKU."
+        ),
+    )
 
     # Report command
     report_parser = subparsers.add_parser("report", help="Generate reports")
@@ -466,12 +510,14 @@ def main():
                     print(f"    {m['description']}")
 
     elif args.command == "run":
+        models = parse_models_flag(getattr(args, "models", None))
         config = EvaluationConfig(
             module=args.module,
             scenario_name=args.scenario,
             rubric_name=args.rubric,
             ai_output_path=args.input,
             output_dir=Path(args.output_dir),
+            models=models,
         )
 
         if not args.input:
