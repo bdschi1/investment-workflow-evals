@@ -51,11 +51,19 @@ secrets.json
 .claude/settings.local.json
 
 # Outputs & Results
-results/
-RESULTS/
+# Everything in results/ is ignored by default — the directory is a
+# scratch area for per-run JSON/JSONL/log outputs. A small allowlist
+# of versioned, human-reviewed files is permitted below.
+results/*
 outputs/
 *.log
 *.jsonl
+# Permit the versioned leaderboard schema + its README; individual
+# JSON run artifacts remain ignored.
+!results/frontier_benchmark_v1.csv
+!results/frontier_benchmark_v1.README.md
+!results/judge_agreement_v1.md
+!results/.gitkeep
 
 # Local data
 data/
@@ -66,6 +74,8 @@ data/
 *.parquet
 *.pkl
 *.joblib
+# Allow the versioned leaderboard schema file; other CSVs stay ignored.
+!results/frontier_benchmark_v1.csv
 
 # Temp
 tmp/
