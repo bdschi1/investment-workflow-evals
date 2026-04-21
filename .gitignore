@@ -47,8 +47,11 @@ secrets.yaml
 secrets.json
 *credentials*
 
-# Claude Code (user-scoped local overrides only)
+# Claude Code (user-scoped local overrides and ephemeral runtime state)
 .claude/settings.local.json
+.claude/worktrees/
+.claude/agent-memory/
+evals/.claude/settings.local.json
 
 # Outputs & Results
 # Everything in results/ is ignored by default — the directory is a

@@ -15,6 +15,8 @@ from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass
 
+from tools.financial_validators import validate_submission
+
 
 _LIKERT_LABELS = {
     5: "Fail", 10: "Poor", 15: "Below Expectations", 20: "Adequate",
@@ -141,7 +143,27 @@ class GradingEngine:
             if self._check_scenario_critical_failure(ai_output, critical):
                 failures.append(f"Scenario critical failure: {critical}")
 
+        # Financial math validators — Tier 1.3 pre-gate. Elevates arithmetic
+        # / mechanical errors (S&U imbalance, BS imbalance, non-monotonic DCF
+        # grid, overconfidence language, etc.) to critical-failure status so
+        # a response with correct vocabulary but wrong math cannot pass.
+        scenario_type = self._infer_scenario_type(scenario)
+        for vr in validate_submission(ai_output, scenario_type=scenario_type):
+            if vr.severity == "critical" and not vr.passed:
+                failures.append(f"Validator critical: {vr.name} — {vr.detail}")
+
         return failures
+
+    @staticmethod
+    def _infer_scenario_type(scenario: dict) -> str:
+        module = (scenario.get("module") or "").lower()
+        if "lbo" in module:
+            return "lbo"
+        if "dcf" in module or "valuation" in module:
+            return "dcf"
+        if "ma_analysis" in module or "m_and_a" in module or "merger" in module:
+            return "ma"
+        return "auto"
 
     def _detect_hallucination(self, ai_output: str, scenario: dict) -> bool:
         """
