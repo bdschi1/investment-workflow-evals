@@ -9,6 +9,8 @@ Evaluation scenarios and graded reference answers for testing AI models on insti
 
 This is a continually developed project. Evaluation modules, scenarios, and rubrics expand over time as new research tasks and failure modes are identified.
 
+**Quick nav:** [SAMPLE_TASK.md](SAMPLE_TASK.md) — one worked scenario end-to-end · [METHODOLOGY.md](METHODOLOGY.md) — scenario design + rubric philosophy · [BENCHMARK_RUN.md](BENCHMARK_RUN.md) — frontier-model run protocol
+
 **Key questions this project answers:**
 - *Can this AI model produce analyst-quality investment research?*
 - *Where does the model fail in ways that sound intelligent but are substantively wrong?*
