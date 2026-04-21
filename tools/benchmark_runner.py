@@ -77,7 +77,6 @@ from typing import Any, Callable
 
 from .eval_runner import EvaluationRunner, EvaluationConfig
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -102,20 +101,25 @@ CSV_COLUMNS = [
     "run_date",
 ]
 
-# Per-million-token price estimates for --estimate-cost. These are rough
-# order-of-magnitude figures used only for budget planning; verify against
-# the provider's current pricing page before committing to a full run.
-# Values are USD per 1M tokens (input, output). Unknown SKUs fall back to
-# ``_FALLBACK_RATE``.
+# Per-million-token price estimates for --estimate-cost. USD per 1M tokens
+# as (input, output). Sourced from provider pricing pages on 2026-04-21:
+#   Anthropic:  https://claude.com/pricing
+#   OpenAI:     https://developers.openai.com/api/docs/pricing
+#   Google:     https://ai.google.dev/gemini-api/docs/pricing
+# Gemini 2.5 Pro has tiered pricing (>200k context surcharge); the standard
+# <=200k tier is used here. Verify before a live frontier run — provider
+# prices change without notice. Unknown SKUs fall back to ``_FALLBACK_RATE``.
 _RATE_CARD: dict[str, tuple[float, float]] = {
-    "claude-opus-4-7": (15.0, 75.0),
+    "claude-opus-4-7": (5.0, 25.0),
     "claude-sonnet-4-6": (3.0, 15.0),
     "claude-haiku-4-5-20251001": (1.0, 5.0),
     "claude-haiku-4-5": (1.0, 5.0),
-    "gpt-5": (10.0, 30.0),
-    "gemini-2.5-pro": (7.0, 21.0),
+    "gpt-5": (0.625, 5.0),
+    "gpt-5.4": (2.5, 15.0),
+    "gemini-2.5-pro": (1.25, 10.0),
 }
-_FALLBACK_RATE: tuple[float, float] = (10.0, 30.0)
+# Conservative fallback (roughly Sonnet 4.6-tier) for unknown SKUs.
+_FALLBACK_RATE: tuple[float, float] = (3.0, 15.0)
 
 # Sentinel returned when a provider refuses the request (stop_reason ==
 # "refusal"). Downstream graders treat this as a scored sample so the
@@ -193,9 +197,14 @@ def _ensure_csv(path: Path) -> None:
             return
         # Legacy migration: pre-fallback_used schema.
         legacy_pre_fallback = [
-            "module", "scenario_id", "model", "score",
-            "critical_failure_triggered", "judge_model",
-            "judge_cache_hit_rate", "run_date",
+            "module",
+            "scenario_id",
+            "model",
+            "score",
+            "critical_failure_triggered",
+            "judge_model",
+            "judge_cache_hit_rate",
+            "run_date",
         ]
         if header == legacy_pre_fallback:
             migrated = [CSV_COLUMNS]
@@ -378,7 +387,9 @@ def _anthropic_is_rate_limit(exc: Exception) -> bool:
         import anthropic  # type: ignore
     except ImportError:
         anthropic = None  # type: ignore
-    if anthropic is not None and isinstance(exc, getattr(anthropic, "RateLimitError", ())):
+    if anthropic is not None and isinstance(
+        exc, getattr(anthropic, "RateLimitError", ())
+    ):
         return True
     status = getattr(exc, "status_code", None) or getattr(exc, "status", None)
     return status == 429
@@ -569,7 +580,11 @@ def _generate_gemini(
         stop_reason=stop_reason,
     )
 
-    if stop_reason and stop_reason.upper() in {"SAFETY", "PROHIBITED_CONTENT", "BLOCKLIST"}:
+    if stop_reason and stop_reason.upper() in {
+        "SAFETY",
+        "PROHIBITED_CONTENT",
+        "BLOCKLIST",
+    }:
         return REFUSAL_SENTINEL, meta
 
     text = getattr(response, "text", None) or ""
@@ -832,9 +847,7 @@ def run_benchmark(
             # None on fallback). Pass 0.0 into the CSV to make it unambiguous
             # and mark the row via the fallback_used column.
             score_value = (
-                float(result.overall_score)
-                if result.overall_score is not None
-                else 0.0
+                float(result.overall_score) if result.overall_score is not None else 0.0
             )
 
             row = BenchmarkRow(

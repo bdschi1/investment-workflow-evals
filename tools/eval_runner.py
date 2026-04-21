@@ -19,7 +19,6 @@ from datetime import datetime, timezone
 from typing import Optional, Dict, Any
 from dataclasses import dataclass
 
-
 DEFAULT_FRONTIER_MODELS: tuple[str, ...] = (
     "claude-opus-4-7",
     "claude-sonnet-4-5",
@@ -52,6 +51,7 @@ def parse_models_flag(raw: Optional[str]) -> list[str]:
 @dataclass
 class EvaluationConfig:
     """Configuration for running an evaluation."""
+
     module: str
     scenario_name: str
     rubric_name: str = "standard"
@@ -69,6 +69,7 @@ class EvaluationConfig:
 @dataclass
 class EvaluationResult:
     """Result of running an evaluation."""
+
     scenario_id: str
     scenario_title: str
     module: str
@@ -112,14 +113,22 @@ class EvaluationRunner:
                             break
 
             scenarios_dir = module_dir / "scenarios"
-            scenario_count = len(list(scenarios_dir.glob("*.yaml"))) if scenarios_dir.exists() else 0
+            scenario_count = (
+                len(list(scenarios_dir.glob("*.yaml"))) if scenarios_dir.exists() else 0
+            )
 
-            modules.append({
-                "id": module_dir.name,
-                "name": module_dir.name.replace("_", " ").title(),
-                "description": description[:100] + "..." if len(description) > 100 else description,
-                "scenario_count": scenario_count,
-            })
+            modules.append(
+                {
+                    "id": module_dir.name,
+                    "name": module_dir.name.replace("_", " ").title(),
+                    "description": (
+                        description[:100] + "..."
+                        if len(description) > 100
+                        else description
+                    ),
+                    "scenario_count": scenario_count,
+                }
+            )
 
         return modules
 
@@ -138,13 +147,15 @@ class EvaluationRunner:
             with open(scenario_file) as f:
                 scenario = yaml.safe_load(f)
 
-            scenarios.append({
-                "id": scenario.get("id", scenario_file.stem),
-                "title": scenario.get("title", ""),
-                "category": scenario.get("category", ""),
-                "difficulty": scenario.get("difficulty", ""),
-                "estimated_time_minutes": scenario.get("estimated_time_minutes", 0),
-            })
+            scenarios.append(
+                {
+                    "id": scenario.get("id", scenario_file.stem),
+                    "title": scenario.get("title", ""),
+                    "category": scenario.get("category", ""),
+                    "difficulty": scenario.get("difficulty", ""),
+                    "estimated_time_minutes": scenario.get("estimated_time_minutes", 0),
+                }
+            )
 
         return scenarios
 
@@ -195,7 +206,9 @@ class EvaluationRunner:
                     return module_dir
         return None
 
-    def run(self, module: str, scenario_name: str, ai_output: str = None) -> Dict[str, Any]:
+    def run(
+        self, module: str, scenario_name: str, ai_output: str = None
+    ) -> Dict[str, Any]:
         """Run complete evaluation workflow (legacy interface)."""
         print(f"Loading scenario: {module}/{scenario_name}")
         scenario = self.load_scenario(module, scenario_name)
@@ -235,14 +248,15 @@ class EvaluationRunner:
 
         # Run grading
         from .grading_engine import GradingEngine
+
         grader = GradingEngine(rubric)
-        scores, critical_failures, detailed_feedback = grader.grade(
-            ai_output, scenario
-        )
+        scores, critical_failures, detailed_feedback = grader.grade(ai_output, scenario)
 
         # Calculate overall score
         # Handle both decimal weights (0.30) and integer weights (30)
-        total_weight = sum(dim.get("weight", 1.0) for dim in rubric.get("dimensions", []))
+        total_weight = sum(
+            dim.get("weight", 1.0) for dim in rubric.get("dimensions", [])
+        )
 
         if total_weight > 10:  # Integer weights (sum to 100)
             overall_score = sum(
@@ -261,6 +275,7 @@ class EvaluationRunner:
 
         # Likert overlay (5-35 scale)
         from .grading_engine import _score_to_likert
+
         likert_score, likert_label = _score_to_likert(overall_score)
 
         # Surface judge metadata (usage, fallback_used, cache-read tokens) when
@@ -319,19 +334,23 @@ class EvaluationRunner:
         if format == "json":
             output_path = output_dir / f"{filename}.json"
             with open(output_path, "w") as f:
-                json.dump({
-                    "scenario_id": result.scenario_id,
-                    "scenario_title": result.scenario_title,
-                    "module": result.module,
-                    "timestamp": result.timestamp,
-                    "overall_score": result.overall_score,
-                    "likert_score": result.likert_score,
-                    "likert_label": result.likert_label,
-                    "passed": result.passed,
-                    "scores": result.scores,
-                    "critical_failures": result.critical_failures,
-                    "detailed_feedback": result.detailed_feedback,
-                }, f, indent=2)
+                json.dump(
+                    {
+                        "scenario_id": result.scenario_id,
+                        "scenario_title": result.scenario_title,
+                        "module": result.module,
+                        "timestamp": result.timestamp,
+                        "overall_score": result.overall_score,
+                        "likert_score": result.likert_score,
+                        "likert_label": result.likert_label,
+                        "passed": result.passed,
+                        "scores": result.scores,
+                        "critical_failures": result.critical_failures,
+                        "detailed_feedback": result.detailed_feedback,
+                    },
+                    f,
+                    indent=2,
+                )
 
         elif format == "markdown":
             output_path = output_dir / f"{filename}.md"
@@ -340,7 +359,9 @@ class EvaluationRunner:
                 f.write(f"**Module:** {result.module}\n")
                 f.write(f"**Scenario:** {result.scenario_id}\n")
                 f.write(f"**Timestamp:** {result.timestamp}\n")
-                f.write(f"**Overall Score:** {result.overall_score:.1f}/100 (Likert: {result.likert_score}/35 — {result.likert_label})\n")
+                f.write(
+                    f"**Overall Score:** {result.overall_score:.1f}/100 (Likert: {result.likert_score}/35 — {result.likert_label})\n"
+                )
                 f.write(f"**Status:** {'PASS' if result.passed else 'FAIL'}\n\n")
 
                 f.write("## Dimension Scores\n\n")
@@ -470,10 +491,18 @@ def main():
     list_parser.add_argument("--module", help="Show scenarios for this module")
 
     # CI command
-    ci_parser = subparsers.add_parser("ci", help="Run fast CI quality gate (5 scenarios, Haiku judge)")
-    ci_parser.add_argument("--module", help="Limit CI run to a specific module (optional)")
-    ci_parser.add_argument("--threshold", type=float, default=0.70,
-                           help="Pass-rate threshold for CI gate (default 0.70)")
+    ci_parser = subparsers.add_parser(
+        "ci", help="Run fast CI quality gate (5 scenarios, Haiku judge)"
+    )
+    ci_parser.add_argument(
+        "--module", help="Limit CI run to a specific module (optional)"
+    )
+    ci_parser.add_argument(
+        "--threshold",
+        type=float,
+        default=0.70,
+        help="Pass-rate threshold for CI gate (default 0.70)",
+    )
 
     # Run command
     run_parser = subparsers.add_parser("run", help="Run an evaluation")
@@ -482,8 +511,9 @@ def main():
     run_parser.add_argument("--input", help="Path to AI output file")
     run_parser.add_argument("--rubric", default="standard", help="Rubric to use")
     run_parser.add_argument("--output-dir", default="results", help="Output directory")
-    run_parser.add_argument("--format", default="json", choices=["json", "markdown"],
-                           help="Report format")
+    run_parser.add_argument(
+        "--format", default="json", choices=["json", "markdown"], help="Report format"
+    )
     run_parser.add_argument(
         "--models",
         default=None,
@@ -520,7 +550,7 @@ def main():
             print("\nAvailable Modules:\n")
             for m in modules:
                 print(f"  {m['id']:<30} ({m['scenario_count']} scenarios)")
-                if m['description']:
+                if m["description"]:
                     print(f"    {m['description']}")
 
     elif args.command == "run":
@@ -541,7 +571,9 @@ def main():
         print(f"Running evaluation: {args.module}/{args.scenario}")
         result = runner.run_evaluation(config)
 
-        print(f"\nOverall Score: {result.overall_score:.1f}/100 (Likert: {result.likert_score}/35 — {result.likert_label})")
+        print(
+            f"\nOverall Score: {result.overall_score:.1f}/100 (Likert: {result.likert_score}/35 — {result.likert_label})"
+        )
         print(f"Status: {'PASS' if result.passed else 'FAIL'}")
 
         if result.critical_failures:

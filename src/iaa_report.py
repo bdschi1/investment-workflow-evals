@@ -24,10 +24,10 @@ from dataclasses import dataclass, field
 from itertools import combinations
 from typing import Union
 
-
 # ---------------------------------------------------------------------------
 # Result type
 # ---------------------------------------------------------------------------
+
 
 @dataclass
 class IAAResult:
@@ -54,6 +54,7 @@ class IAAResult:
 # ---------------------------------------------------------------------------
 # Interpretation (Landis & Koch 1977)
 # ---------------------------------------------------------------------------
+
 
 def interpret_kappa(k: float) -> str:
     """Landis-Koch interpretation bands for kappa-family statistics.
@@ -87,7 +88,10 @@ def interpret_kappa(k: float) -> str:
 # Binning helpers
 # ---------------------------------------------------------------------------
 
-def _bin_score(score: float, n_bins: int = 5, lo: float = 0.0, hi: float = 100.0) -> int:
+
+def _bin_score(
+    score: float, n_bins: int = 5, lo: float = 0.0, hi: float = 100.0
+) -> int:
     """Bin a continuous score into an integer level in [0, n_bins-1].
 
     Default mapping for a 0-100 rubric into 5 bands (Excellent/Good/Acceptable/
@@ -109,6 +113,7 @@ def _bin_score(score: float, n_bins: int = 5, lo: float = 0.0, hi: float = 100.0
 # ---------------------------------------------------------------------------
 # Weighted Cohen's kappa
 # ---------------------------------------------------------------------------
+
 
 def cohen_kappa_weighted(
     scores_a: list,
@@ -158,8 +163,8 @@ def cohen_kappa_weighted(
     denom_k = n_bins - 1
     total = float(n)
 
-    num = 0.0   # sum_{i,j} w_ij * O_ij
-    den = 0.0   # sum_{i,j} w_ij * E_ij
+    num = 0.0  # sum_{i,j} w_ij * O_ij
+    den = 0.0  # sum_{i,j} w_ij * E_ij
     for i in range(n_bins):
         for j in range(n_bins):
             w = abs(i - j) / denom_k
@@ -178,6 +183,7 @@ def cohen_kappa_weighted(
 # ---------------------------------------------------------------------------
 # Krippendorff's alpha (interval level)
 # ---------------------------------------------------------------------------
+
 
 def krippendorff_alpha(
     ratings: dict,
@@ -277,6 +283,7 @@ def _alpha_distance(v1: float, v2: float, level: str) -> float:
 # Pairwise Pearson
 # ---------------------------------------------------------------------------
 
+
 def pairwise_pearson(scores_a: list, scores_b: list) -> float:
     """Pearson correlation coefficient.
 
@@ -301,9 +308,10 @@ def pairwise_pearson(scores_a: list, scores_b: list) -> float:
 # Report orchestration
 # ---------------------------------------------------------------------------
 
+
 def compute_iaa_report(
     records: list,
-    dimensions: list = None,
+    dimensions: list | None = None,
 ) -> list:
     """Compute IAA across all rater pairs (and group-level alpha if >=3 raters).
 
@@ -322,7 +330,7 @@ def compute_iaa_report(
         return []
 
     # Pivot: per-dimension -> item -> rater -> score.
-    by_dim = defaultdict(lambda: defaultdict(dict))
+    by_dim: dict = defaultdict(lambda: defaultdict(dict))
     rater_set = set()
     dim_set = set()
     for rec in records:
@@ -357,60 +365,69 @@ def compute_iaa_report(
                     paired_b.append(rmap[r2])
             n = len(paired_a)
             if n < 3:
-                results.append(IAAResult(
-                    method="cohen_kappa_weighted",
-                    dimension=dim,
-                    raters=(r1, r2),
-                    agreement=float("nan"),
-                    n_items=n,
-                    interpretation="insufficient data (n<3)",
-                ))
-                results.append(IAAResult(
-                    method="pairwise_pearson",
-                    dimension=dim,
-                    raters=(r1, r2),
-                    agreement=float("nan"),
-                    n_items=n,
-                    interpretation="insufficient data (n<3)",
-                ))
+                results.append(
+                    IAAResult(
+                        method="cohen_kappa_weighted",
+                        dimension=dim,
+                        raters=(r1, r2),
+                        agreement=float("nan"),
+                        n_items=n,
+                        interpretation="insufficient data (n<3)",
+                    )
+                )
+                results.append(
+                    IAAResult(
+                        method="pairwise_pearson",
+                        dimension=dim,
+                        raters=(r1, r2),
+                        agreement=float("nan"),
+                        n_items=n,
+                        interpretation="insufficient data (n<3)",
+                    )
+                )
                 continue
             k = cohen_kappa_weighted(paired_a, paired_b)
             r = pairwise_pearson(paired_a, paired_b)
-            results.append(IAAResult(
-                method="cohen_kappa_weighted",
-                dimension=dim,
-                raters=(r1, r2),
-                agreement=k,
-                n_items=n,
-                interpretation=interpret_kappa(k),
-            ))
-            results.append(IAAResult(
-                method="pairwise_pearson",
-                dimension=dim,
-                raters=(r1, r2),
-                agreement=r,
-                n_items=n,
-                interpretation=(
-                    "undefined" if math.isnan(r)
-                    else f"Pearson r={r:.2f}"
-                ),
-            ))
+            results.append(
+                IAAResult(
+                    method="cohen_kappa_weighted",
+                    dimension=dim,
+                    raters=(r1, r2),
+                    agreement=k,
+                    n_items=n,
+                    interpretation=interpret_kappa(k),
+                )
+            )
+            results.append(
+                IAAResult(
+                    method="pairwise_pearson",
+                    dimension=dim,
+                    raters=(r1, r2),
+                    agreement=r,
+                    n_items=n,
+                    interpretation=(
+                        "undefined" if math.isnan(r) else f"Pearson r={r:.2f}"
+                    ),
+                )
+            )
 
         # Krippendorff alpha (interval) when >=3 raters.
         if len(raters) >= 3:
             alpha = krippendorff_alpha(item_map, level="interval")
-            results.append(IAAResult(
-                method="krippendorff_alpha",
-                dimension=dim,
-                raters=list(raters),
-                agreement=alpha,
-                n_items=sum(1 for v in item_map.values() if len(v) >= 2),
-                interpretation=(
-                    "insufficient data (n<2 items with >=2 raters)"
-                    if math.isnan(alpha)
-                    else f"alpha={alpha:.2f}"
-                ),
-            ))
+            results.append(
+                IAAResult(
+                    method="krippendorff_alpha",
+                    dimension=dim,
+                    raters=list(raters),
+                    agreement=alpha,
+                    n_items=sum(1 for v in item_map.values() if len(v) >= 2),
+                    interpretation=(
+                        "insufficient data (n<2 items with >=2 raters)"
+                        if math.isnan(alpha)
+                        else f"alpha={alpha:.2f}"
+                    ),
+                )
+            )
 
     return results
 
@@ -418,6 +435,7 @@ def compute_iaa_report(
 # ---------------------------------------------------------------------------
 # Markdown rendering
 # ---------------------------------------------------------------------------
+
 
 def format_iaa_markdown(results: list) -> str:
     """Render results as a markdown report grouped by dimension.
@@ -438,12 +456,14 @@ def format_iaa_markdown(results: list) -> str:
     for dim in sorted(by_dim.keys()):
         lines.append(f"## Dimension: `{dim}`")
         lines.append("")
-        lines.append("| Rater Pair | Weighted Cohen's k | Pearson r | n | Interpretation |")
+        lines.append(
+            "| Rater Pair | Weighted Cohen's k | Pearson r | n | Interpretation |"
+        )
         lines.append("|---|---|---|---|---|")
 
         # Build pair -> (kappa, pearson, n, interp).
-        pair_rows = {}
-        alpha_rows = []
+        pair_rows: dict[tuple, dict] = {}
+        alpha_rows: list = []
         for res in by_dim[dim]:
             if res.method == "krippendorff_alpha":
                 alpha_rows.append(res)
@@ -452,12 +472,15 @@ def format_iaa_markdown(results: list) -> str:
                 key = res.raters
             else:
                 key = tuple(res.raters)
-            row = pair_rows.setdefault(key, {
-                "kappa": float("nan"),
-                "pearson": float("nan"),
-                "n": res.n_items,
-                "interp": "",
-            })
+            row = pair_rows.setdefault(
+                key,
+                {
+                    "kappa": float("nan"),
+                    "pearson": float("nan"),
+                    "n": res.n_items,
+                    "interp": "",
+                },
+            )
             if res.method == "cohen_kappa_weighted":
                 row["kappa"] = res.agreement
                 row["interp"] = res.interpretation

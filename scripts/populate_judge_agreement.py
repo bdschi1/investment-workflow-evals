@@ -171,7 +171,9 @@ def _build_tables(
     n_pairs = len(all_a)
 
     lines: list[str] = []
-    lines.append("### Simulated Self-Consistency Floor (seed=42) — NOT real inter-judge agreement")
+    lines.append(
+        "### Simulated Self-Consistency Floor (seed=42) — NOT real inter-judge agreement"
+    )
     lines.append("")
     lines.append(
         f"Judge A is the heuristic `GradingEngine` run against {n_goldens} "
@@ -199,22 +201,24 @@ def _build_tables(
         f"| Cohen's κ (weighted) | {_format_number(overall['kappa_weighted'])} | "
         "Linear-weighted κ on 5 rubric bins (Fail/Poor/Acceptable/Good/Excellent). |"
     )
-    lines.append(f"| n (pooled pairs)     | {n_pairs} | {n_goldens} goldens × dimensions per rubric. |")
+    lines.append(
+        f"| n (pooled pairs)     | {n_pairs} | {n_goldens} goldens × dimensions per rubric. |"
+    )
     lines.append("")
-    lines.append("**Per-module breakdown (pooled dimension scores within each module):**")
+    lines.append(
+        "**Per-module breakdown (pooled dimension scores within each module):**"
+    )
     lines.append("")
     lines.append("| Module | n pairs | Pearson r | Spearman ρ | Weighted κ |")
     lines.append("|---|---:|---|---|---|")
     for mod_name in sorted(per_module):
         pairs = per_module[mod_name]
         if len(pairs) < 3:
-            lines.append(
-                f"| `{mod_name}` | {len(pairs)} | n/a | n/a | n/a (n<3) |"
-            )
+            lines.append(f"| `{mod_name}` | {len(pairs)} | n/a | n/a | n/a (n<3) |")
             continue
-        a = [p[0] for p in pairs]
-        b = [p[1] for p in pairs]
-        m = compute_full_agreement(a, b)
+        mod_a = [p[0] for p in pairs]
+        mod_b = [p[1] for p in pairs]
+        m = compute_full_agreement(mod_a, mod_b)
         lines.append(
             f"| `{mod_name}` | {len(pairs)} | "
             f"{_format_number(m['pearson'])} | "
@@ -224,7 +228,9 @@ def _build_tables(
     lines.append("")
 
     # Second table: heuristic vs perturbed heuristic on goldens only (reiterates).
-    lines.append("### Heuristic Grader vs Perturbed Heuristic — per-golden overall scores")
+    lines.append(
+        "### Heuristic Grader vs Perturbed Heuristic — per-golden overall scores"
+    )
     lines.append("")
     lines.append(
         f"For each of the {n_goldens} goldens, we compute a weighted overall "
@@ -241,7 +247,9 @@ def _build_tables(
     lines.append("|---|---|")
     lines.append(f"| Pearson r            | {_format_number(per_memo['pearson'])} |")
     lines.append(f"| Spearman ρ           | {_format_number(per_memo['spearman'])} |")
-    lines.append(f"| Cohen's κ (weighted) | {_format_number(per_memo['kappa_weighted'])} |")
+    lines.append(
+        f"| Cohen's κ (weighted) | {_format_number(per_memo['kappa_weighted'])} |"
+    )
     lines.append(f"| n (goldens)          | {n_goldens} |")
     lines.append("")
 

@@ -32,7 +32,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Literal, Optional
+from typing import Callable, Literal, Optional
 
 Severity = Literal["critical", "warning", "info"]
 
@@ -209,7 +209,7 @@ def _parse_sources_uses_section(
                 continue
             label = cells[0]
             # Find rightmost cell that parses to a number
-            val: Optional[float] = None
+            val = None
             for c in reversed(cells[1:]):
                 nums = _extract_numbers_from_line(c)
                 if nums:
@@ -761,8 +761,7 @@ def check_eps_accretion_math(text: str) -> ValidationResult:
     new_sh = _extract_eps_field(text, "new_shares") or 0.0
     reported_eps = _extract_eps_field(text, "pro_forma_eps")
 
-    have_core = all(v is not None for v in (acq_ni, tgt_ni, acq_sh, reported_eps))
-    if not have_core:
+    if acq_ni is None or tgt_ni is None or acq_sh is None or reported_eps is None:
         return ValidationResult(
             check_id="eps_accretion_math",
             name="EPS Accretion / Dilution Math",
@@ -1183,7 +1182,7 @@ def check_numeric_consistency(text: str) -> ValidationResult:
 # Orchestrator
 # ---------------------------------------------------------------------------
 
-_ALL_CHECKS = {
+_ALL_CHECKS: dict[str, Callable[[str], ValidationResult]] = {
     "sources_uses_balance": check_sources_uses_balance,
     "balance_sheet_balance": check_balance_sheet_balance,
     "terminal_growth_ceiling": check_terminal_growth_ceiling,

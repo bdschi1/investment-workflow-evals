@@ -40,9 +40,9 @@ class IWEAgreementResult:
     """
 
     dimension_correlations: dict[str, float]  # dimension -> Pearson r
-    overall_correlation: float                # overall Pearson r
+    overall_correlation: float  # overall Pearson r
     n_compared: int
-    low_agreement_dimensions: list[str]       # dimensions with Pearson r < 0.6
+    low_agreement_dimensions: list[str]  # dimensions with Pearson r < 0.6
     warning: str = ""
     # Additional metrics (v1.1). Default 0.0 so legacy callers that construct
     # IWEAgreementResult directly still work.
@@ -246,9 +246,13 @@ class WorkflowJudgeAgreement:
         dim_corr: dict[str, float] = {}
         for dim in dim_ai:
             if len(dim_ai[dim]) >= _MIN_PAIRS:
-                dim_corr[dim] = self.pearson_correlation(dim_ai[dim], dim_heuristic[dim])
+                dim_corr[dim] = self.pearson_correlation(
+                    dim_ai[dim], dim_heuristic[dim]
+                )
 
-        low_dims = [d for d, r in dim_corr.items() if r < self.CORRELATION_WARN_THRESHOLD]
+        low_dims = [
+            d for d, r in dim_corr.items() if r < self.CORRELATION_WARN_THRESHOLD
+        ]
         warning = self._build_warning(overall_r, rho, kappa)
         if warning:
             logger.warning(warning)
@@ -267,7 +271,9 @@ class WorkflowJudgeAgreement:
     # Warning helper
     # ------------------------------------------------------------------
 
-    def _build_warning(self, pearson_r: float, spearman_rho_val: float, kappa: float) -> str:
+    def _build_warning(
+        self, pearson_r: float, spearman_rho_val: float, kappa: float
+    ) -> str:
         """Aggregate warning messages for each metric that fell below threshold.
 
         κ is skipped when NaN (e.g. zero-variance non-identical inputs) since

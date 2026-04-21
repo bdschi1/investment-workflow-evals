@@ -16,10 +16,10 @@ from src.iaa_report import (
     pairwise_pearson,
 )
 
-
 # ---------------------------------------------------------------------------
 # Cohen's weighted kappa
 # ---------------------------------------------------------------------------
+
 
 class TestCohenKappaWeighted:
     def test_perfect_agreement_yields_one(self):
@@ -112,6 +112,7 @@ class TestCohenKappaWeighted:
 # Krippendorff's alpha
 # ---------------------------------------------------------------------------
 
+
 class TestKrippendorffAlpha:
     def test_two_raters_perfect_agreement(self):
         ratings = {
@@ -136,8 +137,8 @@ class TestKrippendorffAlpha:
         # One rater missing for some items; alpha should still compute.
         ratings = {
             "item1": {"rA": 10.0, "rB": 12.0, "rC": 11.0},
-            "item2": {"rA": 50.0, "rB": 48.0},         # rC missing
-            "item3": {"rA": 90.0, "rC": 92.0},         # rB missing
+            "item2": {"rA": 50.0, "rB": 48.0},  # rC missing
+            "item3": {"rA": 90.0, "rC": 92.0},  # rB missing
             "item4": {"rA": 70.0, "rB": 72.0, "rC": 68.0},
         }
         alpha = krippendorff_alpha(ratings, level="interval")
@@ -171,6 +172,64 @@ class TestKrippendorffAlpha:
         assert alpha > 0.0
         assert alpha < 1.0
 
+    def test_pinned_hand_computed_interval_example(self):
+        """Worked example with exact expected value, derived from first principles.
+
+        4 items, 2 raters; interval distance = (v1 - v2)^2.
+
+            Item 1: A=1, B=1   d^2 = 0
+            Item 2: A=2, B=3   d^2 = 1
+            Item 3: A=3, B=3   d^2 = 0
+            Item 4: A=3, B=2   d^2 = 1
+
+        D_o (observed) = sum_ordered d^2 / sum m*(m-1) = (2*2) / (4*2) = 0.5
+        Pooled values = [1, 1, 2, 2, 3, 3, 3, 3];  N = 8;  N*(N-1) = 56
+        Ordered cross-pair squared distances:
+            (1,2): 2*2*2 = 8 ordered pairs * 1 = 8
+            (1,3): 2*4*2 = 16 ordered pairs * 4 = 64
+            (2,3): 2*4*2 = 16 ordered pairs * 1 = 16
+        D_e = (8 + 64 + 16) / 56 = 88/56 = 11/7
+        alpha = 1 - (1/2) / (11/7) = 1 - 7/22 = 15/22 = 0.6818...
+        """
+        ratings = {
+            1: {"A": 1, "B": 1},
+            2: {"A": 2, "B": 3},
+            3: {"A": 3, "B": 3},
+            4: {"A": 3, "B": 2},
+        }
+        alpha = krippendorff_alpha(ratings, level="interval")
+        assert alpha == pytest.approx(15.0 / 22.0, abs=1e-9)
+
+    def test_perfect_negative_symmetry(self):
+        """Reversed ordering on a linear scale yields alpha = -0.8 (hand-verifiable).
+
+        5 items with A=[1..5] and B=[5..1]. By symmetry of squared distance
+        around the pooled mean, alpha should be exactly the negative of
+        constant-shift alpha (0.8), i.e. -0.8.
+        """
+        ratings = {
+            1: {"A": 1, "B": 5},
+            2: {"A": 2, "B": 4},
+            3: {"A": 3, "B": 3},
+            4: {"A": 4, "B": 2},
+            5: {"A": 5, "B": 1},
+        }
+        alpha = krippendorff_alpha(ratings, level="interval")
+        assert alpha == pytest.approx(-0.8, abs=1e-9)
+
+    def test_permutation_invariance(self):
+        """Swapping which rater is labelled 'A' vs 'B' must not change alpha."""
+        original = {
+            1: {"A": 10.0, "B": 12.0},
+            2: {"A": 50.0, "B": 55.0},
+            3: {"A": 80.0, "B": 78.0},
+            4: {"A": 30.0, "B": 35.0},
+        }
+        swapped = {k: {"A": v["B"], "B": v["A"]} for k, v in original.items()}
+        assert krippendorff_alpha(original) == pytest.approx(
+            krippendorff_alpha(swapped)
+        )
+
     def test_invalid_level_raises(self):
         with pytest.raises(ValueError):
             krippendorff_alpha({"i": {"a": 1, "b": 2}}, level="ordinal")
@@ -179,6 +238,7 @@ class TestKrippendorffAlpha:
 # ---------------------------------------------------------------------------
 # Pearson
 # ---------------------------------------------------------------------------
+
 
 class TestPairwisePearson:
     def test_perfect_correlation(self):
@@ -200,6 +260,7 @@ class TestPairwisePearson:
 # ---------------------------------------------------------------------------
 # Interpretation (Landis & Koch 1977)
 # ---------------------------------------------------------------------------
+
 
 class TestInterpretKappa:
     def test_poor_band(self):
@@ -229,6 +290,7 @@ class TestInterpretKappa:
 # compute_iaa_report
 # ---------------------------------------------------------------------------
 
+
 class TestComputeIAAReport:
     def _sample_records(self):
         # 2 raters, 5 scenarios, 3 dimensions.
@@ -253,11 +315,13 @@ class TestComputeIAAReport:
         records = []
         for r in raters:
             for item, vec in scores[r].items():
-                records.append({
-                    "item_id": item,
-                    "annotator_id": r,
-                    "dimension_scores": dict(zip(dims, vec)),
-                })
+                records.append(
+                    {
+                        "item_id": item,
+                        "annotator_id": r,
+                        "dimension_scores": dict(zip(dims, vec)),
+                    }
+                )
         return records, dims
 
     def test_two_raters_three_dims_produces_three_kappa_rows(self):
@@ -287,15 +351,17 @@ class TestComputeIAAReport:
         # Add a third rater with similar scores.
         for i, item in enumerate(["s1", "s2", "s3", "s4", "s5"]):
             vec = [80.0 - i * 5, 75.0 - i * 5, 85.0 - i * 5]
-            records.append({
-                "item_id": item,
-                "annotator_id": "rater_C",
-                "dimension_scores": {
-                    "alpha_environment": vec[0],
-                    "risk_framework": vec[1],
-                    "communication": vec[2],
-                },
-            })
+            records.append(
+                {
+                    "item_id": item,
+                    "annotator_id": "rater_C",
+                    "dimension_scores": {
+                        "alpha_environment": vec[0],
+                        "risk_framework": vec[1],
+                        "communication": vec[2],
+                    },
+                }
+            )
         results = compute_iaa_report(records)
         alpha_rows = [r for r in results if r.method == "krippendorff_alpha"]
         # One alpha per dimension.
@@ -343,6 +409,7 @@ class TestComputeIAAReport:
 # Markdown rendering
 # ---------------------------------------------------------------------------
 
+
 class TestFormatMarkdown:
     def test_empty_produces_placeholder(self):
         out = format_iaa_markdown([])
@@ -372,8 +439,7 @@ class TestFormatMarkdown:
         # Table header present.
         assert "| Rater Pair | Weighted Cohen's k" in md
         # One body row (one pair, both metrics collapsed).
-        rA_vs_rB_rows = [line for line in md.splitlines()
-                          if "rA vs rB" in line]
+        rA_vs_rB_rows = [line for line in md.splitlines() if "rA vs rB" in line]
         assert len(rA_vs_rB_rows) == 1
         assert "0.750" in rA_vs_rB_rows[0]
         assert "0.880" in rA_vs_rB_rows[0]
@@ -395,10 +461,22 @@ class TestFormatMarkdown:
 
     def test_multiple_dimensions_are_grouped(self):
         results = [
-            IAAResult("cohen_kappa_weighted", "alpha", ("rA", "rB"), 0.7, 5,
-                      "substantial agreement (k=0.70)"),
-            IAAResult("cohen_kappa_weighted", "risk", ("rA", "rB"), 0.5, 5,
-                      "moderate agreement (k=0.50)"),
+            IAAResult(
+                "cohen_kappa_weighted",
+                "alpha",
+                ("rA", "rB"),
+                0.7,
+                5,
+                "substantial agreement (k=0.70)",
+            ),
+            IAAResult(
+                "cohen_kappa_weighted",
+                "risk",
+                ("rA", "rB"),
+                0.5,
+                5,
+                "moderate agreement (k=0.50)",
+            ),
         ]
         md = format_iaa_markdown(results)
         assert "## Dimension: `alpha`" in md

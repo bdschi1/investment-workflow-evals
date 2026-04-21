@@ -419,9 +419,9 @@ def test_overconfidence_will_definitely():
 def test_overconfidence_accepts_negated_phrases(text):
     """Phrases preceded by a negator should not trip the overconfidence check."""
     r = check_no_overconfidence_language(text)
-    assert r.passed is True, (
-        f"Expected pass for negated phrase; got hits={r.extracted['phrases_found']}"
-    )
+    assert (
+        r.passed is True
+    ), f"Expected pass for negated phrase; got hits={r.extracted['phrases_found']}"
     assert r.extracted["phrases_found"] == []
 
 
