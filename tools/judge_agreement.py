@@ -1,18 +1,27 @@
 """Judge agreement metrics for investment-workflow-evals.
 
 Compares InvestmentWorkflowJudge (AI) vs GradingEngine (heuristic) on the same
-responses. Computes Pearson correlation per dimension and overall.
-Warns when correlation < 0.6.
+responses. Computes three complementary agreement metrics:
 
-# module_version: 1.0.0
-# date: 2026-04-04
+- Pearson r   — linear correlation between continuous scores (original metric).
+- Spearman ρ  — rank correlation; robust to monotone non-linear transforms.
+- Cohen's κ   — weighted (linear) κ on scores binned into 5 rubric levels
+                (Fail, Poor, Acceptable, Good, Excellent); measures
+                categorical-like agreement on the discretised rubric.
+
+Warnings are raised when Pearson r < 0.6, Spearman ρ < 0.5, or weighted
+κ < 0.4. These thresholds are heuristic — treat them as soft signals that
+the judge prompt or rubric anchors may need revision.
+
+# module_version: 1.1.0
+# date: 2026-04-21
 """
 
 from __future__ import annotations
 
 import logging
 import math
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Optional
 
 logger = logging.getLogger(__name__)
@@ -23,22 +32,40 @@ _MIN_PAIRS = 3
 
 @dataclass
 class IWEAgreementResult:
-    """Pearson correlation agreement between AI judge and heuristic grader."""
+    """Agreement between AI judge and heuristic grader.
+
+    Pearson r is retained as the primary overall_correlation for backward
+    compatibility. Spearman ρ and weighted Cohen's κ are reported alongside
+    as additional views of the same paired score data.
+    """
 
     dimension_correlations: dict[str, float]  # dimension -> Pearson r
-    overall_correlation: float
+    overall_correlation: float                # overall Pearson r
     n_compared: int
-    low_agreement_dimensions: list[str]       # dimensions with r < 0.6
+    low_agreement_dimensions: list[str]       # dimensions with Pearson r < 0.6
     warning: str = ""
+    # Additional metrics (v1.1). Default 0.0 so legacy callers that construct
+    # IWEAgreementResult directly still work.
+    spearman: float = 0.0
+    kappa_weighted: float = 0.0
 
 
 class WorkflowJudgeAgreement:
-    """Computes Pearson correlation between AI judge and heuristic grader scores.
+    """Computes multiple agreement metrics between AI judge and heuristic grader.
 
-    IWE grading produces continuous 0-100 scores per dimension. Pearson r
-    measures linear association between the two score series. Values >= 0.6
-    indicate acceptable alignment; values below trigger a prompt revision
-    warning.
+    IWE grading produces continuous 0-100 scores per dimension. Three metrics
+    are reported:
+
+    - **Pearson r**   — linear association; sensitive to scale and outliers.
+    - **Spearman ρ**  — rank correlation; monotone-invariant.
+    - **Cohen's κ (weighted, linear, 5-bin)** — agreement on discretised
+      rubric levels, corrected for chance. Uses the rubric-aligned bins
+      [0, 20, 40, 60, 80, 100] corresponding to Fail/Poor/Acceptable/Good/Excellent.
+
+    Warning thresholds (heuristic):
+    - Pearson r < 0.6   → review judge prompt / few-shot examples.
+    - Spearman ρ < 0.5  → rank order disagrees; rubric anchors may be miscalibrated.
+    - Weighted κ < 0.4  → poor categorical agreement on binned scores.
 
     Usage — single scenario::
 
@@ -52,7 +79,7 @@ class WorkflowJudgeAgreement:
             ai_scores={"factual_accuracy": 82.0, ...},
             heuristic_scores={"factual_accuracy": 75.0, ...},
         )
-        print(result.overall_correlation)
+        print(result.overall_correlation, result.spearman, result.kappa_weighted)
 
     Usage — batch::
 
@@ -63,6 +90,8 @@ class WorkflowJudgeAgreement:
     """
 
     CORRELATION_WARN_THRESHOLD = 0.6
+    SPEARMAN_WARN_THRESHOLD = 0.5
+    KAPPA_WARN_THRESHOLD = 0.4
 
     # ------------------------------------------------------------------
     # Public API
@@ -99,6 +128,8 @@ class WorkflowJudgeAgreement:
                 n_compared=0,
                 low_agreement_dimensions=[],
                 warning="Insufficient data: both ai_scores and heuristic_scores required.",
+                spearman=0.0,
+                kappa_weighted=0.0,
             )
 
         shared_dims = sorted(set(ai_scores.keys()) & set(heuristic_scores.keys()))
@@ -112,24 +143,25 @@ class WorkflowJudgeAgreement:
                     f"Insufficient comparison dimensions ({len(shared_dims)} < {_MIN_PAIRS}). "
                     "Need at least 3 shared dimensions to compute correlation."
                 ),
+                spearman=0.0,
+                kappa_weighted=0.0,
             )
 
         all_ai = [ai_scores[d] for d in shared_dims]
         all_heuristic = [heuristic_scores[d] for d in shared_dims]
-        overall_r = self.pearson_correlation(all_ai, all_heuristic)
+
+        metrics = compute_full_agreement(all_ai, all_heuristic)
+        overall_r = metrics["pearson"]
+        rho = metrics["spearman"]
+        kappa = metrics["kappa_weighted"]
 
         # Per-dimension correlation requires multiple items — report NaN for single-item dims.
         # With a single comparison we only have the cross-dim correlation.
         dim_corr: dict[str, float] = {}
 
-        low_dims = []
-        warning = ""
-        if overall_r < self.CORRELATION_WARN_THRESHOLD:
-            warning = (
-                f"Overall correlation {overall_r:.3f} is below the acceptable "
-                f"threshold ({self.CORRELATION_WARN_THRESHOLD}). Review the judge prompt "
-                "or few-shot examples to improve AI/heuristic score alignment."
-            )
+        low_dims: list[str] = []
+        warning = self._build_warning(overall_r, rho, kappa)
+        if warning:
             logger.warning(warning)
 
         return IWEAgreementResult(
@@ -138,6 +170,8 @@ class WorkflowJudgeAgreement:
             n_compared=len(shared_dims),
             low_agreement_dimensions=low_dims,
             warning=warning,
+            spearman=rho,
+            kappa_weighted=kappa,
         )
 
     def batch_compare(
@@ -154,7 +188,8 @@ class WorkflowJudgeAgreement:
         Pearson r requires >= ``_MIN_PAIRS`` data points.
 
         Returns:
-            IWEAgreementResult aggregated across all items.
+            IWEAgreementResult aggregated across all items, with Pearson,
+            Spearman, and weighted κ computed on the pooled score pairs.
         """
         # dimension -> [ai_score, ...] and [heuristic_score, ...]
         dim_ai: dict[str, list[float]] = {}
@@ -177,6 +212,8 @@ class WorkflowJudgeAgreement:
                 n_compared=0,
                 low_agreement_dimensions=[],
                 warning="No comparable dimension scores found across items.",
+                spearman=0.0,
+                kappa_weighted=0.0,
             )
 
         # Overall correlation: pool all (ai, heuristic) pairs across dimensions.
@@ -197,9 +234,14 @@ class WorkflowJudgeAgreement:
                     f"Insufficient comparison pairs ({n_total} < {_MIN_PAIRS}). "
                     "Collect more graded responses before interpreting correlation."
                 ),
+                spearman=0.0,
+                kappa_weighted=0.0,
             )
 
-        overall_r = self.pearson_correlation(all_ai, all_heuristic)
+        metrics = compute_full_agreement(all_ai, all_heuristic)
+        overall_r = metrics["pearson"]
+        rho = metrics["spearman"]
+        kappa = metrics["kappa_weighted"]
 
         dim_corr: dict[str, float] = {}
         for dim in dim_ai:
@@ -207,13 +249,8 @@ class WorkflowJudgeAgreement:
                 dim_corr[dim] = self.pearson_correlation(dim_ai[dim], dim_heuristic[dim])
 
         low_dims = [d for d, r in dim_corr.items() if r < self.CORRELATION_WARN_THRESHOLD]
-        warning = ""
-        if overall_r < self.CORRELATION_WARN_THRESHOLD:
-            warning = (
-                f"Overall correlation {overall_r:.3f} is below the acceptable "
-                f"threshold ({self.CORRELATION_WARN_THRESHOLD}). Review the judge prompt "
-                "or few-shot examples to improve AI/heuristic score alignment."
-            )
+        warning = self._build_warning(overall_r, rho, kappa)
+        if warning:
             logger.warning(warning)
 
         return IWEAgreementResult(
@@ -222,7 +259,40 @@ class WorkflowJudgeAgreement:
             n_compared=n_total,
             low_agreement_dimensions=low_dims,
             warning=warning,
+            spearman=rho,
+            kappa_weighted=kappa,
         )
+
+    # ------------------------------------------------------------------
+    # Warning helper
+    # ------------------------------------------------------------------
+
+    def _build_warning(self, pearson_r: float, spearman_rho_val: float, kappa: float) -> str:
+        """Aggregate warning messages for each metric that fell below threshold.
+
+        κ is skipped when NaN (e.g. zero-variance non-identical inputs) since
+        the test is not meaningful there.
+        """
+        parts: list[str] = []
+        if pearson_r < self.CORRELATION_WARN_THRESHOLD:
+            parts.append(
+                f"Pearson r {pearson_r:.3f} is below the acceptable threshold "
+                f"({self.CORRELATION_WARN_THRESHOLD}). Review the judge prompt or "
+                "few-shot examples to improve AI/heuristic score alignment."
+            )
+        if spearman_rho_val < self.SPEARMAN_WARN_THRESHOLD:
+            parts.append(
+                f"Spearman rho {spearman_rho_val:.3f} is below the acceptable threshold "
+                f"({self.SPEARMAN_WARN_THRESHOLD}). Rank order disagrees — rubric "
+                "anchors may be miscalibrated."
+            )
+        if not math.isnan(kappa) and kappa < self.KAPPA_WARN_THRESHOLD:
+            parts.append(
+                f"Weighted kappa {kappa:.3f} is below the acceptable threshold "
+                f"({self.KAPPA_WARN_THRESHOLD}). Categorical agreement on binned "
+                "rubric levels is weak; consider revising anchor descriptions."
+            )
+        return " | ".join(parts)
 
     # ------------------------------------------------------------------
     # Static metric
@@ -269,3 +339,192 @@ class WorkflowJudgeAgreement:
         r = cov / denom
         # Clamp to [-1, 1] to guard against floating-point overshoot.
         return max(-1.0, min(1.0, r))
+
+
+# ----------------------------------------------------------------------
+# Module-level metric functions (v1.1)
+# ----------------------------------------------------------------------
+
+
+def _average_ranks(values: list[float]) -> list[float]:
+    """Return average ranks for a list of floats (ties -> mean rank).
+
+    Ranks are 1-indexed. For ties, each tied element gets the mean of the
+    ranks they collectively cover.
+    """
+    n = len(values)
+    indexed = sorted(range(n), key=lambda i: values[i])
+    ranks = [0.0] * n
+    i = 0
+    while i < n:
+        j = i
+        # Grow j while tied.
+        while j + 1 < n and values[indexed[j + 1]] == values[indexed[i]]:
+            j += 1
+        # Ranks i..j are tied; assign average rank (1-indexed).
+        avg_rank = (i + j) / 2.0 + 1.0
+        for k in range(i, j + 1):
+            ranks[indexed[k]] = avg_rank
+        i = j + 1
+    return ranks
+
+
+def spearman_rho(xs: list[float], ys: list[float]) -> float:
+    """Spearman rank correlation coefficient.
+
+    Equivalent to Pearson's r applied to the ranks of ``xs`` and ``ys``.
+    Ties receive their average rank. Stdlib-only implementation; no scipy.
+
+    Args:
+        xs: First series of floats.
+        ys: Second series of floats.
+
+    Returns:
+        Spearman ρ in [-1, 1]. Returns 0.0 if either series has zero variance
+        (or length < 2), matching the Pearson behaviour.
+
+    Raises:
+        ValueError: If xs and ys have different lengths.
+    """
+    if len(xs) != len(ys):
+        raise ValueError(
+            f"xs and ys must have the same length; got {len(xs)} and {len(ys)}"
+        )
+    if len(xs) < 2:
+        return 0.0
+
+    rx = _average_ranks(xs)
+    ry = _average_ranks(ys)
+    return WorkflowJudgeAgreement.pearson_correlation(rx, ry)
+
+
+def cohens_kappa_weighted(
+    xs: list[float],
+    ys: list[float],
+    n_bins: int = 5,
+    max_score: float = 100.0,
+) -> float:
+    """Linear-weighted Cohen's κ on scores binned into ``n_bins`` rubric levels.
+
+    Binning (for ``n_bins=5``, ``max_score=100``):
+        [0, 20)  → 0 (Fail)
+        [20, 40) → 1 (Poor)
+        [40, 60) → 2 (Acceptable)
+        [60, 80) → 3 (Good)
+        [80, 100] → 4 (Excellent)
+
+    Linear weights: ``w_ij = 1 - |i - j| / (n_bins - 1)``. Weighted κ is:
+
+        κ = 1 - (Σ w_dis_ij · O_ij) / (Σ w_dis_ij · E_ij)
+
+    where ``w_dis_ij = |i - j| / (n_bins - 1)`` (the disagreement weight),
+    ``O_ij`` is the observed joint frequency, and ``E_ij`` is the product
+    of the marginal frequencies.
+
+    Edge cases:
+    - Length mismatch → ValueError.
+    - Both inputs zero-variance and identical (all scores in same bin) → 1.0.
+    - One input zero-variance and the other not → NaN (expected disagreement
+      is zero; κ undefined).
+    - n < 2 → NaN.
+
+    Args:
+        xs: First series of scores in [0, max_score].
+        ys: Second series of scores in [0, max_score].
+        n_bins: Number of rubric bins (default 5).
+        max_score: Upper bound of score range (default 100).
+
+    Returns:
+        Weighted κ in [-1, 1], or float('nan') if undefined.
+
+    Raises:
+        ValueError: If xs and ys have different lengths, or n_bins < 2.
+    """
+    if len(xs) != len(ys):
+        raise ValueError(
+            f"xs and ys must have the same length; got {len(xs)} and {len(ys)}"
+        )
+    if n_bins < 2:
+        raise ValueError(f"n_bins must be >= 2; got {n_bins}")
+    n = len(xs)
+    if n < 2:
+        return float("nan")
+
+    def _bin(score: float) -> int:
+        # Clamp to [0, max_score], then map to [0, n_bins - 1].
+        clamped = max(0.0, min(max_score, score))
+        # For scores exactly at max_score the raw index would equal n_bins;
+        # subtract one so the top bin stays inclusive.
+        idx = int(clamped / (max_score / n_bins))
+        return min(idx, n_bins - 1)
+
+    bx = [_bin(v) for v in xs]
+    by = [_bin(v) for v in ys]
+
+    # Zero-variance short-circuit: if both raters land in the same single bin
+    # for all items, agreement is perfect. If at least one rater is constant
+    # but they disagree, κ is undefined (no variance in one marginal means
+    # expected-disagreement and chance correction break down).
+    x_constant = len(set(bx)) == 1
+    y_constant = len(set(by)) == 1
+    if x_constant and y_constant:
+        return 1.0 if bx[0] == by[0] else float("nan")
+    if x_constant or y_constant:
+        return float("nan")
+
+    # Observed joint distribution (counts).
+    observed = [[0 for _ in range(n_bins)] for _ in range(n_bins)]
+    row_marg = [0] * n_bins
+    col_marg = [0] * n_bins
+    for i, j in zip(bx, by):
+        observed[i][j] += 1
+        row_marg[i] += 1
+        col_marg[j] += 1
+
+    denom = n_bins - 1
+    # Weighted observed disagreement and expected disagreement (both normalised by n).
+    obs_dis = 0.0
+    exp_dis = 0.0
+    for i in range(n_bins):
+        for j in range(n_bins):
+            w_dis = abs(i - j) / denom
+            obs_dis += w_dis * observed[i][j]
+            exp_dis += w_dis * (row_marg[i] * col_marg[j] / n)
+    # Normalise by n so we have per-item weighted disagreement.
+    obs_dis /= n
+    exp_dis /= n
+
+    if exp_dis < 1e-12:
+        # Expected disagreement is effectively zero; κ undefined.
+        return float("nan")
+
+    return 1.0 - (obs_dis / exp_dis)
+
+
+def compute_full_agreement(xs: list[float], ys: list[float]) -> dict:
+    """Compute Pearson r, Spearman ρ, and weighted Cohen's κ in one pass.
+
+    Args:
+        xs: First series of scores (0-100).
+        ys: Second series of scores (0-100).
+
+    Returns:
+        Dict with keys:
+            - ``pearson``        — Pearson r (float)
+            - ``spearman``       — Spearman ρ (float)
+            - ``kappa_weighted`` — linear-weighted κ on 5 rubric bins (float; may be NaN)
+            - ``n``              — number of paired observations (int)
+
+    Raises:
+        ValueError: If xs and ys have different lengths.
+    """
+    if len(xs) != len(ys):
+        raise ValueError(
+            f"xs and ys must have the same length; got {len(xs)} and {len(ys)}"
+        )
+    return {
+        "pearson": WorkflowJudgeAgreement.pearson_correlation(xs, ys),
+        "spearman": spearman_rho(xs, ys),
+        "kappa_weighted": cohens_kappa_weighted(xs, ys),
+        "n": len(xs),
+    }

@@ -81,6 +81,9 @@ class EvaluationResult:
     detailed_feedback: dict
     likert_score: int = 0
     likert_label: str = ""
+    # Tier 1.4/1.5: judge metadata surfaced for benchmark cache-rate and
+    # fallback tracking. None when heuristic grading was used.
+    judge_metadata: Optional[dict] = None
 
 
 class EvaluationRunner:
@@ -260,6 +263,16 @@ class EvaluationRunner:
         from .grading_engine import _score_to_likert
         likert_score, likert_label = _score_to_likert(overall_score)
 
+        # Surface judge metadata (usage, fallback_used, cache-read tokens) when
+        # LLM grading was used. Consumed by benchmark_runner for cache-hit-rate
+        # and fallback tracking in the CSV.
+        judge_metadata = None
+        cache = getattr(grader, "_llm_cache", None)
+        if cache:
+            last_judge = next(iter(cache.values()), None)
+            if last_judge is not None and hasattr(last_judge, "metadata"):
+                judge_metadata = dict(last_judge.metadata)
+
         return EvaluationResult(
             scenario_id=scenario.get("id", config.scenario_name),
             scenario_title=scenario.get("title", ""),
@@ -273,6 +286,7 @@ class EvaluationRunner:
             detailed_feedback=detailed_feedback,
             likert_score=likert_score,
             likert_label=likert_label,
+            judge_metadata=judge_metadata,
         )
 
     def _default_rubric(self) -> dict:
