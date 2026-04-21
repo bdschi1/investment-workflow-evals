@@ -102,12 +102,18 @@ class TestWarningTriggered(unittest.TestCase):
 
         # Build items with low correlation: AI scores high where heuristic scores low.
         items = [
-            {"ai_scores": {"d1": 80.0, "d2": 70.0, "d3": 60.0},
-             "heuristic_scores": {"d1": 20.0, "d2": 30.0, "d3": 40.0}},
-            {"ai_scores": {"d1": 75.0, "d2": 65.0, "d3": 55.0},
-             "heuristic_scores": {"d1": 25.0, "d2": 35.0, "d3": 45.0}},
-            {"ai_scores": {"d1": 90.0, "d2": 80.0, "d3": 70.0},
-             "heuristic_scores": {"d1": 10.0, "d2": 20.0, "d3": 30.0}},
+            {
+                "ai_scores": {"d1": 80.0, "d2": 70.0, "d3": 60.0},
+                "heuristic_scores": {"d1": 20.0, "d2": 30.0, "d3": 40.0},
+            },
+            {
+                "ai_scores": {"d1": 75.0, "d2": 65.0, "d3": 55.0},
+                "heuristic_scores": {"d1": 25.0, "d2": 35.0, "d3": 45.0},
+            },
+            {
+                "ai_scores": {"d1": 90.0, "d2": 80.0, "d3": 70.0},
+                "heuristic_scores": {"d1": 10.0, "d2": 20.0, "d3": 30.0},
+            },
         ]
 
         result = agreement.batch_compare(items)
@@ -122,12 +128,18 @@ class TestWarningTriggered(unittest.TestCase):
 
         # Perfect positive correlation → r = 1.0 → no warning.
         items = [
-            {"ai_scores": {"d1": 80.0, "d2": 70.0, "d3": 60.0},
-             "heuristic_scores": {"d1": 79.0, "d2": 69.0, "d3": 59.0}},
-            {"ai_scores": {"d1": 75.0, "d2": 65.0, "d3": 55.0},
-             "heuristic_scores": {"d1": 74.0, "d2": 64.0, "d3": 54.0}},
-            {"ai_scores": {"d1": 90.0, "d2": 85.0, "d3": 80.0},
-             "heuristic_scores": {"d1": 89.0, "d2": 84.0, "d3": 79.0}},
+            {
+                "ai_scores": {"d1": 80.0, "d2": 70.0, "d3": 60.0},
+                "heuristic_scores": {"d1": 79.0, "d2": 69.0, "d3": 59.0},
+            },
+            {
+                "ai_scores": {"d1": 75.0, "d2": 65.0, "d3": 55.0},
+                "heuristic_scores": {"d1": 74.0, "d2": 64.0, "d3": 54.0},
+            },
+            {
+                "ai_scores": {"d1": 90.0, "d2": 85.0, "d3": 80.0},
+                "heuristic_scores": {"d1": 89.0, "d2": 84.0, "d3": 79.0},
+            },
         ]
 
         result = agreement.batch_compare(items)
@@ -307,7 +319,9 @@ class TestIntegrationCompareAndBatch(unittest.TestCase):
                 "evidence_quality": rng.uniform(45, 95),
                 "completeness": rng.uniform(50, 90),
             }
-            heur = {k: max(0.0, min(100.0, v + rng.gauss(0, 5.0))) for k, v in ai.items()}
+            heur = {
+                k: max(0.0, min(100.0, v + rng.gauss(0, 5.0))) for k, v in ai.items()
+            }
             items.append({"ai_scores": ai, "heuristic_scores": heur})
         agreement = WorkflowJudgeAgreement()
         result = agreement.batch_compare(items)
@@ -321,10 +335,14 @@ class TestIntegrationCompareAndBatch(unittest.TestCase):
         # Flipped magnitudes → all three metrics should be poor.
         agreement = WorkflowJudgeAgreement()
         items = [
-            {"ai_scores": {"d1": 90.0, "d2": 85.0, "d3": 80.0, "d4": 95.0},
-             "heuristic_scores": {"d1": 10.0, "d2": 15.0, "d3": 20.0, "d4": 5.0}},
-            {"ai_scores": {"d1": 75.0, "d2": 70.0, "d3": 65.0, "d4": 80.0},
-             "heuristic_scores": {"d1": 25.0, "d2": 30.0, "d3": 35.0, "d4": 20.0}},
+            {
+                "ai_scores": {"d1": 90.0, "d2": 85.0, "d3": 80.0, "d4": 95.0},
+                "heuristic_scores": {"d1": 10.0, "d2": 15.0, "d3": 20.0, "d4": 5.0},
+            },
+            {
+                "ai_scores": {"d1": 75.0, "d2": 70.0, "d3": 65.0, "d4": 80.0},
+                "heuristic_scores": {"d1": 25.0, "d2": 30.0, "d3": 35.0, "d4": 20.0},
+            },
         ]
         result = agreement.batch_compare(items)
         self.assertLess(result.kappa_weighted, 0.4)

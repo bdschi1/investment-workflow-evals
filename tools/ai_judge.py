@@ -74,9 +74,7 @@ def _log_effective_model_once(model: str, source: str) -> None:
     if key in _MODEL_LOG_EMITTED:
         return
     _MODEL_LOG_EMITTED.add(key)
-    _logger.info(
-        "judge_model_resolved model=%s source=%s", model, source
-    )
+    _logger.info("judge_model_resolved model=%s source=%s", model, source)
 
 
 def _thinking_budget_to_effort(budget: int) -> str:
@@ -631,42 +629,52 @@ Return critical_failures as an empty list if none are triggered."""
         for block in previous_response.content:
             if hasattr(block, "type"):
                 if block.type == "tool_use":
-                    assistant_content.append({
-                        "type": "tool_use",
-                        "id": block.id,
-                        "name": block.name,
-                        "input": block.input,
-                    })
+                    assistant_content.append(
+                        {
+                            "type": "tool_use",
+                            "id": block.id,
+                            "name": block.name,
+                            "input": block.input,
+                        }
+                    )
                 elif block.type == "text":
-                    assistant_content.append({
-                        "type": "text",
-                        "text": block.text,
-                    })
+                    assistant_content.append(
+                        {
+                            "type": "text",
+                            "text": block.text,
+                        }
+                    )
 
         if assistant_content:
             updated.append({"role": "assistant", "content": assistant_content})
 
         tool_use_blocks = [
-            b for b in previous_response.content if getattr(b, "type", None) == "tool_use"
+            b
+            for b in previous_response.content
+            if getattr(b, "type", None) == "tool_use"
         ]
         if tool_use_blocks:
             tool_results = []
             for tb in tool_use_blocks:
-                tool_results.append({
-                    "type": "tool_result",
-                    "tool_use_id": tb.id,
-                    "content": f"Validation error: {error_msg}",
-                    "is_error": True,
-                })
+                tool_results.append(
+                    {
+                        "type": "tool_result",
+                        "tool_use_id": tb.id,
+                        "content": f"Validation error: {error_msg}",
+                        "is_error": True,
+                    }
+                )
             updated.append({"role": "user", "content": tool_results})
         else:
-            updated.append({
-                "role": "user",
-                "content": (
-                    f"Validation error: {error_msg} "
-                    "Please call grade_investment_response with corrected values."
-                ),
-            })
+            updated.append(
+                {
+                    "role": "user",
+                    "content": (
+                        f"Validation error: {error_msg} "
+                        "Please call grade_investment_response with corrected values."
+                    ),
+                }
+            )
 
         return updated
 

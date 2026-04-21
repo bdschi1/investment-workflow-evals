@@ -16,7 +16,6 @@ import pytest
 
 from tools import benchmark_runner as br
 
-
 # ---------------------------------------------------------------------------
 # Helpers: fake response objects for each provider SDK
 # ---------------------------------------------------------------------------
@@ -99,10 +98,13 @@ SCENARIO_FIXTURE = {
 
 
 def test_provider_dispatch_claude_routes_to_anthropic():
-    with mock.patch.object(br, "_generate_anthropic") as gen_anth, \
-         mock.patch.object(br, "_generate_openai") as gen_oai, \
-         mock.patch.object(br, "_generate_gemini") as gen_gem:
-        gen_anth.return_value = ("hello from claude", br.UsageMeta(100, 50, 10, "end_turn"))
+    with mock.patch.object(br, "_generate_anthropic") as gen_anth, mock.patch.object(
+        br, "_generate_openai"
+    ) as gen_oai, mock.patch.object(br, "_generate_gemini") as gen_gem:
+        gen_anth.return_value = (
+            "hello from claude",
+            br.UsageMeta(100, 50, 10, "end_turn"),
+        )
         text, usage = br._live_candidate("claude-opus-4-7", SCENARIO_FIXTURE)
         gen_anth.assert_called_once()
         gen_oai.assert_not_called()
@@ -115,9 +117,9 @@ def test_provider_dispatch_claude_routes_to_anthropic():
 
 
 def test_provider_dispatch_gpt_routes_to_openai():
-    with mock.patch.object(br, "_generate_anthropic") as gen_anth, \
-         mock.patch.object(br, "_generate_openai") as gen_oai, \
-         mock.patch.object(br, "_generate_gemini") as gen_gem:
+    with mock.patch.object(br, "_generate_anthropic") as gen_anth, mock.patch.object(
+        br, "_generate_openai"
+    ) as gen_oai, mock.patch.object(br, "_generate_gemini") as gen_gem:
         gen_oai.return_value = ("hello from gpt", br.UsageMeta(80, 40, 0, "stop"))
         text, usage = br._live_candidate("gpt-5", SCENARIO_FIXTURE)
         gen_oai.assert_called_once()
@@ -128,9 +130,9 @@ def test_provider_dispatch_gpt_routes_to_openai():
 
 
 def test_provider_dispatch_gemini_routes_to_google():
-    with mock.patch.object(br, "_generate_anthropic") as gen_anth, \
-         mock.patch.object(br, "_generate_openai") as gen_oai, \
-         mock.patch.object(br, "_generate_gemini") as gen_gem:
+    with mock.patch.object(br, "_generate_anthropic") as gen_anth, mock.patch.object(
+        br, "_generate_openai"
+    ) as gen_oai, mock.patch.object(br, "_generate_gemini") as gen_gem:
         gen_gem.return_value = ("hello from gemini", br.UsageMeta(70, 30, 0, "STOP"))
         text, _ = br._live_candidate("gemini-2.5-pro", SCENARIO_FIXTURE)
         gen_gem.assert_called_once()
@@ -167,9 +169,7 @@ def test_analyst_prompt_does_not_leak_rubric_dimensions():
 
 def test_anthropic_enables_prompt_caching_on_system_block():
     fake_client = mock.MagicMock()
-    fake_client.messages.create.return_value = _make_anthropic_response(
-        cache_read=300
-    )
+    fake_client.messages.create.return_value = _make_anthropic_response(cache_read=300)
     fake_module = types.SimpleNamespace(
         Anthropic=lambda: fake_client, RateLimitError=type("RL", (Exception,), {})
     )
@@ -242,8 +242,9 @@ def test_anthropic_rate_limit_retry_then_success():
     fake_module = types.SimpleNamespace(
         Anthropic=lambda: fake_client, RateLimitError=FakeRateLimitError
     )
-    with mock.patch.dict(sys.modules, {"anthropic": fake_module}), \
-         mock.patch.object(br.time, "sleep") as sleeper:
+    with mock.patch.dict(sys.modules, {"anthropic": fake_module}), mock.patch.object(
+        br.time, "sleep"
+    ) as sleeper:
         text, _ = br._generate_anthropic(
             "claude-opus-4-7", "sys", "usr", max_tokens=512
         )
@@ -267,9 +268,7 @@ def test_anthropic_non_rate_limit_error_propagates():
     )
     with mock.patch.dict(sys.modules, {"anthropic": fake_module}):
         with pytest.raises(OtherError):
-            br._generate_anthropic(
-                "claude-opus-4-7", "sys", "usr", max_tokens=512
-            )
+            br._generate_anthropic("claude-opus-4-7", "sys", "usr", max_tokens=512)
 
 
 # ---------------------------------------------------------------------------
@@ -313,8 +312,9 @@ def test_openai_rate_limit_retry_with_retries_exhausted():
     fake_module = types.SimpleNamespace(
         OpenAI=lambda: fake_client, RateLimitError=FakeRateLimitError
     )
-    with mock.patch.dict(sys.modules, {"openai": fake_module}), \
-         mock.patch.object(br.time, "sleep"):
+    with mock.patch.dict(sys.modules, {"openai": fake_module}), mock.patch.object(
+        br.time, "sleep"
+    ):
         with pytest.raises(FakeRateLimitError):
             br._generate_openai("gpt-5", "sys", "usr", max_tokens=512)
     # Initial call + three retries = four invocations total
@@ -480,33 +480,53 @@ def test_help_advertises_estimate_cost_flag():
 
 def test_estimate_cost_aggregation_uses_rate_card():
     rows = [
-        ("01_equity_thesis", "claude-opus-4-7",
-         {"input_tokens": 1_000_000, "output_tokens": 500_000, "cache_hit_tokens": 0}),
-        ("01_equity_thesis", "claude-opus-4-7",
-         {"input_tokens": 500_000, "output_tokens": 200_000, "cache_hit_tokens": 0}),
-        ("02_competitive_analysis", "gpt-5",
-         {"input_tokens": 100_000, "output_tokens": 50_000, "cache_hit_tokens": 0}),
+        (
+            "01_equity_thesis",
+            "claude-opus-4-7",
+            {
+                "input_tokens": 1_000_000,
+                "output_tokens": 500_000,
+                "cache_hit_tokens": 0,
+            },
+        ),
+        (
+            "01_equity_thesis",
+            "claude-opus-4-7",
+            {"input_tokens": 500_000, "output_tokens": 200_000, "cache_hit_tokens": 0},
+        ),
+        (
+            "02_competitive_analysis",
+            "gpt-5",
+            {"input_tokens": 100_000, "output_tokens": 50_000, "cache_hit_tokens": 0},
+        ),
     ]
     agg = br._estimate_cost_from_usage(rows)
     opus_bucket = agg[("01_equity_thesis", "claude-opus-4-7")]
-    # 1.5M input @ $15 + 0.7M output @ $75 = $22.5 + $52.5 = $75.00
+    # Opus 4.7: 1.5M input @ $5 + 0.7M output @ $25 = $7.50 + $17.50 = $25.00
     assert opus_bucket["input_tokens"] == 1_500_000
     assert opus_bucket["output_tokens"] == 700_000
-    assert opus_bucket["est_usd"] == pytest.approx(22.5 + 52.5)
+    assert opus_bucket["est_usd"] == pytest.approx(7.5 + 17.5)
     gpt_bucket = agg[("02_competitive_analysis", "gpt-5")]
-    # 100k input @ $10 + 50k output @ $30 = $1.00 + $1.50 = $2.50
-    assert gpt_bucket["est_usd"] == pytest.approx(1.0 + 1.5)
+    # GPT-5: 100k input @ $0.625 + 50k output @ $5 = $0.0625 + $0.25 = $0.3125
+    assert gpt_bucket["est_usd"] == pytest.approx(0.0625 + 0.25)
 
 
 def test_estimate_cost_unknown_sku_uses_fallback_rate():
     rows = [
-        ("mod", "unknown-model-xyz",
-         {"input_tokens": 1_000_000, "output_tokens": 1_000_000, "cache_hit_tokens": 0})
+        (
+            "mod",
+            "unknown-model-xyz",
+            {
+                "input_tokens": 1_000_000,
+                "output_tokens": 1_000_000,
+                "cache_hit_tokens": 0,
+            },
+        )
     ]
     agg = br._estimate_cost_from_usage(rows)
     bucket = agg[("mod", "unknown-model-xyz")]
-    # Fallback is (10, 30): 1M * 10 + 1M * 30 = $40
-    assert bucket["est_usd"] == pytest.approx(40.0)
+    # Fallback is (3, 15) — Sonnet 4.6 tier: 1M * 3 + 1M * 15 = $18
+    assert bucket["est_usd"] == pytest.approx(18.0)
 
 
 # ---------------------------------------------------------------------------

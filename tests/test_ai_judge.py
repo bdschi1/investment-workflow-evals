@@ -21,10 +21,10 @@ from tools.ai_judge import (
     _thinking_budget_to_effort,
 )
 
-
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _make_tool_use_block(
     dim_scores: dict,
@@ -105,6 +105,7 @@ def _make_scenario(scenario_id: str = "test_scenario") -> dict:
 # Existing / backward-compat tests
 # ---------------------------------------------------------------------------
 
+
 class TestGradeReturnsDimensionScores(unittest.TestCase):
     """mock returns valid tool_use; verify dimension_scores dict returned."""
 
@@ -167,8 +168,12 @@ class TestRetryOnValidationFailure(unittest.TestCase):
         bad_scores = {"factual_accuracy": 150.0, "risk_assessment": 70.0}
         good_scores = {"factual_accuracy": 85.0, "risk_assessment": 70.0}
 
-        first_response = _make_response([_make_tool_use_block(bad_scores, tool_id="tu_1")])
-        second_response = _make_response([_make_tool_use_block(good_scores, tool_id="tu_2")])
+        first_response = _make_response(
+            [_make_tool_use_block(bad_scores, tool_id="tu_1")]
+        )
+        second_response = _make_response(
+            [_make_tool_use_block(good_scores, tool_id="tu_2")]
+        )
 
         mock_client = MagicMock()
         MockAnthropic.return_value = mock_client
@@ -566,8 +571,12 @@ class TestFallbackLogging(unittest.TestCase):
         with self.assertLogs("tools.ai_judge", level="WARNING") as caplog:
             judge.grade(_make_scenario("scen1"), "resp", _make_rubric(dim_ids))
 
-        triggers = [r for r in caplog.records if "judge_fallback_trigger" in r.getMessage()]
-        self.assertTrue(triggers, "expected at least one judge_fallback_trigger warning")
+        triggers = [
+            r for r in caplog.records if "judge_fallback_trigger" in r.getMessage()
+        ]
+        self.assertTrue(
+            triggers, "expected at least one judge_fallback_trigger warning"
+        )
         # Structured fields must appear in messages.
         joined = " ".join(r.getMessage() for r in triggers)
         self.assertIn("scenario=scen1", joined)
@@ -583,7 +592,9 @@ class TestFallbackLogging(unittest.TestCase):
 
         judge = AIJudge(api_key="x")
         with self.assertLogs("tools.ai_judge", level="WARNING") as caplog:
-            result = judge.grade(_make_scenario("scen_api"), "resp", _make_rubric(dim_ids))
+            result = judge.grade(
+                _make_scenario("scen_api"), "resp", _make_rubric(dim_ids)
+            )
 
         msgs = " ".join(r.getMessage() for r in caplog.records)
         self.assertIn("error_type=api_error", msgs)
@@ -633,7 +644,9 @@ class TestStopReasonRefusal(unittest.TestCase):
 
         judge = AIJudge(api_key="x")
         with self.assertLogs("tools.ai_judge", level="WARNING") as caplog:
-            result = judge.grade(_make_scenario("sc_ref"), "resp", _make_rubric(dim_ids))
+            result = judge.grade(
+                _make_scenario("sc_ref"), "resp", _make_rubric(dim_ids)
+            )
 
         self.assertTrue(result.fallback_used)
         self.assertEqual(result.metadata["fallback_reason"], "model_refused")
@@ -660,7 +673,9 @@ class TestStopReasonContextWindow(unittest.TestCase):
 
         judge = AIJudge(api_key="x")
         with self.assertLogs("tools.ai_judge", level="ERROR") as caplog:
-            result = judge.grade(_make_scenario("sc_ctx"), "resp", _make_rubric(dim_ids))
+            result = judge.grade(
+                _make_scenario("sc_ctx"), "resp", _make_rubric(dim_ids)
+            )
 
         self.assertTrue(result.fallback_used)
         self.assertEqual(result.metadata["fallback_reason"], "context_window_exceeded")
@@ -702,7 +717,9 @@ class TestUsageMetadata(unittest.TestCase):
     def test_usage_on_success_object_style(self, MockAnthropic):
         """SDK-style usage object (attribute access) also works."""
         dim_ids = ["d1"]
-        usage_obj = MagicMock(spec=["input_tokens", "output_tokens", "cache_read_input_tokens"])
+        usage_obj = MagicMock(
+            spec=["input_tokens", "output_tokens", "cache_read_input_tokens"]
+        )
         usage_obj.input_tokens = 500
         usage_obj.output_tokens = 150
         usage_obj.cache_read_input_tokens = 250

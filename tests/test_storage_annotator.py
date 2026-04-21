@@ -31,6 +31,7 @@ def _read_jsonl(path):
 # Required field
 # ---------------------------------------------------------------------------
 
+
 def test_annotator_id_required_missing_raises(tmp_path):
     data_file = str(tmp_path / "ds.jsonl")
     with pytest.raises(TypeError):
@@ -77,6 +78,7 @@ def test_empty_string_annotator_id_raises(tmp_path):
 # ---------------------------------------------------------------------------
 # Happy path: write + read
 # ---------------------------------------------------------------------------
+
 
 def test_save_and_read_preserves_fields(tmp_path):
     data_file = str(tmp_path / "ds.jsonl")
@@ -152,6 +154,7 @@ def test_session_id_accepted_when_provided(tmp_path):
 # ---------------------------------------------------------------------------
 # Backward compatibility: legacy records
 # ---------------------------------------------------------------------------
+
 
 def test_legacy_record_upgraded_on_read(tmp_path, caplog):
     """Legacy shape: meta.annotator = 'Expert_v1', no annotator_id."""
@@ -251,6 +254,7 @@ def test_mixed_legacy_and_new_records(tmp_path):
 # ---------------------------------------------------------------------------
 # load_stats compatibility
 # ---------------------------------------------------------------------------
+
 
 def test_load_stats_handles_missing_file(tmp_path):
     data_file = str(tmp_path / "nope.jsonl")
