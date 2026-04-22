@@ -161,7 +161,7 @@ def compute_format(text: str) -> float:
     if n_paras >= 2:
         lengths = [len(p) for p in paragraphs]
         avg_len = sum(lengths) / n_paras
-        variance = sum((l - avg_len) ** 2 for l in lengths) / n_paras
+        variance = sum((length - avg_len) ** 2 for length in lengths) / n_paras
         cv = (variance ** 0.5) / max(avg_len, 1)
         consistency = max(1.0 - cv, 0.0)
     else:

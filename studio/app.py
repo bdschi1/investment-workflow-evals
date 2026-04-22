@@ -20,7 +20,7 @@ from studio.configs import (
     GenerationConfig, PRESETS, PRESET_CATEGORIES, AVAILABLE_MODELS, ALL_MODELS,
     DEFAULT_SYSTEM_PROMPTS, provider_for_model,
 )
-from studio.ranker import generate_k_outputs, extract_pairwise_preferences, count_pairs
+from studio.ranker import generate_k_outputs, extract_pairwise_preferences, count_pairs, ai_pre_screen
 from studio.generator import generate_draft
 from studio.document import parse_document, assemble_context, get_section_summary, chunk_context
 
@@ -85,6 +85,8 @@ if "chunks" not in st.session_state:
     st.session_state.chunks = []          # list[Chunk] when auto-chunked
 if "current_chunk_idx" not in st.session_state:
     st.session_state.current_chunk_idx = 0
+if "pre_screen_results" not in st.session_state:
+    st.session_state.pre_screen_results = []   # list[dict] from ai_pre_screen()
 
 
 # Default model index for single-pair mode (index into ALL_MODELS)
@@ -618,6 +620,18 @@ with tab2:
         pair_preview = count_pairs(k)
         st.caption(f"K = {k} outputs → **{pair_preview} pairwise pairs** per ranking")
 
+        # AI pre-screen toggle (opt-in)
+        run_pre_screen = st.checkbox(
+            "Run AI pre-screen after generation",
+            value=False,
+            key="run_pre_screen_toggle",
+            help=(
+                "After generating outputs, an AI judge scores each response "
+                "on the evaluation rubric. Scores are shown alongside each "
+                "output as a secondary signal — they do not affect your ranking."
+            ),
+        )
+
         # Generate button
         if st.button(f"Generate {k} Outputs", type="primary", key="ranking_gen"):
             if not uploaded_file:
@@ -643,12 +657,46 @@ with tab2:
                 st.session_state.ranking_outputs = outputs
                 st.session_state.ranking_configs = active_configs
                 st.session_state.ranking_session_id = str(uuid.uuid4())
+                st.session_state.pre_screen_results = []
+
+                if run_pre_screen:
+                    with st.spinner("Running AI pre-screen..."):
+                        try:
+                            labels_list_for_screen = list(outputs.keys())
+                            responses_for_screen = [outputs[lbl] for lbl in labels_list_for_screen]
+                            # Use a minimal scenario/rubric when none is available
+                            # (studio context doesn't carry a full eval scenario)
+                            _screen_scenario = {"title": "Studio Pre-Screen", "context": prompt, "task": prompt}
+                            _screen_rubric = {
+                                "dimensions": [
+                                    {"id": "quality", "name": "Overall Quality", "weight": 1.0,
+                                     "description": "General analytical quality, accuracy, and relevance"},
+                                ]
+                            }
+                            st.session_state.pre_screen_results = ai_pre_screen(
+                                scenario=_screen_scenario,
+                                rubric=_screen_rubric,
+                                responses=responses_for_screen,
+                            )
+                        except Exception as _pre_screen_exc:
+                            st.warning(f"AI pre-screen unavailable: {_pre_screen_exc}")
+                            st.session_state.pre_screen_results = []
+
                 st.rerun()
 
     # ---- Step 2: Review & Rank ----
     if st.session_state.ranking_outputs and st.session_state.ranking_configs:
         configs_by_label = {c.label: c for c in st.session_state.ranking_configs}
         outputs = st.session_state.ranking_outputs
+
+        # Build a label→pre-screen result lookup for display
+        _pre_screen_by_label: dict = {}
+        if st.session_state.pre_screen_results:
+            _labels_order_display = list(outputs.keys())
+            for _psr in st.session_state.pre_screen_results:
+                _idx = _psr.get("response_idx")
+                if _idx is not None and _idx < len(_labels_order_display):
+                    _pre_screen_by_label[_labels_order_display[_idx]] = _psr
 
         with st.container(border=True):
             st.markdown("#### Review Outputs")
@@ -657,7 +705,36 @@ with tab2:
             for label, text in outputs.items():
                 cfg = configs_by_label[label]
                 header = f"Output {label}  —  {cfg.provider}/{cfg.model}, temp={cfg.temperature}"
+
+                # Append AI score badge to header if pre-screening was run
+                _psr = _pre_screen_by_label.get(label)
+                if _psr is not None:
+                    _score = _psr.get("overall_score", None)
+                    _poor = _psr.get("likely_poor_quality", False)
+                    if _score is not None:
+                        if _poor:
+                            header += f"  |  ⚠ Low quality (AI: {_score:.0f}/100)"
+                        else:
+                            header += f"  |  AI Score: {_score:.0f}/100"
+
                 with st.expander(header, expanded=True):
+                    # Show inline score summary if pre-screening ran
+                    if _psr is not None:
+                        _score = _psr.get("overall_score")
+                        _poor = _psr.get("likely_poor_quality", False)
+                        _conf = _psr.get("judge_confidence", "")
+                        _fallback = _psr.get("fallback_used", False)
+                        _crit = _psr.get("critical_failures", [])
+
+                        if _fallback:
+                            st.caption("_AI pre-screen: judge unavailable — score is a neutral fallback._")
+                        else:
+                            _badge_color = "🔴" if _poor else "🟢"
+                            _score_text = f"{_badge_color} **AI pre-screen score: {_score:.0f}/100** (confidence: {_conf})"
+                            if _crit:
+                                _score_text += f" — ⚠ Critical failures: {', '.join(_crit)}"
+                            st.caption(_score_text)
+
                     st.text_area(f"output_{label}", value=text, height=350, disabled=True, label_visibility="collapsed")
 
         # ---- Scratchpad for notes while reviewing ----
@@ -764,6 +841,8 @@ with tab2:
                         source="studio_ranking",
                         tags=ranking_tags,
                         session_id=st.session_state.ranking_session_id,
+                        pre_screen_results=st.session_state.pre_screen_results or None,
+                        labels_order=list(outputs.keys()),
                     )
                     st.session_state.dataset.extend(pairs)
                     st.toast(f"Saved {n_pairs} pairs! Total: {len(st.session_state.dataset)}", icon="✅")
@@ -773,4 +852,4 @@ with tab2:
 
 
 # --- Footer ---
-st.caption("v0.8 | Financial RLHF Studio — Boilerplate Filtering + Auto-Chunking + Multi-Provider + K-Output Ranking")
+st.caption("v0.9 | Financial RLHF Studio — Boilerplate Filtering + Auto-Chunking + Multi-Provider + K-Output Ranking + AI Pre-Screen")

@@ -12,30 +12,64 @@ Usage:
 
 import argparse
 import json
+import sys
 import yaml
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import Optional, Dict, Any
 from dataclasses import dataclass
 
+DEFAULT_FRONTIER_MODELS: tuple[str, ...] = (
+    "claude-opus-4-7",
+    "claude-sonnet-4-5",
+    "gpt-5",
+    "gemini-2.5-pro",
+)
+
+
+def parse_models_flag(raw: Optional[str]) -> list[str]:
+    """Parse a --models value into a cleaned list of SKU strings.
+
+    Accepts `None`/empty (returns `[]`), a single SKU, or a
+    comma-separated list. Whitespace is stripped; empty tokens are
+    dropped; order is preserved with duplicates removed.
+
+    The parsed list is attached to EvaluationConfig.models. Callers
+    that are not benchmark-aware can ignore the attribute; the
+    benchmark runner uses it to fan out generation calls.
+    """
+    if not raw:
+        return []
+    seen: list[str] = []
+    for token in raw.split(","):
+        sku = token.strip()
+        if sku and sku not in seen:
+            seen.append(sku)
+    return seen
+
 
 @dataclass
 class EvaluationConfig:
     """Configuration for running an evaluation."""
+
     module: str
     scenario_name: str
     rubric_name: str = "standard"
     ai_output_path: Optional[str] = None
     output_dir: Path = None
+    models: list[str] = None  # Optional frontier SKUs for benchmark fan-out
 
     def __post_init__(self):
         if self.output_dir is None:
             self.output_dir = Path("results")
+        if self.models is None:
+            self.models = []
 
 
 @dataclass
 class EvaluationResult:
     """Result of running an evaluation."""
+
     scenario_id: str
     scenario_title: str
     module: str
@@ -48,6 +82,9 @@ class EvaluationResult:
     detailed_feedback: dict
     likert_score: int = 0
     likert_label: str = ""
+    # Tier 1.4/1.5: judge metadata surfaced for benchmark cache-rate and
+    # fallback tracking. None when heuristic grading was used.
+    judge_metadata: Optional[dict] = None
 
 
 class EvaluationRunner:
@@ -76,14 +113,22 @@ class EvaluationRunner:
                             break
 
             scenarios_dir = module_dir / "scenarios"
-            scenario_count = len(list(scenarios_dir.glob("*.yaml"))) if scenarios_dir.exists() else 0
+            scenario_count = (
+                len(list(scenarios_dir.glob("*.yaml"))) if scenarios_dir.exists() else 0
+            )
 
-            modules.append({
-                "id": module_dir.name,
-                "name": module_dir.name.replace("_", " ").title(),
-                "description": description[:100] + "..." if len(description) > 100 else description,
-                "scenario_count": scenario_count,
-            })
+            modules.append(
+                {
+                    "id": module_dir.name,
+                    "name": module_dir.name.replace("_", " ").title(),
+                    "description": (
+                        description[:100] + "..."
+                        if len(description) > 100
+                        else description
+                    ),
+                    "scenario_count": scenario_count,
+                }
+            )
 
         return modules
 
@@ -102,13 +147,15 @@ class EvaluationRunner:
             with open(scenario_file) as f:
                 scenario = yaml.safe_load(f)
 
-            scenarios.append({
-                "id": scenario.get("id", scenario_file.stem),
-                "title": scenario.get("title", ""),
-                "category": scenario.get("category", ""),
-                "difficulty": scenario.get("difficulty", ""),
-                "estimated_time_minutes": scenario.get("estimated_time_minutes", 0),
-            })
+            scenarios.append(
+                {
+                    "id": scenario.get("id", scenario_file.stem),
+                    "title": scenario.get("title", ""),
+                    "category": scenario.get("category", ""),
+                    "difficulty": scenario.get("difficulty", ""),
+                    "estimated_time_minutes": scenario.get("estimated_time_minutes", 0),
+                }
+            )
 
         return scenarios
 
@@ -159,7 +206,9 @@ class EvaluationRunner:
                     return module_dir
         return None
 
-    def run(self, module: str, scenario_name: str, ai_output: str = None) -> Dict[str, Any]:
+    def run(
+        self, module: str, scenario_name: str, ai_output: str = None
+    ) -> Dict[str, Any]:
         """Run complete evaluation workflow (legacy interface)."""
         print(f"Loading scenario: {module}/{scenario_name}")
         scenario = self.load_scenario(module, scenario_name)
@@ -199,14 +248,15 @@ class EvaluationRunner:
 
         # Run grading
         from .grading_engine import GradingEngine
+
         grader = GradingEngine(rubric)
-        scores, critical_failures, detailed_feedback = grader.grade(
-            ai_output, scenario
-        )
+        scores, critical_failures, detailed_feedback = grader.grade(ai_output, scenario)
 
         # Calculate overall score
         # Handle both decimal weights (0.30) and integer weights (30)
-        total_weight = sum(dim.get("weight", 1.0) for dim in rubric.get("dimensions", []))
+        total_weight = sum(
+            dim.get("weight", 1.0) for dim in rubric.get("dimensions", [])
+        )
 
         if total_weight > 10:  # Integer weights (sum to 100)
             overall_score = sum(
@@ -225,7 +275,18 @@ class EvaluationRunner:
 
         # Likert overlay (5-35 scale)
         from .grading_engine import _score_to_likert
+
         likert_score, likert_label = _score_to_likert(overall_score)
+
+        # Surface judge metadata (usage, fallback_used, cache-read tokens) when
+        # LLM grading was used. Consumed by benchmark_runner for cache-hit-rate
+        # and fallback tracking in the CSV.
+        judge_metadata = None
+        cache = getattr(grader, "_llm_cache", None)
+        if cache:
+            last_judge = next(iter(cache.values()), None)
+            if last_judge is not None and hasattr(last_judge, "metadata"):
+                judge_metadata = dict(last_judge.metadata)
 
         return EvaluationResult(
             scenario_id=scenario.get("id", config.scenario_name),
@@ -240,6 +301,7 @@ class EvaluationRunner:
             detailed_feedback=detailed_feedback,
             likert_score=likert_score,
             likert_label=likert_label,
+            judge_metadata=judge_metadata,
         )
 
     def _default_rubric(self) -> dict:
@@ -272,19 +334,23 @@ class EvaluationRunner:
         if format == "json":
             output_path = output_dir / f"{filename}.json"
             with open(output_path, "w") as f:
-                json.dump({
-                    "scenario_id": result.scenario_id,
-                    "scenario_title": result.scenario_title,
-                    "module": result.module,
-                    "timestamp": result.timestamp,
-                    "overall_score": result.overall_score,
-                    "likert_score": result.likert_score,
-                    "likert_label": result.likert_label,
-                    "passed": result.passed,
-                    "scores": result.scores,
-                    "critical_failures": result.critical_failures,
-                    "detailed_feedback": result.detailed_feedback,
-                }, f, indent=2)
+                json.dump(
+                    {
+                        "scenario_id": result.scenario_id,
+                        "scenario_title": result.scenario_title,
+                        "module": result.module,
+                        "timestamp": result.timestamp,
+                        "overall_score": result.overall_score,
+                        "likert_score": result.likert_score,
+                        "likert_label": result.likert_label,
+                        "passed": result.passed,
+                        "scores": result.scores,
+                        "critical_failures": result.critical_failures,
+                        "detailed_feedback": result.detailed_feedback,
+                    },
+                    f,
+                    indent=2,
+                )
 
         elif format == "markdown":
             output_path = output_dir / f"{filename}.md"
@@ -293,7 +359,9 @@ class EvaluationRunner:
                 f.write(f"**Module:** {result.module}\n")
                 f.write(f"**Scenario:** {result.scenario_id}\n")
                 f.write(f"**Timestamp:** {result.timestamp}\n")
-                f.write(f"**Overall Score:** {result.overall_score:.1f}/100 (Likert: {result.likert_score}/35 — {result.likert_label})\n")
+                f.write(
+                    f"**Overall Score:** {result.overall_score:.1f}/100 (Likert: {result.likert_score}/35 — {result.likert_label})\n"
+                )
                 f.write(f"**Status:** {'PASS' if result.passed else 'FAIL'}\n\n")
 
                 f.write("## Dimension Scores\n\n")
@@ -315,6 +383,100 @@ class EvaluationRunner:
         return output_path
 
 
+_CI_MODEL = "claude-haiku-4-5-20251001"
+_CI_LIMIT = 5
+_CI_DEFAULT_THRESHOLD = 0.70
+
+
+def _run_ci_mode(runner: "EvaluationRunner", args) -> None:
+    """Run the fast CI quality gate.
+
+    Collects up to _CI_LIMIT scenarios (across all modules or from one module),
+    grades each using a stub (no real AI output — tests structural pass/fail),
+    outputs JSON to stdout, exits 0/1.
+    """
+    threshold = getattr(args, "threshold", _CI_DEFAULT_THRESHOLD)
+    module_filter = getattr(args, "module", None)
+
+    # Collect scenarios
+    collected: list[tuple[str, str]] = []  # (module_name, scenario_name)
+    try:
+        if module_filter:
+            for s in runner.list_scenarios(module_filter):
+                collected.append((module_filter, s["id"]))
+                if len(collected) >= _CI_LIMIT:
+                    break
+        else:
+            for m in runner.list_modules():
+                for s in runner.list_scenarios(m["id"]):
+                    collected.append((m["id"], s["id"]))
+                    if len(collected) >= _CI_LIMIT:
+                        break
+                if len(collected) >= _CI_LIMIT:
+                    break
+    except Exception as exc:
+        print(f"CI mode: failed to collect scenarios: {exc}", file=sys.stderr)
+        collected = []
+
+    n = len(collected)
+    print(
+        f"CI mode: evaluating {n} scenarios with {_CI_MODEL}...",
+        file=sys.stderr,
+    )
+
+    passed_ids: list[str] = []
+    failed_ids: list[str] = []
+
+    for module_name, scenario_name in collected:
+        try:
+            # Load golden answer as a proxy AI output for CI scoring
+            try:
+                golden = runner.load_golden_answer(module_name, scenario_name)
+            except FileNotFoundError:
+                golden = "No output available for CI test."
+
+            config = EvaluationConfig(
+                module=module_name,
+                scenario_name=scenario_name,
+                rubric_name="standard",
+            )
+            result = runner.run_evaluation(config, ai_output=golden)
+            if result.passed:
+                passed_ids.append(scenario_name)
+            else:
+                failed_ids.append(scenario_name)
+        except Exception as exc:
+            print(
+                f"CI mode: scenario {scenario_name} errored: {exc}",
+                file=sys.stderr,
+            )
+            failed_ids.append(scenario_name)
+
+    total = len(passed_ids) + len(failed_ids)
+    pass_rate = len(passed_ids) / total if total > 0 else 0.0
+    gate_passed = pass_rate >= threshold
+
+    status_str = "CI PASS" if gate_passed else "CI FAIL"
+    output = {
+        "ci_mode": True,
+        "model": _CI_MODEL,
+        "scenarios_evaluated": total,
+        "passed": len(passed_ids),
+        "failed": len(failed_ids),
+        "pass_rate": round(pass_rate, 4),
+        "pass": gate_passed,
+        "threshold": threshold,
+        "failed_scenarios": failed_ids,
+        "summary": (
+            f"{len(passed_ids)}/{total} scenarios passed "
+            f"({pass_rate * 100:.1f}%). {status_str}."
+        ),
+    }
+
+    print(json.dumps(output, indent=2))
+    sys.exit(0 if gate_passed else 1)
+
+
 def main():
     """CLI entry point."""
     parser = argparse.ArgumentParser(
@@ -328,6 +490,20 @@ def main():
     list_parser = subparsers.add_parser("list", help="List modules or scenarios")
     list_parser.add_argument("--module", help="Show scenarios for this module")
 
+    # CI command
+    ci_parser = subparsers.add_parser(
+        "ci", help="Run fast CI quality gate (5 scenarios, Haiku judge)"
+    )
+    ci_parser.add_argument(
+        "--module", help="Limit CI run to a specific module (optional)"
+    )
+    ci_parser.add_argument(
+        "--threshold",
+        type=float,
+        default=0.70,
+        help="Pass-rate threshold for CI gate (default 0.70)",
+    )
+
     # Run command
     run_parser = subparsers.add_parser("run", help="Run an evaluation")
     run_parser.add_argument("--module", required=True, help="Evaluation module")
@@ -335,8 +511,21 @@ def main():
     run_parser.add_argument("--input", help="Path to AI output file")
     run_parser.add_argument("--rubric", default="standard", help="Rubric to use")
     run_parser.add_argument("--output-dir", default="results", help="Output directory")
-    run_parser.add_argument("--format", default="json", choices=["json", "markdown"],
-                           help="Report format")
+    run_parser.add_argument(
+        "--format", default="json", choices=["json", "markdown"], help="Report format"
+    )
+    run_parser.add_argument(
+        "--models",
+        default=None,
+        help=(
+            "Comma-separated frontier SKUs to benchmark (e.g. "
+            "'claude-opus-4-7,claude-sonnet-4-5,gpt-5,gemini-2.5-pro'). "
+            "When omitted, behavior matches the pre-existing single-input path. "
+            "When supplied with --input, the SKU list is recorded in the "
+            "result metadata; when supplied without --input, the benchmark "
+            "runner fans out one generation call per SKU."
+        ),
+    )
 
     # Report command
     report_parser = subparsers.add_parser("report", help="Generate reports")
@@ -345,6 +534,10 @@ def main():
     args = parser.parse_args()
 
     runner = EvaluationRunner()
+
+    if args.command == "ci":
+        _run_ci_mode(runner, args)
+        return
 
     if args.command == "list":
         if args.module:
@@ -357,16 +550,18 @@ def main():
             print("\nAvailable Modules:\n")
             for m in modules:
                 print(f"  {m['id']:<30} ({m['scenario_count']} scenarios)")
-                if m['description']:
+                if m["description"]:
                     print(f"    {m['description']}")
 
     elif args.command == "run":
+        models = parse_models_flag(getattr(args, "models", None))
         config = EvaluationConfig(
             module=args.module,
             scenario_name=args.scenario,
             rubric_name=args.rubric,
             ai_output_path=args.input,
             output_dir=Path(args.output_dir),
+            models=models,
         )
 
         if not args.input:
@@ -376,7 +571,9 @@ def main():
         print(f"Running evaluation: {args.module}/{args.scenario}")
         result = runner.run_evaluation(config)
 
-        print(f"\nOverall Score: {result.overall_score:.1f}/100 (Likert: {result.likert_score}/35 — {result.likert_label})")
+        print(
+            f"\nOverall Score: {result.overall_score:.1f}/100 (Likert: {result.likert_score}/35 — {result.likert_label})"
+        )
         print(f"Status: {'PASS' if result.passed else 'FAIL'}")
 
         if result.critical_failures:

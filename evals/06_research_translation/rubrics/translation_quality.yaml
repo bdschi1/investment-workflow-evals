@@ -1,3 +1,6 @@
+# prompt_version: 1.0.0
+# prompt_date: 2026-04-04
+# description: Research Translation Quality Rubric
 version: "1.0.0"
 name: "Research Translation Quality"
 description: "Rubric for evaluating institutional-to-retail research translation"
