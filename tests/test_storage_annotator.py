@@ -7,7 +7,9 @@ import logging
 
 import pytest
 
-from studio import storage
+pytest.importorskip("pandas")
+
+from studio import storage  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
