@@ -6,6 +6,19 @@ from studio.configs import GenerationConfig
 logger = logging.getLogger(__name__)
 
 
+def _format_system(system: str | None) -> list[dict] | str | None:
+    """Wrap system prompts >= 400 chars with cache_control for prompt caching."""
+    if not system or len(system) < 400:
+        return system
+    return [
+        {
+            "type": "text",
+            "text": system,
+            "cache_control": {"type": "ephemeral"},
+        }
+    ]
+
+
 def _generate_openai(context: str, user_prompt: str, config: GenerationConfig, api_key: str) -> str:
     """Generate via OpenAI API."""
     from openai import OpenAI
@@ -60,13 +73,13 @@ def _generate_anthropic(context: str, user_prompt: str, config: GenerationConfig
     response = client.messages.create(
         model=config.model,
         max_tokens=max_tokens,
-        system=config.system_prompt,
+        system=_format_system(config.system_prompt),
         messages=[
             {"role": "user", "content": f"Context: {context}\n\nInstruction: {user_prompt}"},
         ],
         temperature=config.temperature,
     )
-    return response.content[0].text
+    return next((b.text for b in response.content if b.type == "text"), "")
 
 
 def _resolve_api_key(provider: str) -> str | None:

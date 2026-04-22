@@ -1,0 +1,254 @@
+# prompt_version: 1.0.0
+# prompt_date: 2026-04-04
+# description: Deal Execution Standard Rubric
+
+# Deal Execution Evaluation Rubric
+# Covers bid comparison and diligence request list scenarios
+
+id: standard_deal_execution
+title: "Standard Deal Execution Evaluation Rubric"
+version: "1.0.0"
+module: "12_deal_execution"
+
+description: >
+  Evaluates AI-generated deal execution deliverables: bid comparison
+  matrices and due diligence request lists. These test practical
+  deal skills — normalization, risk assessment, completeness, and
+  domain-specific knowledge.
+
+total_points: 100
+pass_threshold: 70
+excellence_threshold: 85
+
+dimensions:
+  - name: "Analytical Accuracy"
+    id: "analytical_accuracy"
+    weight: 30
+    description: >
+      For bid comparison: normalization, probability-discounting,
+      risk scoring. For diligence: specificity and domain correctness.
+
+    scoring_levels:
+      - score: "27-30"
+        label: "Excellent"
+        description: >
+          All values normalized correctly. Earn-outs probability-
+          discounted. Risk scores well-calibrated. Diligence items
+          specific and actionable. Domain expertise evident.
+        anchor_examples:
+          - "Earn-out discounted at 50% → adjusted EV = $800M + ($50M × 50%) = $825M"
+          - "Request: 'Monthly P&L by service line for FY2021-2024 in Excel, with bridge to audited'"
+
+      - score: "21-26"
+        label: "Good"
+        description: >
+          Core analysis correct. Minor normalization gaps.
+          Most items specific and domain-appropriate.
+
+      - score: "15-20"
+        label: "Acceptable"
+        description: >
+          Basic analysis present. Some normalization missing.
+          Items somewhat generic.
+
+      - score: "8-14"
+        label: "Poor"
+        description: >
+          Material analytical errors. Generic items.
+          Domain knowledge gaps.
+
+      - score: "0-7"
+        label: "Fail"
+        description: >
+          Fundamental errors. Cannot rely on analysis.
+
+  - name: "Risk Assessment"
+    id: "risk_assessment"
+    weight: 25
+    description: >
+      Quality of execution risk analysis for bids, or priority
+      assignment and risk focus for diligence.
+
+    scoring_levels:
+      - score: "22-25"
+        label: "Excellent"
+        description: >
+          Comprehensive risk assessment across all dimensions.
+          Regulatory, financing, integration, timeline risks
+          differentiated. Priority levels well-calibrated.
+          Key deal-breaker risks highlighted.
+        anchor_examples:
+          - "Consolidated Controls: regulatory risk HIGH — 35% combined share triggers second request"
+          - "Priority distribution: 28% Critical, 42% Important, 30% Supporting"
+
+      - score: "17-21"
+        label: "Good"
+        description: >
+          Solid risk coverage. Most dimensions assessed.
+          Priorities reasonable.
+
+      - score: "12-16"
+        label: "Acceptable"
+        description: >
+          Basic risk coverage. Some dimensions missing.
+          Priority levels present but calibration off.
+
+      - score: "6-11"
+        label: "Poor"
+        description: >
+          Minimal risk assessment. Key risks missed.
+          No meaningful prioritization.
+
+      - score: "0-5"
+        label: "Fail"
+        description: >
+          No risk assessment or prioritization.
+
+  - name: "Completeness"
+    id: "completeness"
+    weight: 25
+    description: >
+      All bids compared across all dimensions, or all diligence
+      categories covered with appropriate scope.
+
+    scoring_levels:
+      - score: "22-25"
+        label: "Excellent"
+        description: >
+          Every bid/category fully covered. All specified
+          dimensions present. Appropriate scope (not too
+          narrow, not too broad). No material gaps.
+        anchor_examples:
+          - "All 5 bids compared across 10 dimensions"
+          - "95 diligence items across 12 categories"
+
+      - score: "17-21"
+        label: "Good"
+        description: >
+          Most items covered. Minor gaps in secondary areas.
+
+      - score: "12-16"
+        label: "Acceptable"
+        description: >
+          Core items present. Some categories light or missing.
+
+      - score: "6-11"
+        label: "Poor"
+        description: >
+          Multiple gaps. Major categories missing.
+
+      - score: "0-5"
+        label: "Fail"
+        description: >
+          Fundamentally incomplete.
+
+  - name: "Judgment & Framing"
+    id: "judgment"
+    weight: 10
+    description: >
+      Quality of synthesis, trade-off articulation, and
+      appropriate role framing (advisory, not decision-making).
+
+    scoring_levels:
+      - score: "9-10"
+        label: "Excellent"
+        description: >
+          Clear trade-off analysis. Price vs certainty articulated.
+          Framework for decision, not directive. Professional tone.
+
+      - score: "7-8"
+        label: "Good"
+        description: >
+          Reasonable framing. Some trade-offs noted.
+
+      - score: "5-6"
+        label: "Acceptable"
+        description: >
+          Basic framing. Limited synthesis.
+
+      - score: "2-4"
+        label: "Poor"
+        description: >
+          No synthesis or inappropriate framing.
+
+      - score: "0-1"
+        label: "Fail"
+        description: >
+          Unprofessional or directive tone.
+
+  - name: "Presentation"
+    id: "presentation"
+    weight: 10
+    description: >
+      Formatting, organization, visual clarity.
+
+    scoring_levels:
+      - score: "9-10"
+        label: "Excellent"
+        description: >
+          Professional formatting. Color-coded risk/priority.
+          Clean side-by-side layout. Print-ready.
+
+      - score: "7-8"
+        label: "Good"
+        description: >
+          Professional formatting. Some color coding.
+
+      - score: "5-6"
+        label: "Acceptable"
+        description: >
+          Readable. Basic formatting.
+
+      - score: "2-4"
+        label: "Poor"
+        description: >
+          Minimal formatting.
+
+      - score: "0-1"
+        label: "Fail"
+        description: >
+          No formatting.
+
+critical_failures:
+  - id: "missing_bidder"
+    description: "A bidder is completely missing from the comparison"
+
+  - id: "earn_out_face_value"
+    description: "Earn-out treated at full face value without probability discount"
+
+  - id: "price_only_ranking"
+    description: "Bids ranked solely on headline price without risk adjustment"
+
+  - id: "missing_regulatory_diligence"
+    description: "Healthcare diligence list omits regulatory/compliance category"
+
+  - id: "generic_requests"
+    description: "Diligence items are all generic ('provide all X') without specifics"
+
+  - id: "fabricated_terms"
+    description: "Bid terms or financial data not in the scenario context"
+
+  - id: "single_recommendation"
+    description: "Makes definitive bid recommendation instead of presenting framework"
+
+scoring_instructions:
+  general:
+    - "For bid comparisons: verify all bids represented and normalization applied"
+    - "For diligence lists: count items, check category coverage, assess specificity"
+    - "Check for critical failures before scoring"
+
+  calibration:
+    - "'Excellent' = ready for board presentation or data room setup"
+    - "'Good' = needs minor senior review"
+    - "'Acceptable' = structure right, needs rework on detail"
+
+  weighting:
+    - "Apply weights: accuracy(30) + risk(25) + completeness(25) + judgment(10) + presentation(10)"
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-24"
+  applicable_scenarios:
+    - "Bid comparison matrices"
+    - "Due diligence request lists"
+    - "Process management deliverables"

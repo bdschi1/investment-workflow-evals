@@ -15,10 +15,16 @@ from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass
 
+from tools.financial_validators import validate_submission
 
 _LIKERT_LABELS = {
-    5: "Fail", 10: "Poor", 15: "Below Expectations", 20: "Adequate",
-    25: "Good", 30: "Very Good", 35: "Excellent",
+    5: "Fail",
+    10: "Poor",
+    15: "Below Expectations",
+    20: "Adequate",
+    25: "Good",
+    30: "Very Good",
+    35: "Excellent",
 }
 
 
@@ -44,6 +50,7 @@ def _score_to_likert(score_0_100: float) -> tuple[int, str]:
 @dataclass
 class GradingResult:
     """Result of grading a submission."""
+
     dimension_scores: dict[str, float]
     critical_failures: list[str]
     detailed_feedback: dict[str, str]
@@ -136,12 +143,34 @@ class GradingEngine:
             failures.append("Contains forward-looking guarantees")
 
         # Check scenario-specific critical failures
-        scenario_critical = scenario.get("evaluation_criteria", {}).get("critical_failures", [])
+        scenario_critical = scenario.get("evaluation_criteria", {}).get(
+            "critical_failures", []
+        )
         for critical in scenario_critical:
             if self._check_scenario_critical_failure(ai_output, critical):
                 failures.append(f"Scenario critical failure: {critical}")
 
+        # Financial math validators — Tier 1.3 pre-gate. Elevates arithmetic
+        # / mechanical errors (S&U imbalance, BS imbalance, non-monotonic DCF
+        # grid, overconfidence language, etc.) to critical-failure status so
+        # a response with correct vocabulary but wrong math cannot pass.
+        scenario_type = self._infer_scenario_type(scenario)
+        for vr in validate_submission(ai_output, scenario_type=scenario_type):
+            if vr.severity == "critical" and not vr.passed:
+                failures.append(f"Validator critical: {vr.name} — {vr.detail}")
+
         return failures
+
+    @staticmethod
+    def _infer_scenario_type(scenario: dict) -> str:
+        module = (scenario.get("module") or "").lower()
+        if "lbo" in module:
+            return "lbo"
+        if "dcf" in module or "valuation" in module:
+            return "dcf"
+        if "ma_analysis" in module or "m_and_a" in module or "merger" in module:
+            return "ma"
+        return "auto"
 
     def _detect_hallucination(self, ai_output: str, scenario: dict) -> bool:
         """
@@ -156,11 +185,13 @@ class GradingEngine:
         fact_values = []
         for fact in key_facts:
             # Extract any numbers from the facts
-            numbers = re.findall(r'\$[\d,.]+[BMK]?|\d+\.?\d*%|\d{4}', fact.get("fact", ""))
+            numbers = re.findall(
+                r"\$[\d,.]+[BMK]?|\d+\.?\d*%|\d{4}", fact.get("fact", "")
+            )
             fact_values.extend(numbers)
 
         # Check for specific financial figures in output
-        output_figures = re.findall(r'\$[\d,.]+[BMK]?', ai_output)
+        output_figures = re.findall(r"\$[\d,.]+[BMK]?", ai_output)
 
         # If output has many specific figures not in scenario, flag as potential hallucination
         # This is imperfect but catches obvious cases
@@ -168,10 +199,10 @@ class GradingEngine:
 
         # Check if this is a calculation-heavy document type
         calculation_context_patterns = [
-            r'(?i)(position|sizing|notional|volatility.adjusted|risk.contribution)',
-            r'(?i)(factor.{0,20}decomposition|attribution)',
-            r'(?i)(hedge|hedging).{0,20}(instrument|framework)',
-            r'(?i)(terminal|dcf|valuation).{0,20}(value|framework)',
+            r"(?i)(position|sizing|notional|volatility.adjusted|risk.contribution)",
+            r"(?i)(factor.{0,20}decomposition|attribution)",
+            r"(?i)(hedge|hedging).{0,20}(instrument|framework)",
+            r"(?i)(terminal|dcf|valuation).{0,20}(value|framework)",
         ]
         has_calculation_context = any(
             re.search(p, ai_output) for p in calculation_context_patterns
@@ -211,7 +242,7 @@ class GradingEngine:
                 # Also check that there's content after the header
                 match = re.search(pattern, ai_output)
                 if match:
-                    after_header = ai_output[match.end():match.end() + 200]
+                    after_header = ai_output[match.end() : match.end() + 200]
                     # Should have at least 50 chars of risk discussion
                     if len(after_header.strip()) > 50:
                         return True
@@ -246,21 +277,32 @@ class GradingEngine:
 
         if "no probability estimate" in lower_failure:
             # Check for probability language
-            prob_patterns = [r'\d+%', r'probability', r'likelihood', r'chance']
+            prob_patterns = [r"\d+%", r"probability", r"likelihood", r"chance"]
             has_probability = any(re.search(p, ai_output, re.I) for p in prob_patterns)
             return not has_probability
 
         if "ignores binary" in lower_failure or "binary nature" in lower_failure:
             # Check for scenario analysis language indicating awareness of binary outcomes
             scenario_patterns = [
-                r'if.*succeed', r'if.*fail', r'success.*scenario', r'failure.*scenario',
-                r'bull.*case', r'bear.*case', r'base.*case',
-                r'upside.*downside', r'asymmetric',
-                r'binary', r'catalyst',
-                r'probability.*success', r'probability.*fail',
-                r'\d+%.*probability', r'\d+%.*chance',
+                r"if.*succeed",
+                r"if.*fail",
+                r"success.*scenario",
+                r"failure.*scenario",
+                r"bull.*case",
+                r"bear.*case",
+                r"base.*case",
+                r"upside.*downside",
+                r"asymmetric",
+                r"binary",
+                r"catalyst",
+                r"probability.*success",
+                r"probability.*fail",
+                r"\d+%.*probability",
+                r"\d+%.*chance",
             ]
-            has_scenarios = any(re.search(p, ai_output, re.I) for p in scenario_patterns)
+            has_scenarios = any(
+                re.search(p, ai_output, re.I) for p in scenario_patterns
+            )
             return not has_scenarios
 
         return False
@@ -341,15 +383,14 @@ class GradingEngine:
 
         # Check for citations
         citation_patterns = [
-            r'10-[KQ]',
-            r'Q[1-4]\s*20\d{2}',
-            r'\(source:',
-            r'according to',
-            r'per the',
+            r"10-[KQ]",
+            r"Q[1-4]\s*20\d{2}",
+            r"\(source:",
+            r"according to",
+            r"per the",
         ]
         citation_count = sum(
-            len(re.findall(p, ai_output, re.I))
-            for p in citation_patterns
+            len(re.findall(p, ai_output, re.I)) for p in citation_patterns
         )
 
         if citation_count >= 5:
@@ -370,7 +411,11 @@ class GradingEngine:
             # Extract key terms and check if present
             if fact_obj.get("importance") == "critical":
                 key_terms = fact.split()[:5]  # First 5 words
-                if any(term.lower() in ai_output.lower() for term in key_terms if len(term) > 4):
+                if any(
+                    term.lower() in ai_output.lower()
+                    for term in key_terms
+                    if len(term) > 4
+                ):
                     facts_found += 1
 
         if facts_found >= 3:
@@ -383,7 +428,9 @@ class GradingEngine:
         # Cap score
         score = min(100.0, max(0.0, score))
 
-        return score, "; ".join(feedback_parts) if feedback_parts else "Standard factual accuracy"
+        return score, (
+            "; ".join(feedback_parts) if feedback_parts else "Standard factual accuracy"
+        )
 
     def _score_analytical_rigor(
         self,
@@ -396,11 +443,15 @@ class GradingEngine:
         feedback_parts = []
 
         # Check for scenario analysis
-        scenario_keywords = ["bull case", "bear case", "base case", "upside", "downside", "scenario"]
-        scenario_count = sum(
-            1 for kw in scenario_keywords
-            if kw in ai_output.lower()
-        )
+        scenario_keywords = [
+            "bull case",
+            "bear case",
+            "base case",
+            "upside",
+            "downside",
+            "scenario",
+        ]
+        scenario_count = sum(1 for kw in scenario_keywords if kw in ai_output.lower())
 
         if scenario_count >= 3:
             score += 15
@@ -413,10 +464,15 @@ class GradingEngine:
             feedback_parts.append("Limited scenario analysis")
 
         # Check for assumption transparency
-        assumption_keywords = ["assuming", "assumption", "we assume", "estimate", "projected"]
+        assumption_keywords = [
+            "assuming",
+            "assumption",
+            "we assume",
+            "estimate",
+            "projected",
+        ]
         assumption_count = sum(
-            len(re.findall(kw, ai_output, re.I))
-            for kw in assumption_keywords
+            len(re.findall(kw, ai_output, re.I)) for kw in assumption_keywords
         )
 
         if assumption_count >= 5:
@@ -427,10 +483,15 @@ class GradingEngine:
             feedback_parts.append("Some assumptions stated")
 
         # Check for logical structure
-        structure_patterns = ["therefore", "thus", "because", "as a result", "consequently"]
+        structure_patterns = [
+            "therefore",
+            "thus",
+            "because",
+            "as a result",
+            "consequently",
+        ]
         structure_count = sum(
-            len(re.findall(p, ai_output, re.I))
-            for p in structure_patterns
+            len(re.findall(p, ai_output, re.I)) for p in structure_patterns
         )
 
         if structure_count >= 3:
@@ -438,7 +499,9 @@ class GradingEngine:
             feedback_parts.append("Good logical flow")
 
         score = min(100.0, max(0.0, score))
-        return score, "; ".join(feedback_parts) if feedback_parts else "Standard analytical rigor"
+        return score, (
+            "; ".join(feedback_parts) if feedback_parts else "Standard analytical rigor"
+        )
 
     def _score_risk_assessment(
         self,
@@ -451,11 +514,13 @@ class GradingEngine:
         feedback_parts = []
 
         # Count distinct risks mentioned
-        risk_section_match = re.search(r'(?i)(##.*risk|risk.*:)(.*?)(?=##|\Z)', ai_output, re.DOTALL)
+        risk_section_match = re.search(
+            r"(?i)(##.*risk|risk.*:)(.*?)(?=##|\Z)", ai_output, re.DOTALL
+        )
         if risk_section_match:
             risk_section = risk_section_match.group(2)
             # Count bullet points or numbered items
-            risk_items = len(re.findall(r'[-•\*]|\d+\.', risk_section))
+            risk_items = len(re.findall(r"[-•\*]|\d+\.", risk_section))
 
             if risk_items >= 5:
                 score += 20
@@ -479,10 +544,7 @@ class GradingEngine:
             r"(?i)(high|medium|low)\s*(probability|impact|risk)",
         ]
 
-        has_assessment = any(
-            re.search(p, ai_output)
-            for p in prob_impact_patterns
-        )
+        has_assessment = any(re.search(p, ai_output) for p in prob_impact_patterns)
 
         if has_assessment:
             score += 15
@@ -494,7 +556,9 @@ class GradingEngine:
             feedback_parts.append("Discusses risk mitigation")
 
         score = min(100.0, max(0.0, score))
-        return score, "; ".join(feedback_parts) if feedback_parts else "Standard risk assessment"
+        return score, (
+            "; ".join(feedback_parts) if feedback_parts else "Standard risk assessment"
+        )
 
     def _score_evidence_quality(
         self,
@@ -508,19 +572,18 @@ class GradingEngine:
 
         # Check for specific source citations
         specific_source_patterns = [
-            r'10-K',
-            r'10-Q',
-            r'8-K',
-            r'earnings call',
-            r'transcript',
-            r'investor presentation',
-            r'Bloomberg',
-            r'FactSet',
+            r"10-K",
+            r"10-Q",
+            r"8-K",
+            r"earnings call",
+            r"transcript",
+            r"investor presentation",
+            r"Bloomberg",
+            r"FactSet",
         ]
 
         source_count = sum(
-            len(re.findall(p, ai_output, re.I))
-            for p in specific_source_patterns
+            len(re.findall(p, ai_output, re.I)) for p in specific_source_patterns
         )
 
         if source_count >= 5:
@@ -534,7 +597,7 @@ class GradingEngine:
             feedback_parts.append("Limited source citations")
 
         # Check for shown calculations
-        calc_patterns = [r'=', r'\$\d+.*[x×\*]', r'EPS.*\$', r'P/E.*\d+']
+        calc_patterns = [r"=", r"\$\d+.*[x×\*]", r"EPS.*\$", r"P/E.*\d+"]
         has_calculations = any(re.search(p, ai_output) for p in calc_patterns)
 
         if has_calculations:
@@ -542,7 +605,9 @@ class GradingEngine:
             feedback_parts.append("Includes shown calculations")
 
         score = min(100.0, max(0.0, score))
-        return score, "; ".join(feedback_parts) if feedback_parts else "Standard evidence quality"
+        return score, (
+            "; ".join(feedback_parts) if feedback_parts else "Standard evidence quality"
+        )
 
     def _score_completeness(
         self,
@@ -586,14 +651,18 @@ class GradingEngine:
 
         # Check for balanced presentation
         has_bull = any(kw in ai_output.lower() for kw in ["bull", "upside", "positive"])
-        has_bear = any(kw in ai_output.lower() for kw in ["bear", "downside", "risk", "concern"])
+        has_bear = any(
+            kw in ai_output.lower() for kw in ["bear", "downside", "risk", "concern"]
+        )
 
         if has_bull and has_bear:
             score += 10
             feedback_parts.append("Balanced bull/bear presentation")
 
         score = min(100.0, max(0.0, score))
-        return score, "; ".join(feedback_parts) if feedback_parts else "Standard completeness"
+        return score, (
+            "; ".join(feedback_parts) if feedback_parts else "Standard completeness"
+        )
 
     # === DCF VALUATION DIMENSIONS ===
 
@@ -617,7 +686,9 @@ class GradingEngine:
             r"(?i)structural.{0,30}(vs|versus|from).{0,30}cyclical",
         ]
 
-        separation_count = sum(1 for p in separation_patterns if re.search(p, ai_output))
+        separation_count = sum(
+            1 for p in separation_patterns if re.search(p, ai_output)
+        )
         if separation_count >= 2:
             score += 25
             feedback_parts.append("Strong alpha/environment separation")
@@ -635,7 +706,9 @@ class GradingEngine:
             r"(?i)\d+.{0,5}%\s*(was|came from|attributable)",
         ]
 
-        has_quantification = any(re.search(p, ai_output) for p in quantification_patterns)
+        has_quantification = any(
+            re.search(p, ai_output) for p in quantification_patterns
+        )
         if has_quantification:
             score += 15
             feedback_parts.append("Quantifies driver contributions")
@@ -649,13 +722,19 @@ class GradingEngine:
             r"(?i)revert.{0,15}mean",
         ]
 
-        has_extrapolation_awareness = any(re.search(p, ai_output) for p in extrapolation_warning_patterns)
+        has_extrapolation_awareness = any(
+            re.search(p, ai_output) for p in extrapolation_warning_patterns
+        )
         if has_extrapolation_awareness:
             score += 10
             feedback_parts.append("Warns against environmental extrapolation")
 
         score = min(100.0, max(0.0, score))
-        return score, "; ".join(feedback_parts) if feedback_parts else "Standard alpha/environment analysis"
+        return score, (
+            "; ".join(feedback_parts)
+            if feedback_parts
+            else "Standard alpha/environment analysis"
+        )
 
     def _score_risk_treatment(
         self,
@@ -694,7 +773,9 @@ class GradingEngine:
             r"(?i)unhedged",
         ]
 
-        uncertainty_count = sum(1 for p in uncertainty_patterns if re.search(p, ai_output))
+        uncertainty_count = sum(
+            1 for p in uncertainty_patterns if re.search(p, ai_output)
+        )
         if uncertainty_count >= 2:
             score += 15
             feedback_parts.append("Explicit uncertainty acknowledgment")
@@ -708,7 +789,9 @@ class GradingEngine:
             feedback_parts.append("Probability-weighted scenarios")
 
         score = min(100.0, max(0.0, score))
-        return score, "; ".join(feedback_parts) if feedback_parts else "Standard risk treatment"
+        return score, (
+            "; ".join(feedback_parts) if feedback_parts else "Standard risk treatment"
+        )
 
     def _score_terminal_value(
         self,
@@ -763,7 +846,11 @@ class GradingEngine:
             feedback_parts.append("Internal consistency checked")
 
         score = min(100.0, max(0.0, score))
-        return score, "; ".join(feedback_parts) if feedback_parts else "Standard terminal value analysis"
+        return score, (
+            "; ".join(feedback_parts)
+            if feedback_parts
+            else "Standard terminal value analysis"
+        )
 
     def _score_cyclical_structural(
         self,
@@ -806,7 +893,11 @@ class GradingEngine:
             feedback_parts.append("Uses normalized metrics")
 
         score = min(100.0, max(0.0, score))
-        return score, "; ".join(feedback_parts) if feedback_parts else "Standard cyclical analysis"
+        return score, (
+            "; ".join(feedback_parts)
+            if feedback_parts
+            else "Standard cyclical analysis"
+        )
 
     # === PORTFOLIO CONSTRUCTION DIMENSIONS ===
 
@@ -857,7 +948,11 @@ class GradingEngine:
             feedback_parts.append("Multiple risks identified")
 
         score = min(100.0, max(0.0, score))
-        return score, "; ".join(feedback_parts) if feedback_parts else "Standard risk classification"
+        return score, (
+            "; ".join(feedback_parts)
+            if feedback_parts
+            else "Standard risk classification"
+        )
 
     def _score_hedging_logic(
         self,
@@ -878,7 +973,9 @@ class GradingEngine:
             r"(?i)what.{0,10}(to|not to).{0,10}hedge",
         ]
 
-        hedge_logic_count = sum(1 for p in hedge_logic_patterns if re.search(p, ai_output))
+        hedge_logic_count = sum(
+            1 for p in hedge_logic_patterns if re.search(p, ai_output)
+        )
         if hedge_logic_count >= 2:
             score += 25
             feedback_parts.append("Strong hedging logic")
@@ -914,7 +1011,9 @@ class GradingEngine:
             feedback_parts.append("Acknowledges residual exposure")
 
         score = min(100.0, max(0.0, score))
-        return score, "; ".join(feedback_parts) if feedback_parts else "Standard hedging analysis"
+        return score, (
+            "; ".join(feedback_parts) if feedback_parts else "Standard hedging analysis"
+        )
 
     def _score_sizing_methodology(
         self,
@@ -936,7 +1035,9 @@ class GradingEngine:
             r"(?i)size.{0,20}(on|for|by).{0,20}risk",
         ]
 
-        risk_sizing_count = sum(1 for p in risk_sizing_patterns if re.search(p, ai_output))
+        risk_sizing_count = sum(
+            1 for p in risk_sizing_patterns if re.search(p, ai_output)
+        )
         if risk_sizing_count >= 2:
             score += 25
             feedback_parts.append("Strong risk-based sizing")
@@ -972,7 +1073,11 @@ class GradingEngine:
             feedback_parts.append("Addresses binary event sizing")
 
         score = min(100.0, max(0.0, score))
-        return score, "; ".join(feedback_parts) if feedback_parts else "Standard sizing methodology"
+        return score, (
+            "; ".join(feedback_parts)
+            if feedback_parts
+            else "Standard sizing methodology"
+        )
 
     def _score_risk_placement(
         self,
@@ -1013,7 +1118,9 @@ class GradingEngine:
             feedback_parts.append("Risk budgeting present")
 
         score = min(100.0, max(0.0, score))
-        return score, "; ".join(feedback_parts) if feedback_parts else "Standard risk placement"
+        return score, (
+            "; ".join(feedback_parts) if feedback_parts else "Standard risk placement"
+        )
 
     def _score_uncertainty_judgment(
         self,
@@ -1034,7 +1141,9 @@ class GradingEngine:
             r"(?i)probability",
         ]
 
-        uncertainty_count = sum(1 for p in uncertainty_patterns if re.search(p, ai_output))
+        uncertainty_count = sum(
+            1 for p in uncertainty_patterns if re.search(p, ai_output)
+        )
         if uncertainty_count >= 3:
             score += 20
             feedback_parts.append("Strong uncertainty acknowledgment")
@@ -1056,7 +1165,11 @@ class GradingEngine:
             feedback_parts.append("Includes contingency planning")
 
         score = min(100.0, max(0.0, score))
-        return score, "; ".join(feedback_parts) if feedback_parts else "Standard uncertainty handling"
+        return score, (
+            "; ".join(feedback_parts)
+            if feedback_parts
+            else "Standard uncertainty handling"
+        )
 
     # === RISK ATTRIBUTION DIMENSIONS ===
 
@@ -1108,7 +1221,11 @@ class GradingEngine:
             feedback_parts.append("Shows calculation methodology")
 
         score = min(100.0, max(0.0, score))
-        return score, "; ".join(feedback_parts) if feedback_parts else "Standard attribution analysis"
+        return score, (
+            "; ".join(feedback_parts)
+            if feedback_parts
+            else "Standard attribution analysis"
+        )
 
     def _score_hypothesis_testing(
         self,
@@ -1129,7 +1246,9 @@ class GradingEngine:
             r"(?i)evidence.{0,20}(would|should).{0,20}(show|support)",
         ]
 
-        hypothesis_count = sum(1 for p in hypothesis_patterns if re.search(p, ai_output))
+        hypothesis_count = sum(
+            1 for p in hypothesis_patterns if re.search(p, ai_output)
+        )
         if hypothesis_count >= 2:
             score += 25
             feedback_parts.append("Strong hypothesis testing")
@@ -1165,7 +1284,11 @@ class GradingEngine:
             feedback_parts.append("Evidence-based conclusions")
 
         score = min(100.0, max(0.0, score))
-        return score, "; ".join(feedback_parts) if feedback_parts else "Standard hypothesis testing"
+        return score, (
+            "; ".join(feedback_parts)
+            if feedback_parts
+            else "Standard hypothesis testing"
+        )
 
     def _score_contextual_evaluation(
         self,
@@ -1186,7 +1309,9 @@ class GradingEngine:
             r"(?i)skill.{0,20}(given|conditional|after)",
         ]
 
-        conditional_count = sum(1 for p in conditional_patterns if re.search(p, ai_output))
+        conditional_count = sum(
+            1 for p in conditional_patterns if re.search(p, ai_output)
+        )
         if conditional_count >= 2:
             score += 20
             feedback_parts.append("Evaluates skill conditionally")
@@ -1202,7 +1327,9 @@ class GradingEngine:
             r"(?i)accidental.{0,20}(accumulation|exposure)",
         ]
 
-        has_intentionality = any(re.search(p, ai_output) for p in intentionality_patterns)
+        has_intentionality = any(
+            re.search(p, ai_output) for p in intentionality_patterns
+        )
         if has_intentionality:
             score += 20
             feedback_parts.append("Addresses intentionality question")
@@ -1214,13 +1341,19 @@ class GradingEngine:
             r"(?i)environment.{0,20}(wasn't|was not|not).{0,15}neutral",
         ]
 
-        has_neutral_skepticism = any(re.search(p, ai_output) for p in neutral_skepticism_patterns)
+        has_neutral_skepticism = any(
+            re.search(p, ai_output) for p in neutral_skepticism_patterns
+        )
         if has_neutral_skepticism:
             score += 10
             feedback_parts.append("Questions neutral environment assumption")
 
         score = min(100.0, max(0.0, score))
-        return score, "; ".join(feedback_parts) if feedback_parts else "Standard contextual evaluation"
+        return score, (
+            "; ".join(feedback_parts)
+            if feedback_parts
+            else "Standard contextual evaluation"
+        )
 
     def _score_with_llm(
         self,
@@ -1229,13 +1362,47 @@ class GradingEngine:
         dimension: dict,
     ) -> tuple[float, str]:
         """
-        Score a dimension using an LLM.
+        Score a dimension using an LLM (InvestmentWorkflowJudge).
 
-        This provides more nuanced evaluation but requires API access.
+        Grades all dimensions in a single API call and caches the result on
+        self._llm_result so subsequent calls per grading pass do not re-invoke
+        the API.  Returns (score, feedback) for the requested dimension only.
         """
-        # Placeholder for LLM-based scoring
-        # Would integrate with Anthropic or OpenAI API
-        return 75.0, "LLM scoring not yet implemented"
+        from tools.ai_judge import InvestmentWorkflowJudge
+
+        # Lazy-instantiate the judge once per GradingEngine lifetime.
+        if not hasattr(self, "_judge") or self._judge is None:
+            self._judge = InvestmentWorkflowJudge()
+
+        # Cache the full JudgeResult per (ai_output, scenario id) so all
+        # dimensions in one grade() call share a single API round-trip.
+        cache_key = (
+            id(ai_output),
+            scenario.get("id", ""),
+        )
+        if not hasattr(self, "_llm_cache"):
+            self._llm_cache: dict = {}
+
+        if cache_key not in self._llm_cache:
+            judge_result = self._judge.grade(
+                scenario=scenario,
+                ai_output=ai_output,
+                rubric=self.rubric,
+            )
+            self._llm_cache[cache_key] = judge_result
+
+        result = self._llm_cache[cache_key]
+
+        dim_id = dimension["id"]
+        score = result.dimension_scores.get(dim_id, 50.0)
+        feedback = result.feedback.get(
+            dim_id,
+            result.detected_patterns.get(dim_id, "LLM-graded"),
+        )
+        if result.fallback_used:
+            feedback = "Fallback score — AI judge unavailable"
+
+        return score, feedback
 
     def calculate_overall_score(self, dimension_scores: dict) -> float:
         """Calculate weighted overall score."""
@@ -1276,10 +1443,14 @@ def main():
 
     # Grade command
     grade_parser = subparsers.add_parser("grade", help="Grade a submission")
-    grade_parser.add_argument("--submission", required=True, help="Path to submission file")
+    grade_parser.add_argument(
+        "--submission", required=True, help="Path to submission file"
+    )
     grade_parser.add_argument("--rubric", required=True, help="Path to rubric YAML")
     grade_parser.add_argument("--scenario", help="Path to scenario YAML (optional)")
-    grade_parser.add_argument("--use-llm", action="store_true", help="Use LLM for grading")
+    grade_parser.add_argument(
+        "--use-llm", action="store_true", help="Use LLM for grading"
+    )
 
     args = parser.parse_args()
 

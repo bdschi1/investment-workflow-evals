@@ -1,0 +1,214 @@
+# DCF Sensitivity Table — Terminal Growth vs WACC
+# Tests: 2D sensitivity grid construction, terminal value mechanics, directional correctness
+# SMB integration: Base financials from smb_bridge
+
+id: dcf_sensitivity_growth_wacc
+title: "DCF Sensitivity Analysis — Terminal Growth Rate vs WACC"
+version: "1.0.0"
+module: "10_valuation_synthesis"
+category: "dcf_sensitivity"
+difficulty: "moderate"
+estimated_time_minutes: 45
+output_format: "excel"
+
+smb_integration:
+  enabled: true
+  placeholder_prefix: "[X]"
+  sheets_required:
+    - "IS Annual"
+    - "CF Annual"
+    - "Valuation"
+  fill_fields:
+    - "revenue"
+    - "ebitda"
+    - "ebitda_margin"
+    - "capex"
+    - "depreciation_amortization"
+    - "enterprise_value"
+    - "total_debt"
+    - "cash"
+    - "shares_outstanding"
+    - "share_price"
+
+context:
+  company:
+    name: "[COMPANY]"
+    ticker: "[TICKER]"
+    sector: "Consumer — Branded Goods"
+    market_cap: "[X]"
+    description: >
+      Mid-cap consumer branded goods company. SMB provides actual
+      financials for DCF base year inputs.
+
+  dcf_base_case:
+    projection_period: "5 years"
+    terminal_year_ufcf: "$185M"
+    base_wacc: "9.5%"
+    base_terminal_growth: "2.5%"
+    terminal_value_method: "Gordon Growth (perpetuity growth)"
+    projection_period_pv: "$650M"
+    notes: >
+      Terminal value typically represents 65-75% of total DCF enterprise
+      value for a mature consumer company. The sensitivity table should
+      demonstrate how changes in WACC and terminal growth rate affect
+      the implied enterprise value and per-share price.
+
+  situation: >
+    A sell-side analyst is updating a DCF model for [COMPANY] and
+    needs to present the sensitivity of the valuation to the two
+    most impactful assumptions: the weighted average cost of capital
+    (WACC) and the terminal growth rate. The analyst should construct
+    a 2D sensitivity table showing implied enterprise value and
+    implied price per share at various WACC/growth combinations.
+
+  as_of_date: "2024-12-15"
+
+task:
+  prompt: >
+    Build a DCF sensitivity analysis for [COMPANY]. Your Excel
+    deliverable must include:
+
+    1. **Terminal Value Calculation** — Show the Gordon Growth formula:
+       TV = terminal UFCF × (1 + g) ÷ (WACC − g). Calculate at
+       base case assumptions.
+    2. **PV of Terminal Value** — Discount TV back to present using
+       mid-year convention. Show as % of total enterprise value.
+    3. **Implied EV Sensitivity Table** — 2D matrix:
+       - Rows: WACC from 8.0% to 11.5% (0.5% increments = 8 rows)
+       - Columns: Terminal growth from 1.5% to 3.5% (0.25% increments = 9 cols)
+       - Cell values: implied enterprise value ($mm)
+    4. **Implied Price/Share Sensitivity Table** — Same dimensions,
+       showing implied equity value per share after subtracting
+       net debt and dividing by diluted shares
+    5. **Highlight Base Case** — Visually highlight the base case
+       cell (9.5% WACC, 2.5% growth). Show current share price
+       for reference.
+    6. **Terminal Value as % of EV** — Show how TV% changes across
+       the grid (should increase as WACC decreases or growth increases)
+
+  expected_output_type: "dcf_sensitivity"
+
+  constraints:
+    - "Terminal growth rate must be < WACC in every cell (g < WACC)"
+    - "Gordon Growth formula: TV = UFCF × (1+g) ÷ (WACC − g)"
+    - "PV of TV = TV ÷ (1 + WACC)^n where n = years to terminal"
+    - "Implied EV = PV of projection period CFs + PV of terminal value"
+    - "Net debt and share count must be consistent across all cells"
+    - "Directional check: higher WACC → lower EV; higher growth → higher EV"
+    - "Mid-year convention for discounting"
+
+  time_horizon: "5-year DCF with perpetuity terminal value"
+
+data_sources:
+  - type: "dcf_model"
+    description: "Pre-computed DCF base case"
+    date: "2024-12-15"
+    key_data_points:
+      - "Terminal year UFCF: $185M"
+      - "Base WACC: 9.5%"
+      - "Base terminal growth: 2.5%"
+      - "PV of projection period CFs: $650M"
+
+  - type: "balance_sheet"
+    description: "From SMB for EV-to-equity bridge"
+    date: "[X]"
+    key_data_points:
+      - "Total debt: [X]"
+      - "Cash: [X]"
+      - "Shares outstanding: [X]"
+      - "Current share price: [X]"
+
+key_facts:
+  - fact: "Terminal value represents 65-75% of total EV for mature consumer companies"
+    source: "Valuation methodology"
+    importance: "critical"
+
+  - fact: "WACC − g spread drives terminal value magnitude; small changes in either have outsized impact"
+    source: "DCF mechanics"
+    importance: "critical"
+
+  - fact: "Terminal growth rate should not exceed long-term nominal GDP growth (~3-3.5%)"
+    source: "Valuation best practices"
+    importance: "important"
+
+  - fact: "Mid-year convention assumes cash flows occur at the midpoint of each year, reducing discount by half a year"
+    source: "DCF methodology"
+    importance: "supporting"
+
+pitfalls:
+  - description: "Terminal growth rate ≥ WACC in some cells — produces negative or infinite terminal value"
+    failure_type: "mathematical_error"
+    severity: "critical"
+
+  - description: "Forgetting to add PV of projection period CFs — showing only PV of terminal value"
+    failure_type: "omission_error"
+    severity: "critical"
+
+  - description: "Using end-of-year discounting instead of mid-year convention"
+    failure_type: "methodology_error"
+    severity: "minor"
+
+  - description: "Directional errors — higher WACC showing higher EV (formula is inverted)"
+    failure_type: "formula_error"
+    severity: "critical"
+
+  - description: "Not flagging or excluding cells where g approaches WACC (spread < 100bps is unreliable)"
+    failure_type: "judgment_error"
+    severity: "minor"
+
+evaluation_criteria:
+  dimensions:
+    - name: "Terminal Value Mechanics"
+      weight: 0.30
+      criteria:
+        - "Gordon Growth formula correctly applied"
+        - "Terminal UFCF × (1+g) used (not just UFCF)"
+        - "PV of TV correctly discounted to present"
+        - "TV as % of EV shown and reasonable (65-75%)"
+        - "g < WACC enforced in all cells"
+
+    - name: "Sensitivity Table Construction"
+      weight: 0.30
+      criteria:
+        - "Correct dimensions (8 rows × 9 columns or similar)"
+        - "WACC increments consistent"
+        - "Growth rate increments consistent"
+        - "Every cell formula-driven (not hardcoded)"
+        - "Directionally correct throughout"
+
+    - name: "Equity Bridge"
+      weight: 0.20
+      criteria:
+        - "EV → equity value → per share bridge shown"
+        - "Consistent net debt and share count"
+        - "Both EV and per-share sensitivity tables"
+        - "Current share price reference"
+
+    - name: "Presentation"
+      weight: 0.20
+      criteria:
+        - "Base case cell highlighted"
+        - "Conditional formatting (green high value, red low)"
+        - "Units clearly labeled"
+        - "Current price reference line or note"
+        - "Professional formatting"
+
+  critical_failures:
+    - "Gordon Growth formula is wrong"
+    - "Terminal growth ≥ WACC in any cell without flagging"
+    - "Directional errors (higher WACC → higher EV)"
+    - "EV-to-equity bridge has wrong sign on net debt"
+    - "Hallucinated financial data"
+
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-24"
+  tags:
+    - "dcf"
+    - "sensitivity"
+    - "terminal_value"
+    - "wacc"
+    - "gordon_growth"
+    - "smb_integration"

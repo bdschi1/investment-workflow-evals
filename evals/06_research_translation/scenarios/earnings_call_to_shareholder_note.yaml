@@ -1,0 +1,113 @@
+# Earnings Call → Shareholder Note
+# Tests: signal-vs-noise in management commentary, guidance-change framing
+
+id: earnings_call_to_shareholder_note
+title: "Translate an Earnings Call Transcript into a Shareholder Note"
+version: "1.0.0"
+module: "06_research_translation"
+category: "earnings_to_shareholder"
+difficulty: "hard"
+estimated_time_minutes: 50
+
+context:
+  source_artifact:
+    type: "earnings_call_transcript"
+    length_words: 9200
+    issuer: "Large-cap consumer-staples multinational"
+    description: >
+      On the Q4 FY26 earnings call, management (a) reaffirmed prior
+      full-year FY27 organic-growth guidance of 3-5% but tightened
+      the operating-margin guidance from 'flat to up 50bps' down to
+      'flat to down 30bps' citing input-cost stickiness, (b) announced
+      a $1.5B three-year productivity program expected to land ~40%
+      in the P&L and 60% reinvested, (c) flagged a slow start to Q1
+      FY27 in a specific emerging-market region (~8% of revenue), and
+      (d) walked analysts through a routine accounting reclassification
+      that has no P&L impact. The Q&A was dominated (12 of 18 analyst
+      turns) by the margin-guidance change.
+  target_audience:
+    label: "existing individual shareholders subscribed to the company IR mailing list"
+    reading_level: "grade 7-9"
+  situation: >
+    The shareholder note must correctly identify that the headline
+    signal is the margin-guidance cut, not the productivity program
+    or the accounting reclassification, while not overstating the
+    emerging-market softness (which is one region representing ~8% of
+    revenue).
+  as_of_date: "2026-04-05"
+
+task:
+  prompt: >
+    Produce a ~400-word shareholder note conveying the Q4 FY26
+    earnings call results. Structure:
+
+    1. Headline (1 sentence) — the most important takeaway
+    2. What changed vs prior guidance (2-3 sentences) — specifically
+       the margin range
+    3. What did not change (1-2 sentences) — organic growth reaffirmed
+    4. Productivity program (1 short paragraph) — size and P&L flow-through
+    5. Early Q1 FY27 comment (1-2 sentences) — put the regional
+       softness in size context
+    6. What to watch (3 bullets)
+
+    Do not describe the routine accounting reclassification as
+    material. Do not turn the regional softness into a company-wide
+    headline.
+
+  expected_output_type: "shareholder_note"
+  constraints:
+    - "Margin-guidance change MUST be the headline"
+    - "Accounting reclassification must be omitted or noted as non-material"
+    - "Regional softness context (~8% of revenue) must be preserved"
+    - "No guaranteed-return language"
+
+key_facts:
+  - fact: "Margin guidance tightened from 'flat to +50bps' to 'flat to -30bps'"
+    source: "Management prepared remarks"
+    importance: "critical"
+  - fact: "Organic-growth guidance of 3-5% reaffirmed, not cut"
+    source: "Management prepared remarks"
+    importance: "critical"
+  - fact: "Productivity program is $1.5B over 3 years with ~40% P&L flow-through"
+    source: "Management prepared remarks"
+    importance: "important"
+  - fact: "Emerging-market softness is in one region representing ~8% of revenue"
+    source: "Q&A"
+    importance: "important"
+  - fact: "Accounting reclassification has no P&L impact"
+    source: "Management Q&A"
+    importance: "supporting"
+
+pitfalls:
+  - description: "Headline focuses on productivity program or accounting reclassification rather than margin cut"
+    failure_type: "signal_noise_confusion"
+    severity: "major"
+  - description: "Describing emerging-market softness as company-wide"
+    failure_type: "magnitude_distortion"
+    severity: "major"
+  - description: "Implying organic-growth guidance was reduced when it was reaffirmed"
+    failure_type: "direction_reversal"
+    severity: "critical"
+  - description: "Characterizing the routine accounting reclassification as material"
+    failure_type: "misframing"
+    severity: "major"
+  - description: "Reproducing dense jargon ('constant-currency,' 'underlying ex-FX') without defining it"
+    failure_type: "readability"
+    severity: "major"
+
+evaluation_criteria:
+  rubric: translation_quality
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-04-18"
+  tags:
+    - "research_translation"
+    - "earnings_call"
+    - "shareholder_note"
+    - "signal_vs_noise"
+  notes: >
+    This scenario explicitly tests signal-vs-noise: four discrete
+    management items with only one being the headline signal. Models
+    that uniformly summarize all four will fail the headline test.

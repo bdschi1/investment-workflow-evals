@@ -1,0 +1,229 @@
+# prompt_version: 1.0.0
+# prompt_date: 2026-04-04
+# description: Valuation Synthesis Standard Rubric
+
+# Valuation Synthesis Evaluation Rubric
+# Covers football field, SOTP, and DCF sensitivity scenarios
+
+id: standard_valuation_synthesis
+title: "Standard Valuation Synthesis Evaluation Rubric"
+version: "1.0.0"
+module: "10_valuation_synthesis"
+
+description: >
+  Evaluates AI-generated valuation synthesis deliverables: football field
+  summaries, sum-of-the-parts analyses, and DCF sensitivity tables. These
+  test integration of multiple valuation inputs into a coherent output
+  with correct EV-to-equity bridging.
+
+total_points: 100
+pass_threshold: 70
+excellence_threshold: 85
+
+dimensions:
+  - name: "Valuation Mechanics"
+    id: "valuation_mechanics"
+    weight: 35
+    description: >
+      Core valuation math: terminal value formulas, multiple
+      application, EV-to-equity bridge, per-share derivation.
+
+    scoring_levels:
+      - score: "31-35"
+        label: "Excellent"
+        description: >
+          All valuation formulas correct. EV-to-equity bridge
+          consistent across methods. Per-share values correct.
+          Terminal value mechanics (if applicable) properly applied.
+          Sensitivity grids directionally correct throughout.
+        anchor_examples:
+          - "Gordon Growth: TV = $185M × 1.025 ÷ (0.095 − 0.025) = $2,711M"
+          - "EV $2,400M − net debt $320M = equity $2,080M ÷ 52M shares = $40/share"
+          - "All 72 sensitivity cells formula-driven and directionally correct"
+
+      - score: "24-30"
+        label: "Good"
+        description: >
+          Core mechanics correct. Minor formula variations
+          (e.g., end-of-year vs mid-year discounting). Bridge
+          correct.
+
+      - score: "17-23"
+        label: "Acceptable"
+        description: >
+          Basic mechanics present. One formula error or
+          inconsistency. Bridge mostly correct.
+
+      - score: "9-16"
+        label: "Poor"
+        description: >
+          Material formula errors. Bridge has issues.
+          Directional errors in sensitivity.
+
+      - score: "0-8"
+        label: "Fail"
+        description: >
+          Fundamental valuation errors. Cannot rely on
+          any outputs.
+
+  - name: "Synthesis & Judgment"
+    id: "synthesis_judgment"
+    weight: 25
+    description: >
+      Integration across methods, appropriate weighting,
+      recognition of premiums/discounts, insightful observations.
+
+    scoring_levels:
+      - score: "22-25"
+        label: "Excellent"
+        description: >
+          Thoughtful weighting with rationale. Recognizes control
+          premium in precedents, conglomerate discount in SOTP.
+          Identifies convergence/divergence across methods.
+          Key observations are insightful and specific.
+        anchor_examples:
+          - "DCF and comps converge at $36-42/share; precedents higher at $44-52 due to control premium"
+          - "Weighting: DCF 35% (intrinsic value), precedents 30% (M&A context), comps 25%, 52-wk 10%"
+
+      - score: "17-21"
+        label: "Good"
+        description: >
+          Reasonable synthesis. Some methodology weighting.
+          Basic observations present.
+
+      - score: "12-16"
+        label: "Acceptable"
+        description: >
+          Methods presented side by side but limited synthesis.
+          Equal weighting or no weighting rationale.
+
+      - score: "6-11"
+        label: "Poor"
+        description: >
+          No real synthesis. Methods in isolation.
+          No observations or judgment.
+
+      - score: "0-5"
+        label: "Fail"
+        description: >
+          No integration across methods.
+
+  - name: "Completeness"
+    id: "completeness"
+    weight: 20
+    description: >
+      All required components present: multiple methods, ranges,
+      sensitivities, chart data.
+
+    scoring_levels:
+      - score: "18-20"
+        label: "Excellent"
+        description: >
+          All specified methods/components present. Ranges shown
+          (low/mid/high). Sensitivity at specified dimensions.
+          Summary chart data prepared. Reference price included.
+
+      - score: "14-17"
+        label: "Good"
+        description: >
+          Most components present. Ranges shown. Some sensitivity.
+
+      - score: "10-13"
+        label: "Acceptable"
+        description: >
+          Core components present. Limited ranges or sensitivity.
+
+      - score: "5-9"
+        label: "Poor"
+        description: >
+          Multiple components missing.
+
+      - score: "0-4"
+        label: "Fail"
+        description: >
+          Fundamentally incomplete.
+
+  - name: "Presentation"
+    id: "presentation"
+    weight: 20
+    description: >
+      Formatting, visual clarity, chart-readiness, conditional
+      formatting on sensitivity grids.
+
+    scoring_levels:
+      - score: "18-20"
+        label: "Excellent"
+        description: >
+          Wall Street formatting. Conditional formatting on grids
+          (green/yellow/red). Base case highlighted. Football field
+          data structured for charting. Print-ready.
+        anchor_examples:
+          - "Sensitivity grid: green ≥$45, yellow $30-45, red <$30"
+          - "Base case cell bordered and shaded"
+          - "Chart data tab with horizontal bar ranges"
+
+      - score: "14-17"
+        label: "Good"
+        description: >
+          Professional formatting. Some conditional formatting.
+          Base case noted.
+
+      - score: "10-13"
+        label: "Acceptable"
+        description: >
+          Readable. Basic formatting. No conditional formatting.
+
+      - score: "5-9"
+        label: "Poor"
+        description: >
+          Minimal formatting. Hard to interpret.
+
+      - score: "0-4"
+        label: "Fail"
+        description: >
+          No formatting. Raw data.
+
+critical_failures:
+  - id: "ev_equity_bridge_error"
+    description: "EV-to-equity bridge has wrong sign on net debt or is inconsistent across methods"
+
+  - id: "directional_error"
+    description: "Sensitivity grid shows higher value with higher discount rate (inverted)"
+
+  - id: "gordon_growth_error"
+    description: "Terminal value formula is mathematically wrong"
+
+  - id: "growth_exceeds_wacc"
+    description: "Terminal growth rate ≥ WACC without flagging"
+
+  - id: "hallucinated_data"
+    description: "Financial data not from SMB or scenario inputs"
+
+  - id: "sotp_no_corporate"
+    description: "SOTP ignores corporate overhead (overstates value)"
+
+scoring_instructions:
+  general:
+    - "Verify EV-to-equity bridge arithmetic first"
+    - "Check directional correctness of all sensitivity tables"
+    - "Spot-check at least 3 cells in any sensitivity grid"
+    - "Confirm base case values match stated assumptions"
+
+  calibration:
+    - "'Excellent' = ready for fairness opinion backup"
+    - "'Good' = needs minor VP edits"
+    - "'Acceptable' = structure right, details need work"
+
+  weighting:
+    - "Apply weights: mechanics(35) + synthesis(25) + completeness(20) + presentation(20)"
+    - "Round final score to nearest integer"
+    - "Any critical failure = automatic fail"
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-24"
+  applicable_scenarios:
+    - "Football field summaries"
+    - "Sum-of-the-parts analyses"
+    - "DCF sensitivity tables"
+    - "Valuation synthesis deliverables"

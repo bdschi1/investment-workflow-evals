@@ -1,0 +1,111 @@
+# Signing-to-Close Workstream Plan — M&A Transaction
+# Tests: workstream sequencing, regulatory gating items, risk flags
+
+id: signing_to_close_workstream
+title: "Signing-to-Close Workstream Plan — Strategic Healthcare Acquisition"
+version: "1.0.0"
+module: "12_deal_execution"
+category: "closing_workstream"
+difficulty: "moderate"
+estimated_time_minutes: 45
+
+context:
+  deal:
+    acquirer: "MeridianHealth Services (strategic, public)"
+    target: "CarePoint Health Services (private; home health & hospice)"
+    structure: "Merger agreement, 100% cash"
+    signed_EV: "$400M"
+    close_target: "90 days from signing"
+    signing_date: "2026-03-01"
+    announced_close: "2026-06-01"
+  key_closing_conditions:
+    - "HSR clearance (expected 30 days; pull-and-refile risk due to ~$100M deal value in overlapping geographies)"
+    - "State Department of Health change-of-ownership approvals in 8 states (30-90 days each)"
+    - "Medicare/Medicaid CHOW notifications (45-60 days)"
+    - "Third-party consents (top-20 payer contracts, 4 landlord consents)"
+    - "Representation & warranty insurance binding"
+    - "Financing close (acquirer drawing $250M on existing revolver + $150M new term loan)"
+    - "Employee WARN-Act notifications (if applicable)"
+    - "Target auditor sign-off on working capital closing certificate"
+  key_risks:
+    - "State Department of Health review is the binding constraint in 2 of 8 states"
+    - "One top-5 payer has standard assignment-consent language but is currently renegotiating rates"
+    - "Auditor turnover at the target in Q4 2025; closing financials may slip"
+  situation: >
+    MeridianHealth corp-dev team must draft a signing-to-close
+    workstream plan for the board. Plan must identify the critical
+    path, the pre-signing-deferred risks the team is now picking up,
+    and ownership across MeridianHealth (corp-dev, legal, HR, IT,
+    finance), the target's management, and outside advisors.
+  as_of_date: "2026-03-01"
+
+task:
+  prompt: >
+    Produce a signing-to-close workstream plan for the MeridianHealth
+    acquisition of CarePoint. Structure:
+
+    1. **Critical-path identification** — which 3-4 workstreams
+       determine the close date, and why. State the likely binding
+       constraint.
+    2. **Workstream inventory** — table of workstreams, owner, key
+       milestones, target completion week (Week 1 through Week 13).
+       Cover: regulatory (HSR, State DOH, Medicare CHOW), payer
+       consents, financing, integration planning, HR/communications,
+       IT/cyber, closing mechanics (working capital cert, escrow, R&W
+       bind), post-sign diligence cleanup.
+    3. **Risk flags** — for each risk in the scenario, one-sentence
+       statement of what would need to go wrong for it to delay
+       close by ≥30 days.
+    4. **Governance cadence** — proposed weekly cadence (deal-team
+       standup, exec steering, board update frequency).
+    5. **Go/no-go gating items** — the 5-7 items the CEO needs to
+       see green before calling the close date firm.
+
+  expected_output_type: "workstream_plan"
+  constraints:
+    - "Must identify critical path explicitly, not just list everything in parallel"
+    - "State Department of Health review and CHOW notifications must be flagged"
+    - "Owner names/roles must be specific, not 'TBD'"
+    - "Timeline must be grounded in the 90-day close target"
+    - "Risk framing must be probabilistic, not certain-tone"
+
+key_facts:
+  - fact: "Deal signed on 2026-03-01 with 90-day close target"
+    source: "Merger agreement"
+    importance: "critical"
+  - fact: "State DOH change-of-ownership in 8 states; 2 are historical bottlenecks"
+    source: "Regulatory counsel"
+    importance: "critical"
+  - fact: "HSR filing required; 30-day waiting period with pull-and-refile risk"
+    source: "Antitrust counsel"
+    importance: "critical"
+  - fact: "Top-5 payer contract is in active rate renegotiation"
+    source: "Target CEO update"
+    importance: "important"
+
+pitfalls:
+  - description: "Presenting every workstream as parallel equal-priority instead of naming a critical path"
+    failure_type: "prioritization_error"
+    severity: "major"
+  - description: "Omitting State DOH or CHOW from the binding-constraint discussion"
+    failure_type: "omission_error"
+    severity: "major"
+  - description: "Treating the 90-day close as a certainty rather than a scenario-contingent target"
+    failure_type: "overconfidence_language"
+    severity: "major"
+  - description: "Vague ownership ('deal team to own X') instead of named functional owners"
+    failure_type: "specificity_error"
+    severity: "major"
+
+evaluation_criteria:
+  rubric: standard
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-04-18"
+  tags:
+    - "deal_execution"
+    - "signing_to_close"
+    - "critical_path"
+    - "healthcare"

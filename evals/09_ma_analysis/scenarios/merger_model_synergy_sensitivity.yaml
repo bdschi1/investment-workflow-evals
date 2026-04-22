@@ -1,0 +1,114 @@
+# Merger Model — Synergy Sensitivity
+# Tests: synergy phasing, sensitivity construction, decision framing
+
+id: merger_model_synergy_sensitivity
+title: "Merger Model — Synergy Sensitivity Grid"
+version: "1.0.0"
+module: "09_ma_analysis"
+category: "synergy_sensitivity"
+difficulty: "moderate"
+estimated_time_minutes: 50
+
+context:
+  acquirer:
+    name: "IndustrialCo"
+    sector: "Industrial — Automation"
+    market_cap: "$6.2B"
+    description: >
+      Mid-cap industrial automation vendor. Standalone EPS $2.40 on
+      250M diluted shares. Trades at 18x trailing EPS.
+  target:
+    name: "ControlsSoft"
+    sector: "Industrial — Software"
+    description: >
+      Privately held industrial controls software firm. Revenue $180M,
+      EBITDA $45M (25% margin), net income $28M. Growth ~12% annually.
+  deal:
+    purchase_price: "$540M enterprise value"
+    implied_multiples:
+      ev_ebitda: "12.0x"
+      ev_revenue: "3.0x"
+    financing: "70% cash / 30% new debt at 5.0% pre-tax"
+    synergies_announced:
+      cost: "$15M pre-tax run-rate; 3-year phase (25% / 60% / 100%)"
+      revenue: "$10M pre-tax run-rate; 4-year phase (10% / 40% / 70% / 100%)"
+    tax_rate: "23%"
+    foregone_interest_on_cash: "4.0% pre-tax"
+    intangible_amort: "$18M/year over 10 years"
+  situation: >
+    Corp-dev presenting a synergy-sensitivity view to the CEO. The
+    baseline deal is marginally accretive in Year 2 and solidly
+    accretive in Year 3, but the synergy assumption drives the
+    outcome. Corp-dev needs a defensible sensitivity grid that shows
+    the deal's accretion/dilution profile across realistic synergy
+    realization rates (50% / 75% / 100% / 125% of announced) against
+    baseline-vs-stretch revenue-synergy timing.
+  as_of_date: "2026-03-20"
+
+task:
+  prompt: >
+    Build a synergy-sensitivity view for the ControlsSoft acquisition.
+    Produce:
+
+    1. A 4x2 sensitivity grid of Year 3 pro forma EPS accretion /
+       (dilution) in dollar terms and in percent:
+         rows = synergy realization [50%, 75%, 100%, 125%]
+         columns = revenue-synergy timing [as-announced, 12-month slip]
+    2. Synergy breakeven: minimum combined cost + revenue synergy
+       realization (as a % of announced) for the deal to be
+       accretive in Year 3.
+    3. A 3-sentence commentary framing the sensitivity — what it
+       tells the CEO, and what it does not tell the CEO.
+
+    Show pro forma mechanics: target net income added, foregone
+    interest on cash (after-tax), new debt interest (after-tax),
+    intangible amortization (after-tax), cost and revenue synergies
+    (after-tax, phased).
+
+  expected_output_type: "sensitivity_memo"
+  constraints:
+    - "All synergy flows tax-affected at 23%"
+    - "Foregone interest AND new debt interest both included"
+    - "Synergy phasing applied per schedule, not run-rate"
+    - "Commentary must note synergies are an assumption, not a guarantee"
+
+key_facts:
+  - fact: "Purchase price is $540M EV, financed 70% cash / 30% debt"
+    source: "Deal terms"
+    importance: "critical"
+  - fact: "Cost synergies phase 25/60/100% over 3 years"
+    source: "Synergy plan"
+    importance: "critical"
+  - fact: "Revenue synergies phase 10/40/70/100% over 4 years"
+    source: "Synergy plan"
+    importance: "critical"
+  - fact: "Intangible amortization is $18M/year, after-tax reduces GAAP EPS"
+    source: "Purchase accounting"
+    importance: "important"
+
+pitfalls:
+  - description: "Not tax-affecting synergies or interest items"
+    failure_type: "tax_error"
+    severity: "major"
+  - description: "Running synergies at full rate in Year 1"
+    failure_type: "phasing_error"
+    severity: "major"
+  - description: "Omitting foregone interest on cash used"
+    failure_type: "omission_error"
+    severity: "major"
+  - description: "Presenting the sensitivity as a precision forecast rather than a range"
+    failure_type: "overconfidence_language"
+    severity: "major"
+
+evaluation_criteria:
+  rubric: standard
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-04-18"
+  tags:
+    - "ma"
+    - "synergy_sensitivity"
+    - "pro_forma"
+    - "decision_memo"

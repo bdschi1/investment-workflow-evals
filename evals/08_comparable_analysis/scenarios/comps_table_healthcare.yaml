@@ -1,0 +1,261 @@
+# Comparable Company Analysis — Healthcare Services
+# Tests: Peer selection, multiple calculation, calendarization, implied valuation range
+# SMB integration: Target financials from smb_bridge extract_fill_values()
+
+id: comps_table_healthcare
+title: "Comparable Company Analysis — Healthcare Services"
+version: "1.0.0"
+module: "08_comparable_analysis"
+category: "trading_comps"
+difficulty: "moderate"
+estimated_time_minutes: 60
+output_format: "excel"
+
+smb_integration:
+  enabled: true
+  placeholder_prefix: "[X]"
+  sheets_required:
+    - "IS Annual"
+    - "BS Annual"
+    - "Valuation"
+  fill_fields:
+    - "revenue"
+    - "ebitda"
+    - "net_income"
+    - "total_debt"
+    - "cash"
+    - "shares_outstanding"
+    - "share_price"
+    - "enterprise_value"
+    - "ev_ebitda"
+    - "gross_margin"
+    - "ebitda_margin"
+    - "eps"
+
+context:
+  company:
+    name: "[COMPANY]"
+    ticker: "[TICKER]"
+    sector: "Healthcare — Outsourced Services"
+    market_cap: "[X]"
+    description: >
+      Mid-cap healthcare services company providing outsourced revenue
+      cycle management (RCM), coding, and clinical documentation
+      improvement services to hospitals and physician groups. Primarily
+      technology-enabled services model with ~70% recurring revenue.
+
+  situation: >
+    A sell-side equity research analyst is initiating coverage on
+    [COMPANY] and needs a comprehensive comparable company analysis
+    to establish a valuation framework. The analyst must select an
+    appropriate peer set, calculate standardized trading multiples,
+    and derive an implied valuation range for [COMPANY].
+
+    Key considerations:
+    - Peers should include both pure-play healthcare IT/services and
+      diversified healthcare services companies
+    - Multiples should be calendarized to a common fiscal year-end
+    - Both current (NTM) and historical average multiples are relevant
+    - Growth-adjusted multiples (PEG, EV/EBITDA/growth) may differentiate
+      high-growth vs mature peers
+
+  market_conditions: >
+    Healthcare services sector trading at ~12-16x NTM EV/EBITDA, a
+    premium to historical averages driven by secular tailwinds (aging
+    population, regulatory complexity, labor shortages favoring
+    outsourcing). M&A activity elevated as PE sponsors consolidate
+    fragmented subsectors. Public market valuations compressed ~1-2
+    turns from 2021 peaks.
+
+  as_of_date: "2024-12-15"
+
+  additional_context: >
+    [COMPANY] has a December fiscal year-end. Several peers have
+    non-December year-ends requiring calendarization. The company
+    has grown revenue ~12% CAGR over 3 years via organic growth
+    (~8%) and tuck-in acquisitions (~4%). EBITDA margins are
+    expanding as the company scales its technology platform.
+
+task:
+  prompt: >
+    Build a comprehensive comparable company analysis for [COMPANY]
+    in Excel format. Your deliverable should include:
+
+    1. **Peer Selection** — Identify 8-12 comparable public companies
+       with rationale for inclusion. Include a mix of direct competitors,
+       adjacent healthcare IT names, and broader healthcare services
+       companies. Note any peers that are imperfect comparables and why.
+
+    2. **Trading Multiples Table** — For each peer, calculate:
+       - EV/Revenue (NTM and LTM)
+       - EV/EBITDA (NTM and LTM)
+       - P/E (NTM)
+       - EV/EBITDA/Growth (PEG-equivalent for EV multiples)
+       - Revenue growth (NTM)
+       - EBITDA margin (NTM)
+       Include mean, median, 25th/75th percentile for each metric.
+
+    3. **Calendarization** — Adjust all peers to a common December
+       fiscal year-end. Show the calendarization methodology for
+       any non-December year-end peers.
+
+    4. **Implied Valuation** — Apply the peer median and mean
+       multiples to [COMPANY]'s financials to derive an implied
+       equity value per share range. Show both EV-based and P/E-based
+       implied values.
+
+    5. **Scatter Plot Data** — Prepare data for an EV/EBITDA vs
+       EBITDA growth scatter plot positioning [COMPANY] relative
+       to peers.
+
+  expected_output_type: "comps_table"
+
+  constraints:
+    - "All multiples must be calculated consistently across peers"
+    - "Calendarization must be shown, not just applied silently"
+    - "NTM estimates should reference consensus source and date"
+    - "Enterprise value must use diluted shares (treasury stock method for options/RSUs)"
+    - "Net debt calculation must include all debt-like items (operating leases, pension, preferred)"
+    - "Formatting per Wall Street conventions"
+
+  time_horizon: "Point-in-time valuation (as of analysis date)"
+
+data_sources:
+  - type: "10-K"
+    description: "[COMPANY] most recent Annual Report"
+    date: "[X]"
+    key_data_points:
+      - "Revenue: [X]"
+      - "EBITDA: [X]"
+      - "EPS: [X]"
+      - "Total debt: [X]"
+      - "Cash: [X]"
+      - "Shares outstanding: [X]"
+
+  - type: "market_data"
+    description: "Current trading data from SMB Valuation sheet"
+    date: "[X]"
+    key_data_points:
+      - "Share price: [X]"
+      - "Market cap: [X]"
+      - "EV/EBITDA: [X]"
+      - "EV: [X]"
+
+  - type: "consensus_estimates"
+    description: "Street consensus for target and peers"
+    date: "2024-12-15"
+    key_data_points:
+      - "NTM revenue, EBITDA, EPS estimates for all peers"
+      - "Consensus growth rates"
+      - "Source: FactSet or Capital IQ consensus"
+
+key_facts:
+  - fact: "[COMPANY] trades at [X] EV/EBITDA on LTM basis"
+    source: "SMB Valuation sheet"
+    importance: "critical"
+
+  - fact: "Healthcare RCM peers typically trade at 12-18x NTM EV/EBITDA depending on growth profile"
+    source: "Industry data"
+    importance: "critical"
+
+  - fact: "Calendarization is necessary for peers with June (many healthcare cos) and September year-ends"
+    source: "Peer fiscal year analysis"
+    importance: "important"
+
+  - fact: "Diluted share count should use treasury stock method for in-the-money options and unvested RSUs"
+    source: "Valuation methodology"
+    importance: "important"
+
+  - fact: "Operating leases capitalized under ASC 842 should be treated consistently across peers"
+    source: "Accounting standards"
+    importance: "supporting"
+
+pitfalls:
+  - description: "Using basic shares instead of diluted shares for equity value and per-share metrics"
+    failure_type: "methodology_error"
+    severity: "major"
+
+  - description: "Not calendarizing peers with different fiscal year-ends — comparing June FYE LTM to December FYE LTM"
+    failure_type: "comparability_error"
+    severity: "major"
+
+  - description: "Including peers from fundamentally different business models (e.g., pharma, hospitals) without noting limitations"
+    failure_type: "peer_selection_error"
+    severity: "major"
+
+  - description: "Calculating EV without adjusting for minority interests, pension obligations, or operating leases"
+    failure_type: "methodology_error"
+    severity: "minor"
+
+  - description: "Applying mean multiples when outliers skew the average — should prefer median or trimmed mean"
+    failure_type: "statistical_error"
+    severity: "minor"
+
+evaluation_criteria:
+  dimensions:
+    - name: "Peer Selection"
+      weight: 0.20
+      criteria:
+        - "8-12 peers selected with clear rationale"
+        - "Mix of direct competitors and adjacent companies"
+        - "Imperfect comparables flagged with explanation"
+        - "No irrelevant companies (e.g., pharma, hospitals)"
+        - "Peer set reflects similar business model, size, and growth profile"
+
+    - name: "Multiple Accuracy"
+      weight: 0.30
+      criteria:
+        - "EV calculated correctly (market cap + net debt + adjustments)"
+        - "Multiples consistent across all peers"
+        - "NTM and LTM multiples both present"
+        - "Growth-adjusted multiples included"
+        - "Summary statistics (mean, median, percentiles) correct"
+
+    - name: "Calendarization"
+      weight: 0.15
+      criteria:
+        - "Non-December FYE peers calendarized"
+        - "Methodology shown (weighted average of fiscal years)"
+        - "Applied consistently to both revenue and EBITDA"
+
+    - name: "Implied Valuation"
+      weight: 0.25
+      criteria:
+        - "Implied EV derived from peer multiples × target financials"
+        - "Bridge from implied EV to implied equity value per share shown"
+        - "Range presented (not single point estimate)"
+        - "Both EV-based and P/E-based valuations"
+        - "Football field or summary range clearly presented"
+
+    - name: "Presentation"
+      weight: 0.10
+      criteria:
+        - "Wall Street formatting (blue inputs, parentheses negatives, $mm)"
+        - "Clean table layout with peer names, tickers, and all metrics"
+        - "Sorted by a logical metric (e.g., EV/EBITDA)"
+        - "Scatter plot data prepared"
+
+  critical_failures:
+    - "EV calculation fundamentally wrong (e.g., subtracting debt instead of adding)"
+    - "Multiples calculated inconsistently across peers"
+    - "Hallucinated peer companies or financial data"
+    - "Implied valuation math is demonstrably wrong"
+    - "No summary statistics for peer multiples"
+
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-24"
+  tags:
+    - "comps"
+    - "comparable_company"
+    - "trading_multiples"
+    - "valuation"
+    - "healthcare"
+    - "smb_integration"
+  notes: >
+    Tests the foundational sell-side valuation skill. Peer selection
+    judgment is the qualitative differentiator — the math itself is
+    straightforward. Calendarization is the most commonly missed step.
+    SMB provides target financials; peer data requires consensus estimates.

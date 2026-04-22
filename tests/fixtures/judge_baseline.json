@@ -1,0 +1,69 @@
+{
+  "version": "1.0.0",
+  "created_date": "2026-04-04",
+  "repo": "investment-workflow-evals",
+  "description": "Baseline AI judge scores for regression testing. Synthetic responses with known expected dimension scores. Used to mock InvestmentWorkflowJudge and verify GradingEngine pipeline stability.",
+  "rubric_dimensions": [
+    {"id": "factual_accuracy", "weight": 30},
+    {"id": "analytical_rigor", "weight": 25},
+    {"id": "risk_assessment", "weight": 20},
+    {"id": "evidence_quality", "weight": 15},
+    {"id": "completeness", "weight": 10}
+  ],
+  "baselines": [
+    {
+      "id": "iwe_baseline_001",
+      "description": "Excellent equity thesis — strong across all dimensions, no critical failures",
+      "scenario_id": "biotech_phase3_catalyst",
+      "scenario_context": "Company: BioTherapeutics Inc. (BTIX). Phase 3 readout expected Q2 2026 for lead asset in NASH.",
+      "task": "Build an investment thesis for BTIX ahead of the Phase 3 readout.",
+      "model_response": "BTIX presents an asymmetric risk/reward ahead of the Q2 2026 Phase 3 NASH readout. Based on Q3 10-Q filings, the company has $340M cash runway through Q4 2026, providing buffer past the catalyst. Key assumption: Phase 3 NASH data mirrors Phase 2 results (47% reduction in liver fat at 52 weeks, p<0.001). Bull case (55% prob): FDA approval pathway, $4.2B peak sales, NPV $28/share. Bear case (45% prob): trial miss, stock -70% to $6/share. Current price $19 implies 55% bear case probability, which understates the Phase 2 signal quality. Key risks: trial size (n=480, powered at 90%), endpoint sensitivity (biopsy-confirmed fibrosis reduction), and competitive pressure from FXR agonists. Position: 2% of book, hedged with BTIX puts at $15 strike for binary risk management.",
+      "dimension_scores": {
+        "factual_accuracy": 88.0,
+        "analytical_rigor": 90.0,
+        "risk_assessment": 85.0,
+        "evidence_quality": 82.0,
+        "completeness": 92.0
+      },
+      "critical_failures": [],
+      "expected_overall_score": 87.65,
+      "expected_overall_quality": "excellent"
+    },
+    {
+      "id": "iwe_baseline_002",
+      "description": "Adequate equity thesis — covers basics but shallow risk assessment and weak evidence",
+      "scenario_id": "industrial_value_play",
+      "scenario_context": "Company: Meridian Manufacturing (MRMF). PE ratio 9x, below sector average 14x.",
+      "task": "Evaluate whether Meridian Manufacturing represents a value opportunity.",
+      "model_response": "Meridian Manufacturing trades at 9x P/E which is below the sector average of 14x. This discount suggests potential upside. The company has been profitable for several years. Revenue appears stable. There are some risks including competition and raw material costs. The stock could be worth more if the multiple expands toward peers. Recommendation: consider buying with a 12-month price target of $42.",
+      "dimension_scores": {
+        "factual_accuracy": 55.0,
+        "analytical_rigor": 45.0,
+        "risk_assessment": 40.0,
+        "evidence_quality": 38.0,
+        "completeness": 50.0
+      },
+      "critical_failures": [],
+      "expected_overall_score": 46.95,
+      "expected_overall_quality": "poor"
+    },
+    {
+      "id": "iwe_baseline_003",
+      "description": "Fail case — hallucinated data and investment guarantee language",
+      "scenario_id": "short_thesis_retail",
+      "scenario_context": "Company: RetailCo (RTCO). Same-store sales declining for 3 consecutive quarters.",
+      "task": "Develop a short thesis for RTCO.",
+      "model_response": "RetailCo is guaranteed to decline. Their Q3 2025 earnings showed $2.1B revenue and 18% EBITDA margins (data confirmed in their recent press release). The stock will definitely fall to $8 within 6 months. There is no risk to this trade — the business is in secular decline and the balance sheet has no issues. Short the stock.",
+      "dimension_scores": {
+        "factual_accuracy": 15.0,
+        "analytical_rigor": 10.0,
+        "risk_assessment": 5.0,
+        "evidence_quality": 8.0,
+        "completeness": 12.0
+      },
+      "critical_failures": ["hallucinated_data", "regulatory_violation"],
+      "expected_overall_score": 10.35,
+      "expected_overall_quality": "fail"
+    }
+  ]
+}

@@ -1,0 +1,191 @@
+# Sources & Uses — LBO Transaction
+# Tests: Financing structure, balance check, pro forma cap table
+# SMB integration: Target financials from smb_bridge
+
+id: sources_and_uses_lbo
+title: "Sources & Uses — PE Take-Private Transaction"
+version: "1.0.0"
+module: "09_ma_analysis"
+category: "sources_and_uses"
+difficulty: "moderate"
+estimated_time_minutes: 45
+output_format: "excel"
+
+smb_integration:
+  enabled: true
+  placeholder_prefix: "[X]"
+  sheets_required:
+    - "BS Annual"
+    - "Valuation"
+  fill_fields:
+    - "total_debt"
+    - "cash"
+    - "shares_outstanding"
+    - "share_price"
+    - "enterprise_value"
+    - "ebitda"
+
+context:
+  company:
+    name: "[COMPANY]"
+    ticker: "[TICKER]"
+    sector: "Business Services"
+    market_cap: "[X]"
+    description: >
+      Mid-cap business services company being taken private by a PE
+      sponsor. SMB provides current financial data.
+
+  situation: >
+    A PE sponsor has agreed to acquire [COMPANY] at a 30% premium
+    to the unaffected share price. The advisory team must construct
+    a detailed sources & uses table showing how the transaction
+    is financed and where the capital is deployed.
+
+    Transaction terms:
+    - Offer price: [X] per share × 1.30 (30% premium)
+    - Equity purchase price: offer price × diluted shares outstanding
+    - Existing debt: [X] (to be refinanced at close)
+    - Existing cash: [X] (remains on balance sheet, $10M minimum)
+    - Transaction fees: advisory 1.5% of TEV, financing 3.0% of new debt, legal/other $4M
+    - Financing: senior secured term loan (3.0x EBITDA at SOFR+375),
+      subordinated notes (1.25x EBITDA at 8.25% fixed),
+      sponsor equity (residual), management rollover (7.5% of PF equity)
+
+  as_of_date: "2024-12-15"
+
+task:
+  prompt: >
+    Build a Sources & Uses table for the proposed take-private of
+    [COMPANY]. Your Excel deliverable must include:
+
+    1. **Sources** — Each debt tranche (term loan, sub notes), sponsor
+       equity check, management rollover. Show amount and % of total.
+    2. **Uses** — Equity purchase price (fully diluted), refinance
+       existing debt, transaction fees (itemized: advisory, financing,
+       legal/other), cash to balance sheet. Show amount and % of total.
+    3. **Balance Check** — Sources total = Uses total (difference = $0)
+    4. **Pro Forma Capitalization** — Post-close debt, equity, and
+       total capitalization with implied leverage multiples
+    5. **Ownership Table** — Sponsor vs management equity split
+
+    All amounts in $mm. Sources must exactly equal uses.
+
+  expected_output_type: "sources_and_uses"
+
+  constraints:
+    - "Sources must equal uses — zero residual"
+    - "Diluted shares must use treasury stock method for in-the-money options"
+    - "Existing debt must be refinanced (shown in uses)"
+    - "Transaction fees must be itemized, not lumped"
+    - "Minimum $10M cash on balance sheet post-close"
+    - "Management rollover reduces sponsor equity check but is both a source and a use"
+
+  time_horizon: "Point-in-time (closing date)"
+
+data_sources:
+  - type: "10-K"
+    description: "[COMPANY] most recent Annual Report"
+    date: "[X]"
+    key_data_points:
+      - "Total debt: [X]"
+      - "Cash: [X]"
+      - "EBITDA: [X]"
+      - "Shares outstanding: [X]"
+
+  - type: "market_data"
+    description: "Current trading data from SMB"
+    date: "[X]"
+    key_data_points:
+      - "Share price: [X]"
+      - "Market cap: [X]"
+      - "EV: [X]"
+
+key_facts:
+  - fact: "30% premium to unaffected share price of [X]"
+    source: "Deal terms"
+    importance: "critical"
+
+  - fact: "Existing debt of [X] must be fully refinanced at close"
+    source: "Balance sheet"
+    importance: "critical"
+
+  - fact: "Management rollover of 7.5% of PF equity appears as both source (equity contribution) and use (rolled equity)"
+    source: "Deal structure"
+    importance: "important"
+
+  - fact: "Financing fees are calculated on new debt raised, not total transaction value"
+    source: "Fee conventions"
+    importance: "important"
+
+pitfalls:
+  - description: "Sources ≠ Uses — most common error is forgetting cash to balance sheet or existing debt refinancing"
+    failure_type: "arithmetic_error"
+    severity: "critical"
+
+  - description: "Calculating advisory fees on equity value instead of total enterprise value"
+    failure_type: "convention_error"
+    severity: "major"
+
+  - description: "Financing fees calculated on total debt (including existing) instead of only new debt raised"
+    failure_type: "convention_error"
+    severity: "major"
+
+  - description: "Double-counting management rollover — it nets to zero (source = use) but must appear on both sides"
+    failure_type: "structural_error"
+    severity: "major"
+
+  - description: "Using basic shares instead of diluted shares for equity purchase price"
+    failure_type: "methodology_error"
+    severity: "major"
+
+evaluation_criteria:
+  dimensions:
+    - name: "Balance & Completeness"
+      weight: 0.40
+      criteria:
+        - "Sources = Uses exactly ($0 difference)"
+        - "All sources listed: TL, sub notes, sponsor equity, mgmt rollover"
+        - "All uses listed: equity purchase price, refinance debt, fees (itemized), cash to B/S"
+        - "Percentages of total shown for each line"
+
+    - name: "Calculation Accuracy"
+      weight: 0.30
+      criteria:
+        - "Offer price = unaffected price × (1 + premium)"
+        - "Equity purchase price = offer price × diluted shares"
+        - "Debt tranches sized correctly (multiples of EBITDA)"
+        - "Fees calculated on correct bases"
+        - "Sponsor equity = total uses − debt − mgmt rollover"
+
+    - name: "Pro Forma Cap Table"
+      weight: 0.20
+      criteria:
+        - "Post-close debt balances correct"
+        - "Leverage multiples calculated (senior, total)"
+        - "Ownership split between sponsor and management"
+        - "Implied equity value at close"
+
+    - name: "Presentation"
+      weight: 0.10
+      criteria:
+        - "Professional formatting ($mm, parentheses, blue inputs)"
+        - "Clear section headers"
+        - "Check cell prominently displayed"
+
+  critical_failures:
+    - "Sources ≠ Uses (imbalance > $0.5M)"
+    - "Missing refinancing of existing debt"
+    - "Equity purchase price uses wrong share price or count"
+    - "Hallucinated financial data"
+
+  pass_threshold: 70
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-24"
+  tags:
+    - "sources_and_uses"
+    - "lbo"
+    - "pe"
+    - "transaction_structure"
+    - "smb_integration"

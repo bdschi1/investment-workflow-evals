@@ -1,0 +1,271 @@
+# prompt_version: 1.0.0
+# prompt_date: 2026-04-04
+# description: Comparable Company Analysis Standard Rubric
+
+# Comparable Company Analysis Evaluation Rubric
+
+id: standard_comparable_analysis
+title: "Standard Comparable Company Analysis Evaluation Rubric"
+version: "1.0.0"
+module: "08_comparable_analysis"
+
+description: >
+  Evaluates AI-generated comparable company analyses against institutional
+  sell-side standards. Emphasis on peer selection judgment, multiple
+  calculation accuracy, calendarization methodology, and implied
+  valuation derivation.
+
+total_points: 100
+pass_threshold: 70
+excellence_threshold: 85
+
+dimensions:
+  - name: "Peer Selection"
+    id: "peer_selection"
+    weight: 20
+    description: >
+      Evaluates the quality, relevance, and completeness of the
+      comparable company universe selected.
+
+    scoring_levels:
+      - score: "18-20"
+        label: "Excellent"
+        description: >
+          8-12 well-chosen peers. Clear rationale for each inclusion.
+          Mix of direct competitors and adjacent names. Imperfect
+          comps flagged. No irrelevant companies.
+        anchor_examples:
+          - "12 peers: 6 direct RCM competitors, 4 healthcare IT, 2 broader services"
+          - "Notes that Company X is a partial comp due to 40% non-healthcare revenue"
+
+      - score: "14-17"
+        label: "Good"
+        description: >
+          Reasonable peer set. Most inclusions justified. May be
+          slightly narrow or broad. Minor imperfect comps not flagged.
+
+      - score: "10-13"
+        label: "Acceptable"
+        description: >
+          Adequate peer set but missing obvious comparables or
+          including questionable names. Limited rationale.
+
+      - score: "5-9"
+        label: "Poor"
+        description: >
+          Peer set too small (<6) or includes clearly irrelevant
+          companies. No selection rationale.
+
+      - score: "0-4"
+        label: "Fail"
+        description: >
+          No coherent peer set. Companies from wrong industry
+          or fabricated tickers.
+
+  - name: "Multiple Accuracy"
+    id: "multiple_accuracy"
+    weight: 30
+    description: >
+      Evaluates correctness and consistency of trading multiple
+      calculations across all peers.
+
+    scoring_levels:
+      - score: "27-30"
+        label: "Excellent"
+        description: >
+          All multiples correctly calculated. EV includes diluted shares,
+          net debt, and adjustments. NTM and LTM multiples present.
+          Growth-adjusted multiples included. Summary stats correct
+          (mean, median, 25th/75th percentile).
+        anchor_examples:
+          - "EV = diluted market cap + total debt - cash + minority interest + PV of operating leases"
+          - "EV/EBITDA, EV/Revenue, P/E, EV/EBITDA/Growth for all 12 peers"
+          - "Median 14.2x, Mean 14.8x, 25th 12.5x, 75th 16.1x"
+
+      - score: "21-26"
+        label: "Good"
+        description: >
+          Multiples mostly correct. Minor EV adjustments may be
+          missing (e.g., pension, minority interest). Stats present.
+
+      - score: "15-20"
+        label: "Acceptable"
+        description: >
+          Core multiples correct but limited set (e.g., only EV/EBITDA).
+          May use basic shares instead of diluted.
+
+      - score: "8-14"
+        label: "Poor"
+        description: >
+          Material errors in multiple calculations. Inconsistent
+          methodology across peers. Missing summary statistics.
+
+      - score: "0-7"
+        label: "Fail"
+        description: >
+          Multiples fundamentally wrong. EV calculated incorrectly.
+          Cannot rely on any values presented.
+
+  - name: "Calendarization"
+    id: "calendarization"
+    weight: 15
+    description: >
+      Evaluates handling of different fiscal year-ends to ensure
+      apples-to-apples comparison.
+
+    scoring_levels:
+      - score: "14-15"
+        label: "Excellent"
+        description: >
+          All non-December FYE peers calendarized. Methodology shown
+          (weighted average of adjacent fiscal years). Applied
+          consistently to revenue and EBITDA.
+        anchor_examples:
+          - "Peer with June FYE: CY2024E = 6/12 × FY2024 + 6/12 × FY2025E"
+          - "Calendarization tab showing methodology for 4 non-Dec peers"
+
+      - score: "11-13"
+        label: "Good"
+        description: >
+          Calendarization applied. Methodology noted but not fully
+          shown. Most peers adjusted correctly.
+
+      - score: "8-10"
+        label: "Acceptable"
+        description: >
+          Some calendarization attempted. May miss one or two peers.
+          Methodology implicit.
+
+      - score: "4-7"
+        label: "Poor"
+        description: >
+          Minimal calendarization. Most non-December peers unadjusted.
+
+      - score: "0-3"
+        label: "Fail"
+        description: >
+          No calendarization. June FYE LTM compared directly to
+          December FYE LTM without adjustment.
+
+  - name: "Implied Valuation"
+    id: "implied_valuation"
+    weight: 25
+    description: >
+      Evaluates the derivation of implied equity value per share
+      from peer multiples applied to target financials.
+
+    scoring_levels:
+      - score: "22-25"
+        label: "Excellent"
+        description: >
+          Multiple valuation approaches (EV/EBITDA, EV/Revenue, P/E).
+          Clear bridge from implied EV to equity value per share.
+          Range presented using median/mean and percentile bounds.
+          Summary football field or range table.
+        anchor_examples:
+          - "At median EV/EBITDA of 14.2x → implied EV $2.1B → equity value $38/share"
+          - "Valuation range: $32-$44 across methodologies"
+
+      - score: "17-21"
+        label: "Good"
+        description: >
+          Implied valuation present with EV-to-equity bridge.
+          2+ methods used. Range presented but may be narrow.
+
+      - score: "12-16"
+        label: "Acceptable"
+        description: >
+          Basic implied valuation. Single method or incomplete
+          EV-to-equity bridge. Point estimate rather than range.
+
+      - score: "6-11"
+        label: "Poor"
+        description: >
+          Implied valuation attempted but materially flawed.
+          Bridge has errors. No range.
+
+      - score: "0-5"
+        label: "Fail"
+        description: >
+          No implied valuation derived from comps. Analysis stops
+          at peer multiples without applying to target.
+
+  - name: "Presentation"
+    id: "presentation"
+    weight: 10
+    description: >
+      Evaluates formatting, layout, and professional presentation.
+
+    scoring_levels:
+      - score: "9-10"
+        label: "Excellent"
+        description: >
+          Wall Street formatting. Clean table layout. Sorted
+          logically. Scatter plot data prepared. Print-ready.
+
+      - score: "7-8"
+        label: "Good"
+        description: >
+          Professional formatting. Minor inconsistencies.
+
+      - score: "5-6"
+        label: "Acceptable"
+        description: >
+          Readable. Basic formatting. Some conventions missing.
+
+      - score: "2-4"
+        label: "Poor"
+        description: >
+          Minimal formatting. Hard to parse. Inconsistent units.
+
+      - score: "0-1"
+        label: "Fail"
+        description: >
+          No formatting. Raw data dump.
+
+critical_failures:
+  - id: "ev_calculation_error"
+    description: "Enterprise value fundamentally miscalculated"
+    examples:
+      - "EV = market cap − debt (subtracting instead of adding)"
+      - "Using basic instead of diluted shares for a company with significant options"
+
+  - id: "inconsistent_multiples"
+    description: "Multiples calculated differently across peers"
+    examples:
+      - "Using LTM EBITDA for some peers and NTM for others in the same column"
+      - "Including stock-based comp in EBITDA for some peers but not others"
+
+  - id: "hallucinated_peers"
+    description: "Fabricated company names, tickers, or financial data"
+    examples:
+      - "Includes non-existent company 'MedServ Corp (MDSV)'"
+      - "Peer financial data that doesn't match any public filings"
+
+  - id: "valuation_math_error"
+    description: "Implied valuation arithmetic is demonstrably wrong"
+    examples:
+      - "Implied EV of $2B but implied equity value of $2.5B (added net debt instead of subtracting)"
+
+scoring_instructions:
+  general:
+    - "Score each dimension independently"
+    - "Verify at least 2 peers' EV calculations by hand"
+    - "Check that summary statistics match the individual peer data"
+    - "Confirm implied valuation bridge arithmetic"
+
+  calibration:
+    - "'Excellent' comps table could go directly into a pitchbook"
+    - "'Good' needs minor cleanup by a VP before client use"
+    - "'Acceptable' has the right structure but needs rework on data"
+
+  weighting:
+    - "Apply weights: peer selection(20) + multiples(30) + calendarization(15) + implied valuation(25) + presentation(10)"
+    - "Round final score to nearest integer"
+
+metadata:
+  author: "Brad Schonhoft, CFA"
+  created_at: "2026-03-24"
+  applicable_scenarios:
+    - "All comparable company analysis scenarios"
+    - "Trading comps across sectors"
