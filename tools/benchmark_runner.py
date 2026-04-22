@@ -783,10 +783,6 @@ def run_benchmark(
     run_date = _dt.date.today().isoformat()
     rows_written = 0
 
-    # Judge cache tracking. ai_judge.py does not currently surface usage
-    # metadata to callers, so we cannot observe per-call cache hits from
-    # here. judge_cache_hit_rate stays 0.0 until ai_judge.py exposes usage.
-    # TODO(tier1.5): Populate once ai_judge.py exposes usage.
     judge_calls = 0
     judge_cache_hits = 0
 
