@@ -23,6 +23,8 @@ Usage:
 
 from __future__ import annotations
 
+import os
+
 import argparse
 import sys
 import textwrap
@@ -417,9 +419,9 @@ def run_sift(filepath: Path) -> bool:
     """Run SIFT/AAH screening on the generated file. Returns True if passed."""
     import subprocess
 
-    sift_dir = Path("/Users/bdsm4/code/tools/acs")
-    if not sift_dir.exists():
-        print("  [warn] SIFT not found at /Users/bdsm4/code/tools/acs — skipping screening")
+    sift_dir = Path(os.environ.get("SIFT_DIR", ""))
+    if not sift_dir or not sift_dir.exists():
+        print("  [warn] SIFT_DIR env var unset or path missing — skipping screening")
         return True
 
     venv_python = sift_dir / ".venv" / "bin" / "python"

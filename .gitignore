@@ -124,3 +124,6 @@ logs/
 
 # Windows
 Desktop.ini
+
+# Local agent config (full directory)
+.claude/

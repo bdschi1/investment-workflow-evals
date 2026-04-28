@@ -92,7 +92,7 @@ A module can define a `standard.yaml` rubric that scenarios inherit; scenarios m
 Each scenario ships a golden answer at `evals/<module>/golden_answers/<scenario>.md`. Principles:
 
 1. **Institutional-grade, not textbook.** Written at the bar expected at a platform hedge fund — thesis, evidence with sources, margin bridge, recommendation, sensitivity, risk factors, upgrade/downgrade criteria.
-2. **Probabilistic, not declarative.** Ranges and probability statements throughout; no "guaranteed", "certain", "100%" language ([see `rules/output-language.md`](/Users/bdsm4/.claude/rules/output-language.md)).
+2. **Probabilistic, not declarative.** Ranges and probability statements throughout; no "guaranteed", "certain", "100%" language.
 3. **Specifies the upgrade path.** What evidence would change the rating. This is where the golden separates from the merely correct — naming the falsifiers makes the view operational.
 4. **Cross-validated.** Key facts in the golden are tagged to source in the scenario `key_facts[]` block; rubric authors check that goldens actually score at or above the Excellence threshold against the rubric.
 

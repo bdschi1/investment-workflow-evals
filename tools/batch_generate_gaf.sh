@@ -7,7 +7,7 @@
 set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-IRR_PYTHON="/Users/bdsm4/code/work/bds_repos/Tier_1/investment-research-rag/.venv/bin/python"
+IRR_PYTHON="${IRR_PYTHON:-$REPO_ROOT/.venv/bin/python}"
 EXTRA_ARGS="${*}"
 
 cd "$REPO_ROOT"
