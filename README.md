@@ -4,6 +4,7 @@
 
 [![Python 3.10+](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![tests](https://img.shields.io/badge/tests-321%20passing-brightgreen.svg)](tests/)
 
 Evaluation scenarios and graded reference answers for testing AI models on institutional investment research tasks. Covers the core analyst workflow — from reading SEC filings to writing investment memos — with rubric-scored outputs that double as fine-tuning training data. An interactive RLHF Studio is also included for generating DPO preference pairs from live LLM outputs against real financial documents.
 
@@ -40,7 +41,7 @@ documents the methodology for cross-model judge agreement.
 
 **Placeholder — numbers to be filled by v1.1:**
 
-| Module | `claude-opus-4-7` | `claude-sonnet-4-5` | `gpt-5` | `gemini-2.5-pro` |
+| Module | `claude-opus-4-7` | `claude-sonnet-4-6` | `gpt-5` | `gemini-2.5-pro` |
 |---|---|---|---|---|
 | 00 qualification | TBD | TBD | TBD | TBD |
 | 01 equity thesis | TBD | TBD | TBD | TBD |
@@ -117,7 +118,7 @@ python -m src.summarize_dataset
 ```bash
 # Schema / wiring dry-run (no API calls, no cost):
 python -m tools.benchmark_runner --modules all --dry-run \
-    --models claude-opus-4-7,claude-sonnet-4-5,gpt-5,gemini-2.5-pro
+    --models claude-opus-4-7,claude-sonnet-4-6,gpt-5,gemini-2.5-pro
 
 # Cheap validation against 2-3 scenarios:
 python -m tools.benchmark_runner --modules 06_research_translation \
@@ -125,7 +126,7 @@ python -m tools.benchmark_runner --modules 06_research_translation \
 
 # Full live-frontier run (expensive, ~$150-250):
 python -m tools.benchmark_runner --modules all --generator live --yes-live \
-    --models claude-opus-4-7,claude-sonnet-4-5,gpt-5,gemini-2.5-pro
+    --models claude-opus-4-7,claude-sonnet-4-6,gpt-5,gemini-2.5-pro
 ```
 
 Results append to [`results/frontier_benchmark_v1.csv`](results/frontier_benchmark_v1.csv). Full invocation details, per-SKU cost estimates, and judge-agreement methodology live in [`BENCHMARK_RUN.md`](BENCHMARK_RUN.md). The live-generation path is intentionally gated behind `--yes-live` as a budget safety rail.
