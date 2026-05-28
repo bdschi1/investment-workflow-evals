@@ -31,7 +31,7 @@ is one function; wire each provider SDK path there).
 ```bash
 python -m tools.benchmark_runner \
     --modules all \
-    --models claude-opus-4-7,claude-sonnet-4-5,gpt-5,gemini-2.5-pro \
+    --models claude-opus-4-7,claude-sonnet-4-6,gpt-5,gemini-2.5-pro \
     --dry-run
 ```
 
@@ -58,7 +58,7 @@ path works end-to-end.
 ```bash
 python -m tools.benchmark_runner \
     --modules all \
-    --models claude-opus-4-7,claude-sonnet-4-5,gpt-5,gemini-2.5-pro \
+    --models claude-opus-4-7,claude-sonnet-4-6,gpt-5,gemini-2.5-pro \
     --generator live \
     --yes-live
 ```
@@ -78,7 +78,7 @@ targets.
 | Model | Input $ / 1M tok | Output $ / 1M tok | Est. cost (gen + judge) |
 |---|---:|---:|---:|
 | `claude-opus-4-7` | 15 | 75 | $60-90 |
-| `claude-sonnet-4-5` | 3 | 15 | $15-25 |
+| `claude-sonnet-4-6` | 3 | 15 | $15-25 |
 | `gpt-5` | 12-15 | 60-75 | $50-80 |
 | `gemini-2.5-pro` | 7-10 | 21-30 | $25-45 |
 | `claude-opus-4-6` (judge) | 15 | 75 | (already included above) |
@@ -106,7 +106,7 @@ Spearman and exact-match rate:
 python -m tools.judge_agreement \
     --sample-size 20 \
     --primary-judge claude-opus-4-6 \
-    --cross-judge claude-sonnet-4-5 \
+    --cross-judge claude-sonnet-4-6 \
     --out results/judge_agreement_v1.md
 ```
 

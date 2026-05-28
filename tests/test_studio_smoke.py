@@ -42,7 +42,7 @@ def test_import_configs():
     from studio.configs import GenerationConfig, PRESETS  # noqa: F401
     from studio.configs import provider_for_model
 
-    assert provider_for_model("claude-sonnet-4-20250514") == "anthropic"
+    assert provider_for_model("claude-opus-4-7") == "anthropic"
     assert provider_for_model("gemini-2.0-flash") == "gemini"
     assert provider_for_model("gpt-4o-mini") == "openai"
 
@@ -105,11 +105,11 @@ def test_generation_config_dataclass():
     """GenerationConfig has expected fields and methods."""
     from studio.configs import GenerationConfig
 
-    cfg = GenerationConfig(label="X", model="claude-sonnet-4-20250514", temperature=0.5)
+    cfg = GenerationConfig(label="X", model="claude-opus-4-7", temperature=0.5)
     assert cfg.provider == "anthropic"
     assert cfg.label == "X"
 
     d = cfg.to_dict()
-    assert d["model"] == "claude-sonnet-4-20250514"
+    assert d["model"] == "claude-opus-4-7"
     assert d["temperature"] == 0.5
     assert d["provider"] == "anthropic"

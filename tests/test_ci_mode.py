@@ -149,13 +149,13 @@ class TestModelsFlag(unittest.TestCase):
         from tools.eval_runner import parse_models_flag
 
         parsed = parse_models_flag(
-            "claude-opus-4-7, claude-sonnet-4-5 , gpt-5 ,gemini-2.5-pro"
+            "claude-opus-4-7, claude-sonnet-4-6 , gpt-5 ,gemini-2.5-pro"
         )
         self.assertEqual(
             parsed,
             [
                 "claude-opus-4-7",
-                "claude-sonnet-4-5",
+                "claude-sonnet-4-6",
                 "gpt-5",
                 "gemini-2.5-pro",
             ],
@@ -165,9 +165,9 @@ class TestModelsFlag(unittest.TestCase):
         from tools.eval_runner import parse_models_flag
 
         parsed = parse_models_flag(
-            "claude-opus-4-7,claude-sonnet-4-5,claude-opus-4-7"
+            "claude-opus-4-7,claude-sonnet-4-6,claude-opus-4-7"
         )
-        self.assertEqual(parsed, ["claude-opus-4-7", "claude-sonnet-4-5"])
+        self.assertEqual(parsed, ["claude-opus-4-7", "claude-sonnet-4-6"])
 
     def test_evaluation_config_defaults_models_to_empty_list(self):
         from tools.eval_runner import EvaluationConfig
@@ -191,7 +191,7 @@ class TestModelsFlag(unittest.TestCase):
 
         expected = {
             "claude-opus-4-7",
-            "claude-sonnet-4-5",
+            "claude-sonnet-4-6",
             "gpt-5",
             "gemini-2.5-pro",
         }

@@ -21,7 +21,7 @@ from dataclasses import dataclass
 
 DEFAULT_FRONTIER_MODELS: tuple[str, ...] = (
     "claude-opus-4-7",
-    "claude-sonnet-4-5",
+    "claude-sonnet-4-6",
     "gpt-5",
     "gemini-2.5-pro",
 )
@@ -519,7 +519,7 @@ def main():
         default=None,
         help=(
             "Comma-separated frontier SKUs to benchmark (e.g. "
-            "'claude-opus-4-7,claude-sonnet-4-5,gpt-5,gemini-2.5-pro'). "
+            "'claude-opus-4-7,claude-sonnet-4-6,gpt-5,gemini-2.5-pro'). "
             "When omitted, behavior matches the pre-existing single-input path. "
             "When supplied with --input, the SKU list is recorded in the "
             "result metadata; when supplied without --input, the benchmark "

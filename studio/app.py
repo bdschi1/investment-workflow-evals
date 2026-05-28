@@ -90,7 +90,7 @@ if "pre_screen_results" not in st.session_state:
 
 
 # Default model index for single-pair mode (index into ALL_MODELS)
-_DEFAULT_SINGLE_MODEL = "claude-sonnet-4-20250514"
+_DEFAULT_SINGLE_MODEL = "claude-opus-4-7"
 
 # Context budget (chars) — default 60k (~15k tokens, fits comfortably in
 # Claude/GPT-4o/Gemini context windows while leaving room for system

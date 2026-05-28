@@ -34,7 +34,7 @@ def _make_configs(labels: List[str]) -> dict:
     """Create minimal GenerationConfig objects keyed by label."""
     configs = {}
     for lbl in labels:
-        cfg = GenerationConfig(label=lbl, model="claude-sonnet-4-20250514")
+        cfg = GenerationConfig(label=lbl, model="claude-opus-4-7")
         configs[lbl] = cfg
     return configs
 

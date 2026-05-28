@@ -4,7 +4,7 @@ from typing import Optional, List
 PROVIDERS = ["anthropic", "gemini", "openai"]
 
 AVAILABLE_MODELS = {
-    "anthropic": ["claude-sonnet-4-20250514", "claude-haiku-4-20250414", "claude-3-5-sonnet-20241022"],
+    "anthropic": ["claude-opus-4-7", "claude-sonnet-4-6", "claude-haiku-4-5-20251001"],
     "gemini": ["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash", "gemini-1.5-pro"],
     "openai": ["gpt-4o-mini", "gpt-4o", "gpt-4-turbo"],
 }
@@ -31,7 +31,7 @@ def provider_for_model(model: str) -> str:
 @dataclass
 class GenerationConfig:
     label: str
-    model: str = "claude-sonnet-4-20250514"
+    model: str = "claude-opus-4-7"
     temperature: float = 0.7
     system_prompt: str = "You are a junior financial analyst. Use the provided context to answer the user prompt."
     max_tokens: Optional[int] = None
@@ -83,7 +83,7 @@ def build_persona_sweep() -> List[GenerationConfig]:
 def build_cross_provider() -> List[GenerationConfig]:
     """Compare top models across all three providers."""
     return [
-        GenerationConfig(label="A", model="claude-sonnet-4-20250514", temperature=0.7),
+        GenerationConfig(label="A", model="claude-opus-4-7", temperature=0.7),
         GenerationConfig(label="B", model="gemini-2.0-flash", temperature=0.7),
         GenerationConfig(label="C", model="gpt-4o-mini", temperature=0.7),
     ]
@@ -93,7 +93,7 @@ def build_cross_provider() -> List[GenerationConfig]:
 PRESETS = {
     "Temperature Sweep (4 outputs)": build_temperature_sweep([0.2, 0.5, 0.8, 1.0]),
     "Anthropic (3 models)": build_model_comparison(
-        ["claude-sonnet-4-20250514", "claude-haiku-4-20250414", "claude-3-5-sonnet-20241022"]
+        ["claude-opus-4-7", "claude-sonnet-4-6", "claude-haiku-4-5-20251001"]
     ),
     "Gemini (4 models)": build_model_comparison(
         ["gemini-2.0-flash", "gemini-2.0-flash-lite", "gemini-1.5-flash", "gemini-1.5-pro"]
