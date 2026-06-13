@@ -1,0 +1,15 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: investment-workflow-evals:dev
+    container_name: iwe-dev
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./results:/app/results
+      - ./outputs:/app/outputs
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: ["sleep", "infinity"]
